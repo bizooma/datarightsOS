@@ -4,7 +4,7 @@ import { Copy, Check } from 'lucide-react';
 export default function EmbedSnippet({ site }) {
   const [copied, setCopied] = useState(false);
   const appDomain = window.location.host;
-  const snippet = `<script src="https://${appDomain}/widget.js" data-tessera-site="${site.site_key}"></script>`;
+  const snippet = `<script src="https://${appDomain}/api/widgetJs" data-tessera-site="${site.site_key}"></script>`;
 
   function copy() {
     navigator.clipboard.writeText(snippet);
