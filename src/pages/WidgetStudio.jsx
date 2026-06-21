@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import { generateKey } from '@/lib/tenantUtils';
+import { canAddSite } from '@/lib/planLimits';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import { FileText, Plus, Globe, Check } from 'lucide-react';
@@ -21,6 +22,16 @@ import { toast } from 'sonner';
 export default function WidgetStudio() {
   const { orgId } = useCurrentUser();
   const queryClient = useQueryClient();
+
+  const { data: org } = useQuery({
+    queryKey: ['organization', orgId],
+    queryFn: async () => {
+      if (!orgId) return null;
+      const orgs = await base44.entities.Organization.filter({ id: orgId });
+      return orgs[0] || null;
+    },
+    enabled: !!orgId,
+  });
   const [selectedSiteId, setSelectedSiteId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDomain, setNewDomain] = useState('');
@@ -32,6 +43,7 @@ export default function WidgetStudio() {
   });
 
   const selectedSite = sites.find(s => s.id === selectedSiteId) || sites[0];
+  const atSiteLimit = org ? !canAddSite(org.plan, sites.length) : false;
 
   const createSiteMutation = useMutation({
     mutationFn: (data) => base44.entities.Site.create(data),
@@ -70,10 +82,15 @@ export default function WidgetStudio() {
         title="Widget Studio"
         description="Configure privacy widgets for your sites"
         actions={
-          <Button size="sm" className="h-9 text-sm" onClick={() => setShowAddForm(true)}>
-            <Plus className="w-3.5 h-3.5 mr-1.5" />
-            Add Site
-          </Button>
+          <div className="flex items-center gap-2">
+            {atSiteLimit && (
+              <span className="text-[11px] text-amber-600">Site limit reached — upgrade to add more</span>
+            )}
+            <Button size="sm" className="h-9 text-sm" onClick={() => setShowAddForm(true)} disabled={atSiteLimit} title={atSiteLimit ? 'Site limit reached for your plan' : undefined}>
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
+              Add Site
+            </Button>
+          </div>
         }
       />
 

@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Check, Building2, Users, CreditCard, Trash2, Lock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import BillingTab from '@/components/settings/BillingTab';
+import { canAddMember } from '@/lib/planLimits';
 
 export default function Settings() {
   const { orgId, user, isOwnerOrAdmin } = useCurrentUser();
@@ -32,6 +34,14 @@ export default function Settings() {
     queryFn: () => orgId ? base44.entities.User.filter({ organization: orgId }) : [],
     enabled: !!orgId,
   });
+
+  const { data: sites = [] } = useQuery({
+    queryKey: ['sites', orgId],
+    queryFn: () => orgId ? base44.entities.Site.filter({ organization: orgId }) : [],
+    enabled: !!orgId,
+  });
+
+  const siteCount = sites.length;
 
   if (isLoading) return <Skeleton className="h-64 w-full rounded-lg" />;
 
@@ -64,13 +74,13 @@ export default function Settings() {
         </TabsContent>
 
         <TabsContent value="team">
-          <TeamTab members={teamMembers} currentUser={user} orgId={orgId} isOwnerOrAdmin={isOwnerOrAdmin} refetch={refetchTeam} />
+          <TeamTab members={teamMembers} currentUser={user} orgId={orgId} isOwnerOrAdmin={isOwnerOrAdmin} refetch={refetchTeam} plan={org?.plan} />
         </TabsContent>
 
         <TabsContent value="plan">
           {org && (
             isOwnerOrAdmin
-              ? <PlanTab org={org} />
+              ? <BillingTab org={org} siteCount={siteCount} memberCount={teamMembers.length} />
               : <LockedTab label="Plan & Billing" description="Only owners and admins can view billing information." />
           )}
         </TabsContent>
@@ -185,11 +195,13 @@ function BrandingTab({ org }) {
   );
 }
 
-function TeamTab({ members, currentUser, orgId, isOwnerOrAdmin, refetch }) {
+function TeamTab({ members, currentUser, orgId, isOwnerOrAdmin, refetch, plan }) {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('staff');
   const [inviting, setInviting] = useState(false);
   const [removing, setRemoving] = useState(null);
+
+  const atMemberLimit = !canAddMember(plan, members.length);
 
   const handleInvite = async () => {
     if (!inviteEmail.trim()) return;
@@ -248,9 +260,12 @@ function TeamTab({ members, currentUser, orgId, isOwnerOrAdmin, refetch }) {
                 </SelectContent>
               </Select>
             </div>
-            <Button size="sm" className="h-9 text-sm" onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
+            <Button size="sm" className="h-9 text-sm" onClick={handleInvite} disabled={inviting || !inviteEmail.trim() || atMemberLimit} title={atMemberLimit ? 'Team member limit reached for your plan' : undefined}>
               {inviting ? 'Sending…' : 'Invite'}
             </Button>
+            {atMemberLimit && (
+              <p className="text-[11px] text-amber-600 w-full mt-1">Team member limit reached. Upgrade your plan to add more.</p>
+            )}
           </div>
         )}
 
@@ -287,46 +302,6 @@ function TeamTab({ members, currentUser, orgId, isOwnerOrAdmin, refetch }) {
             <p><span className="font-medium text-foreground">Owner / Admin</span> — full access including branding, billing, and team management</p>
             <p><span className="font-medium text-foreground">Staff</span> — can work requests, view consent log and audit trail; cannot edit branding or billing</p>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function PlanTab({ org }) {
-  const planFeatures = {
-    trial: ['1 site', '100 consent records/mo', 'Basic audit trail'],
-    starter: ['3 sites', '5,000 consent records/mo', 'Full audit trail', 'CSV export'],
-    pro: ['10 sites', '50,000 consent records/mo', 'Priority support', 'White-label'],
-    agency: ['Unlimited sites', 'Unlimited records', 'Multi-org management', 'Custom branding'],
-  };
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold">Subscription</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-3 mb-4">
-          <Badge className="bg-primary text-white text-xs capitalize">{org.plan}</Badge>
-          <Badge variant="outline" className={`text-[11px] ${
-            org.billing_status === 'active' ? 'border-emerald-300 text-emerald-700' :
-            org.billing_status === 'past_due' ? 'border-amber-300 text-amber-700' :
-            'border-red-300 text-red-700'
-          }`}>
-            {org.billing_status === 'active' ? '● Active' : org.billing_status === 'past_due' ? '⚠ Past Due' : '✕ Canceled'}
-          </Badge>
-        </div>
-        <div className="mt-4">
-          <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">Plan Features</p>
-          <ul className="space-y-1.5">
-            {(planFeatures[org.plan] || []).map((f, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm text-foreground">
-                <Check className="w-3.5 h-3.5 text-primary" />
-                {f}
-              </li>
-            ))}
-          </ul>
         </div>
       </CardContent>
     </Card>
