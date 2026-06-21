@@ -35,7 +35,7 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   // Resolve effective orgId — supports super-admin impersonation via sessionStorage
-  const impersonateOrgId = sessionStorage.getItem('tessera_impersonate_org');
+  const impersonateOrgId = sessionStorage.getItem('dros_impersonate_org');
   const effectiveOrgId = impersonateOrgId || user?.organization;
 
   const { data: org } = useQuery({
@@ -49,7 +49,7 @@ export default function Sidebar() {
   });
 
   const brandColor = org?.brand_primary_color || '#0d7d74';
-  const productName = org?.white_label_product_name || 'Tessera Privacy';
+  const productName = org?.white_label_product_name || 'Data Rights OS';
   const logoUrl = org?.brand_logo_url;
 
   const allItems = isSuperAdmin
@@ -92,7 +92,7 @@ export default function Sidebar() {
       {!collapsed && impersonateOrgId && (
         <div className="px-3 py-1.5 bg-amber-500/20 border-b border-amber-400/20">
           <p className="text-[10px] text-amber-300 truncate">
-            ⚡ {sessionStorage.getItem('tessera_impersonate_org_name') || 'Impersonating'}
+            ⚡ {sessionStorage.getItem('dros_impersonate_org_name') || 'Impersonating'}
           </p>
         </div>
       )}

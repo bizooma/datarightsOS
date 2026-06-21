@@ -19,7 +19,7 @@ export default function Organizations() {
   const { isSuperAdmin, loading, user } = useCurrentUser();
   const queryClient = useQueryClient();
   const [impersonatingOrgId, setImpersonatingOrgId] = useState(
-    () => sessionStorage.getItem('tessera_impersonate_org') || null
+    () => sessionStorage.getItem('dros_impersonate_org') || null
   );
   const [showCreate, setShowCreate] = useState(false);
 
@@ -41,16 +41,16 @@ export default function Organizations() {
   if (!loading && !isSuperAdmin) return <Navigate to="/" replace />;
 
   function impersonate(org) {
-    sessionStorage.setItem('tessera_impersonate_org', org.id);
-    sessionStorage.setItem('tessera_impersonate_org_name', org.name);
+    sessionStorage.setItem('dros_impersonate_org', org.id);
+    sessionStorage.setItem('dros_impersonate_org_name', org.name);
     setImpersonatingOrgId(org.id);
     toast.success(`Now working as: ${org.name}`);
     window.location.href = '/';
   }
 
   function clearImpersonation() {
-    sessionStorage.removeItem('tessera_impersonate_org');
-    sessionStorage.removeItem('tessera_impersonate_org_name');
+    sessionStorage.removeItem('dros_impersonate_org');
+    sessionStorage.removeItem('dros_impersonate_org_name');
     setImpersonatingOrgId(null);
     toast.success('Returned to super admin view');
   }
@@ -91,7 +91,7 @@ export default function Organizations() {
 
       {impersonatingOrgId && (
         <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-          ⚡ You are impersonating: <strong>{sessionStorage.getItem('tessera_impersonate_org_name')}</strong>.
+          ⚡ You are impersonating: <strong>{sessionStorage.getItem('dros_impersonate_org_name')}</strong>.
           All actions you take will affect this organization. <button className="underline ml-1" onClick={clearImpersonation}>Exit</button>
         </div>
       )}

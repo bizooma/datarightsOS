@@ -20,7 +20,7 @@ export function useCurrentUser() {
 
   // Super-admins can impersonate an org via sessionStorage
   const impersonateOrgId = typeof window !== 'undefined'
-    ? sessionStorage.getItem('tessera_impersonate_org')
+    ? sessionStorage.getItem('dros_impersonate_org')
     : null;
   const orgId = (isSuperAdmin && impersonateOrgId) ? impersonateOrgId : user?.organization;
 
