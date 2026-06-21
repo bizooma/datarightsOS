@@ -6,6 +6,8 @@ import { generateKey } from '@/lib/tenantUtils';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import { FileText, Plus, Globe, Check } from 'lucide-react';
+import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
+import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -121,10 +123,14 @@ export default function WidgetStudio() {
             ))}
           </div>
 
-          {/* Site config form */}
+          {/* Site config form + embed + preview */}
           {selectedSite && (
-            <div className="col-span-3">
+            <div className="col-span-3 space-y-6">
               <SiteConfigForm site={selectedSite} onUpdate={updateSiteMutation.mutate} />
+              <div className="border-t border-border pt-6 space-y-6">
+                <EmbedSnippet site={selectedSite} />
+                <PrivacyCenterPreview site={selectedSite} />
+              </div>
             </div>
           )}
         </div>

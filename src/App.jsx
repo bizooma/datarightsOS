@@ -20,6 +20,7 @@ import AuditTrail from '@/pages/AuditTrail';
 import AccessibilityReports from '@/pages/AccessibilityReports';
 import Settings from '@/pages/Settings';
 import Organizations from '@/pages/Organizations';
+import PrivacyCenter from '@/pages/PrivacyCenter';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -59,6 +60,7 @@ const AuthenticatedApp = () => {
           <Route path="/organizations" element={<Organizations />} />
         </Route>
       </Route>
+      <Route path="/privacy-center" element={<PrivacyCenter />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
