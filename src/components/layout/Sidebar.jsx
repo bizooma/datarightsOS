@@ -65,12 +65,12 @@ export default function Sidebar() {
     >
       {/* Logo / Brand Header */}
       <div className="flex items-center gap-2.5 px-4 h-16 border-b border-white/10 shrink-0">
-        {logoUrl ? (
+        {!collapsed ? (
           <img
-            src={logoUrl}
+            src={logoUrl || "https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9664d0c97_datarights.png"}
             alt="Logo"
-            className="h-8 object-contain shrink-0 rounded"
-            style={{ maxWidth: collapsed ? '32px' : '120px' }}
+            className="h-8 object-contain"
+            style={{ filter: 'brightness(0) invert(1)' }}
             onError={e => e.target.style.display = 'none'}
           />
         ) : (
@@ -80,11 +80,6 @@ export default function Sidebar() {
           >
             <Shield className="w-4 h-4 text-white" />
           </div>
-        )}
-        {!collapsed && (
-          <span className="text-white font-semibold text-sm tracking-tight truncate">
-            {productName}
-          </span>
         )}
       </div>
 

@@ -5,11 +5,8 @@ export default function MarketingNav() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#0d7d74] flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-semibold text-[#14202b] text-sm tracking-tight">Data Rights OS</span>
+        <Link to="/" className="flex items-center">
+          <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9664d0c97_datarights.png" alt="Data Rights OS" className="h-9 object-contain" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-7 text-sm text-slate-600">
