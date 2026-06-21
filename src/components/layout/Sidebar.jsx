@@ -17,7 +17,7 @@ import { base44 } from '@/api/base44Client';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 
 const navItems = [
-  { path: '/', label: 'Request Inbox', icon: Inbox },
+  { path: '/dashboard', label: 'Request Inbox', icon: Inbox },
   { path: '/consent-log', label: 'Consent Log', icon: Cookie },
   { path: '/widget-studio', label: 'Widget Studio', icon: FileText },
   { path: '/audit-trail', label: 'Audit Trail', icon: Shield },
@@ -101,8 +101,8 @@ export default function Sidebar() {
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
         {allItems.map(item => {
           const isActive =
-            item.path === '/'
-              ? location.pathname === '/'
+            item.path === '/dashboard'
+              ? location.pathname === '/dashboard'
               : location.pathname.startsWith(item.path);
 
           return (
