@@ -13,7 +13,16 @@ export function useCurrentUser() {
   }, []);
 
   const isSuperAdmin = user?.role === 'bizooma_superadmin';
-  const orgId = user?.organization;
+  const isOwner = user?.role === 'owner';
+  const isAdmin = user?.role === 'admin';
+  const isOwnerOrAdmin = isOwner || isAdmin || isSuperAdmin;
+  const isStaff = user?.role === 'staff';
 
-  return { user, loading, isSuperAdmin, orgId };
+  // Super-admins can impersonate an org via sessionStorage
+  const impersonateOrgId = typeof window !== 'undefined'
+    ? sessionStorage.getItem('tessera_impersonate_org')
+    : null;
+  const orgId = (isSuperAdmin && impersonateOrgId) ? impersonateOrgId : user?.organization;
+
+  return { user, loading, isSuperAdmin, isOwner, isAdmin, isOwnerOrAdmin, isStaff, orgId };
 }

@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 
@@ -33,6 +34,24 @@ export default function Sidebar() {
   const { user, isSuperAdmin } = useCurrentUser();
   const [collapsed, setCollapsed] = useState(false);
 
+  // Resolve effective orgId — supports super-admin impersonation via sessionStorage
+  const impersonateOrgId = sessionStorage.getItem('tessera_impersonate_org');
+  const effectiveOrgId = impersonateOrgId || user?.organization;
+
+  const { data: org } = useQuery({
+    queryKey: ['org-branding', effectiveOrgId],
+    queryFn: async () => {
+      const orgs = await base44.entities.Organization.filter({ id: effectiveOrgId });
+      return orgs[0] || null;
+    },
+    enabled: !!effectiveOrgId,
+    staleTime: 60_000,
+  });
+
+  const brandColor = org?.brand_primary_color || '#0d7d74';
+  const productName = org?.white_label_product_name || 'Tessera Privacy';
+  const logoUrl = org?.brand_logo_url;
+
   const allItems = isSuperAdmin
     ? [...superAdminItems, ...navItems]
     : navItems;
@@ -44,17 +63,39 @@ export default function Sidebar() {
       }`}
       style={{ backgroundColor: 'hsl(210, 40%, 11%)' }}
     >
-      {/* Logo */}
+      {/* Logo / Brand Header */}
       <div className="flex items-center gap-2.5 px-4 h-16 border-b border-white/10 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-          <Shield className="w-4 h-4 text-white" />
-        </div>
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt="Logo"
+            className="h-8 object-contain shrink-0 rounded"
+            style={{ maxWidth: collapsed ? '32px' : '120px' }}
+            onError={e => e.target.style.display = 'none'}
+          />
+        ) : (
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+            style={{ backgroundColor: brandColor }}
+          >
+            <Shield className="w-4 h-4 text-white" />
+          </div>
+        )}
         {!collapsed && (
           <span className="text-white font-semibold text-sm tracking-tight truncate">
-            Tessera Privacy
+            {productName}
           </span>
         )}
       </div>
+
+      {/* Impersonation banner */}
+      {!collapsed && impersonateOrgId && (
+        <div className="px-3 py-1.5 bg-amber-500/20 border-b border-amber-400/20">
+          <p className="text-[10px] text-amber-300 truncate">
+            ⚡ {sessionStorage.getItem('tessera_impersonate_org_name') || 'Impersonating'}
+          </p>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
@@ -70,12 +111,13 @@ export default function Sidebar() {
               to={item.path}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium transition-colors ${
                 isActive
-                  ? 'bg-primary/20 text-primary'
+                  ? 'bg-white/10 text-white'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
+              style={isActive ? { backgroundColor: `${brandColor}30`, color: 'white' } : undefined}
               title={collapsed ? item.label : undefined}
             >
-              <item.icon className="w-4 h-4 shrink-0" />
+              <item.icon className="w-4 h-4 shrink-0" style={isActive ? { color: brandColor } : undefined} />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </Link>
           );
@@ -88,6 +130,9 @@ export default function Sidebar() {
           <div className="px-1 mb-2">
             <p className="text-white text-xs font-medium truncate">{user.full_name}</p>
             <p className="text-slate-500 text-[11px] truncate">{user.email}</p>
+            <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-slate-300 capitalize">
+              {user.role}
+            </span>
           </div>
         )}
         <div className="flex items-center justify-between">
