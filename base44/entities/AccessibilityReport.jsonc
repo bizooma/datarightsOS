@@ -1,0 +1,37 @@
+{
+  "name": "AccessibilityReport",
+  "type": "object",
+  "properties": {
+    "site": {
+      "type": "string",
+      "description": "Reference to Site"
+    },
+    "page_url": {
+      "type": "string",
+      "description": "URL of the page with the accessibility issue"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the accessibility issue"
+    },
+    "reporter_email": {
+      "type": "string",
+      "description": "Email of the person reporting the issue"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewing",
+        "resolved"
+      ],
+      "default": "new",
+      "description": "Current status of the report"
+    }
+  },
+  "required": [
+    "site",
+    "page_url",
+    "description"
+  ]
+}

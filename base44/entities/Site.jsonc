@@ -1,0 +1,73 @@
+{
+  "name": "Site",
+  "type": "object",
+  "properties": {
+    "organization": {
+      "type": "string",
+      "description": "Reference to Organization"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Website domain, e.g. clientfirm.com"
+    },
+    "site_key": {
+      "type": "string",
+      "description": "Public unique key the widget uses (auto-generated)"
+    },
+    "install_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active"
+      ],
+      "default": "pending",
+      "description": "Widget installation status"
+    },
+    "enabled_drawers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "cookies",
+          "privacy_rights",
+          "accessibility"
+        ]
+      },
+      "default": [
+        "cookies",
+        "privacy_rights"
+      ],
+      "description": "Which drawers are enabled in the widget"
+    },
+    "honor_gpc": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to honor Global Privacy Control signals"
+    },
+    "intro_video_url": {
+      "type": "string",
+      "description": "URL to an introductory video"
+    },
+    "accessibility_statement_url": {
+      "type": "string",
+      "description": "URL to accessibility statement"
+    },
+    "barrier_report_email": {
+      "type": "string",
+      "description": "Email for accessibility barrier reports"
+    },
+    "privacy_policy_url": {
+      "type": "string",
+      "description": "URL to the privacy policy"
+    },
+    "policy_version": {
+      "type": "string",
+      "default": "1.0",
+      "description": "Current privacy policy version"
+    }
+  },
+  "required": [
+    "organization",
+    "domain"
+  ]
+}

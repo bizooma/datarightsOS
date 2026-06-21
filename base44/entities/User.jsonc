@@ -1,0 +1,21 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "admin",
+        "staff",
+        "bizooma_superadmin"
+      ],
+      "default": "staff",
+      "description": "User role in the system"
+    },
+    "organization": {
+      "type": "string",
+      "description": "Reference to the user's Organization"
+    }
+  }
+}

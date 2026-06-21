@@ -1,0 +1,65 @@
+{
+  "name": "ConsentRecord",
+  "type": "object",
+  "properties": {
+    "site": {
+      "type": "string",
+      "description": "Reference to Site"
+    },
+    "visitor_id": {
+      "type": "string",
+      "description": "Anonymous visitor identifier from the widget"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "accept_all",
+        "reject_all",
+        "save_choices",
+        "gpc_optout"
+      ],
+      "description": "The consent action taken"
+    },
+    "necessary": {
+      "type": "boolean",
+      "default": true,
+      "description": "Necessary cookies accepted"
+    },
+    "functional": {
+      "type": "boolean",
+      "description": "Functional cookies accepted"
+    },
+    "analytics": {
+      "type": "boolean",
+      "description": "Analytics cookies accepted"
+    },
+    "advertising": {
+      "type": "boolean",
+      "description": "Advertising cookies accepted"
+    },
+    "gpc_detected": {
+      "type": "boolean",
+      "description": "Whether Global Privacy Control was detected"
+    },
+    "region_state": {
+      "type": "string",
+      "description": "Inferred US state of the visitor"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Browser user agent string"
+    },
+    "policy_version": {
+      "type": "string",
+      "description": "Privacy policy version at time of consent"
+    },
+    "consent_receipt_id": {
+      "type": "string",
+      "description": "Unique consent receipt identifier (auto-generated)"
+    }
+  },
+  "required": [
+    "site",
+    "action"
+  ]
+}

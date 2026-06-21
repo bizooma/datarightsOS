@@ -1,0 +1,36 @@
+{
+  "name": "AuditEvent",
+  "type": "object",
+  "properties": {
+    "organization": {
+      "type": "string",
+      "description": "Reference to Organization"
+    },
+    "related_request": {
+      "type": "string",
+      "description": "Reference to DataRightsRequest (optional)"
+    },
+    "related_consent": {
+      "type": "string",
+      "description": "Reference to ConsentRecord (optional)"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Type of event, e.g. request_received, identity_verified"
+    },
+    "actor": {
+      "type": "string",
+      "description": "Email of the user who performed the action, or 'system'"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the event"
+    }
+  },
+  "required": [
+    "organization",
+    "event_type",
+    "actor",
+    "description"
+  ]
+}

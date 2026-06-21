@@ -1,0 +1,48 @@
+{
+  "name": "Organization",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Organization name"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "starter",
+        "pro",
+        "agency"
+      ],
+      "default": "trial",
+      "description": "Subscription plan"
+    },
+    "white_label_product_name": {
+      "type": "string",
+      "default": "Privacy & Data Rights Center",
+      "description": "White-label product name shown in the widget"
+    },
+    "brand_logo_url": {
+      "type": "string",
+      "description": "URL to the organization's brand logo"
+    },
+    "brand_primary_color": {
+      "type": "string",
+      "default": "#0d7d74",
+      "description": "Primary brand color for the widget"
+    },
+    "billing_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "past_due",
+        "canceled"
+      ],
+      "default": "active",
+      "description": "Current billing status"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

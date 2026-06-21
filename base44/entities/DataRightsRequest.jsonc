@@ -1,0 +1,98 @@
+{
+  "name": "DataRightsRequest",
+  "type": "object",
+  "properties": {
+    "organization": {
+      "type": "string",
+      "description": "Reference to Organization"
+    },
+    "site": {
+      "type": "string",
+      "description": "Reference to Site"
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "access",
+        "delete",
+        "correct",
+        "opt_out"
+      ],
+      "description": "Type of data rights request"
+    },
+    "requester_name": {
+      "type": "string",
+      "description": "Name of the person making the request (PII)"
+    },
+    "requester_email": {
+      "type": "string",
+      "description": "Email of the person making the request (PII)"
+    },
+    "requester_state": {
+      "type": "string",
+      "description": "US state of the requester"
+    },
+    "is_authorized_agent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether request was made by an authorized agent"
+    },
+    "agent_details": {
+      "type": "string",
+      "description": "Details about the authorized agent"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "verifying",
+        "verified",
+        "rejected"
+      ],
+      "default": "unverified",
+      "description": "Identity verification status"
+    },
+    "request_status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "in_progress",
+        "awaiting_info",
+        "fulfilled",
+        "denied"
+      ],
+      "default": "new",
+      "description": "Current request processing status"
+    },
+    "received_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the request was received"
+    },
+    "statutory_deadline": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Legal deadline for fulfillment (received_date + 45 days)"
+    },
+    "fulfilled_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the request was fulfilled"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Reference to assigned User"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes about the request (PII)"
+    }
+  },
+  "required": [
+    "organization",
+    "site",
+    "request_type",
+    "requester_name",
+    "requester_email"
+  ]
+}
