@@ -24,15 +24,12 @@ import PrivacyCenter from '@/pages/PrivacyCenter';
 import Home from '@/pages/Home';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { authError } = useAuth();
 
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return null;
-    }
+  // Only block rendering for user_not_registered — let all routes (including public "/") render normally.
+  // auth_required is handled per-route by ProtectedRoute.
+  if (authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
 
   return (
