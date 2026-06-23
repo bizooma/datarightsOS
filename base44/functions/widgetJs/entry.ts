@@ -12,9 +12,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   if (req.method !== 'GET') return new Response('Method Not Allowed', { status: 405, headers: CORS });
 
-  const url = new URL(req.url);
   const appId = Deno.env.get('BASE44_APP_ID');
-  const API = `https://app.base44.com/api/apps/${appId}/functions`;
+  const API = `https://${appId}.base44.app/api/functions`;
 
   const widgetCode = `/* ===== Data Rights OS widget.js ===== */
 (function () {

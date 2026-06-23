@@ -5,7 +5,7 @@ import { appParams } from '@/lib/app-params';
 export default function EmbedSnippet({ site }) {
   const [copied, setCopied] = useState(false);
   const appId = appParams.appId;
-  const snippet = `<script src="https://app.base44.com/api/apps/${appId}/functions/widgetJs" data-tessera-site="${site.site_key}"></script>`;
+  const snippet = `<script src="https://${appId}.base44.app/api/functions/widgetJs" data-tessera-site="${site.site_key}"></script>`;
 
   function copy() {
     navigator.clipboard.writeText(snippet);
