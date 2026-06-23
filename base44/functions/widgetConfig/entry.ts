@@ -29,6 +29,7 @@ Deno.serve(async (req) => {
     primary_color: org.brand_primary_color || '#0d7d74',
     enabled_drawers: site.enabled_drawers || ['cookies', 'privacy_rights'],
     widget_position: site.widget_position || 'bottom-right',
+    widget_theme: site.widget_theme || 'dark',
     honor_gpc: site.honor_gpc !== false,
     intro_video_url: site.intro_video_url || '',
     accessibility_statement_url: site.accessibility_statement_url || '',

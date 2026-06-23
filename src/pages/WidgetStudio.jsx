@@ -235,6 +235,16 @@ function SiteConfigForm({ site, onUpdate, onFormChange }) {
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">Widget Theme</Label>
+            <Select value={form.widget_theme || 'dark'} onValueChange={v => handleChange('widget_theme', v)}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dark">Dark (launcher &amp; panel dark)</SelectItem>
+                <SelectItem value="light">Light (launcher &amp; panel white)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 

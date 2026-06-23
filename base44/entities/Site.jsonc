@@ -50,6 +50,15 @@
       "default": "bottom-right",
       "description": "Corner position of the widget launcher button"
     },
+    "widget_theme": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "description": "Color theme of the widget launcher and panel"
+    },
     "honor_gpc": {
       "type": "boolean",
       "default": true,
