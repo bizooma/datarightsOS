@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Check, Building2, Users, CreditCard, Trash2, Lock, Upload } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
 import BillingTab from '@/components/settings/BillingTab';
 import { canAddMember } from '@/lib/planLimits';
 
@@ -140,6 +140,7 @@ function InfoRow({ label, value }) {
 
 function BrandingTab({ org }) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [form, setForm] = useState({
     name: org.name || '',
     white_label_product_name: org.white_label_product_name || '',
@@ -161,7 +162,7 @@ function BrandingTab({ org }) {
     mutationFn: (data) => base44.entities.Organization.update(org.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization'] });
-      toast.success('Branding updated');
+      toast({ title: 'Branding saved', description: 'Your organization branding has been updated.' });
     },
   });
 
@@ -215,6 +216,7 @@ function BrandingTab({ org }) {
 }
 
 function TeamTab({ members, currentUser, orgId, isOwnerOrAdmin, refetch, plan }) {
+  const { toast } = useToast();
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('staff');
   const [inviting, setInviting] = useState(false);
@@ -226,17 +228,17 @@ function TeamTab({ members, currentUser, orgId, isOwnerOrAdmin, refetch, plan })
     if (!inviteEmail.trim()) return;
     setInviting(true);
     await base44.users.inviteUser(inviteEmail.trim(), inviteRole);
-    toast.success(`Invitation sent to ${inviteEmail.trim()} as ${inviteRole}`);
+    toast({ title: 'Invitation sent', description: `Invite sent to ${inviteEmail.trim()} as ${inviteRole}.` });
     setInviteEmail('');
     setInviting(false);
     refetch();
   };
 
   const handleRemove = async (member) => {
-    if (member.id === currentUser?.id) { toast.error("You can't remove yourself."); return; }
+    if (member.id === currentUser?.id) { toast({ title: "Can't remove yourself", variant: 'destructive' }); return; }
     setRemoving(member.id);
     await base44.entities.User.update(member.id, { organization: null });
-    toast.success(`${member.full_name || member.email} removed from the organization`);
+    toast({ title: 'Member removed', description: `${member.full_name || member.email} has been removed.` });
     setRemoving(null);
     refetch();
   };
