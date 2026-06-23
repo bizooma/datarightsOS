@@ -12,7 +12,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   if (req.method !== 'GET') return new Response('Method Not Allowed', { status: 405, headers: CORS });
 
-  const API = 'https://datarightsos.com/api/functions';
+  const reqUrl = new URL(req.url);
+  const API = `${reqUrl.protocol}//${reqUrl.host}/api/functions`;
 
   const widgetCode = `/* ===== Data Rights OS widget.js ===== */
 (function () {
@@ -20,7 +21,7 @@ Deno.serve(async (req) => {
     var s = document.getElementsByTagName('script'); return s[s.length - 1];
   })();
   var SITE = script.getAttribute('data-tessera-site');
-  var API = '${API}';
+  var API = script.src.replace(/\\/widgetJs.*$/, '');
 
   if (!SITE) { console.warn('[DataRightsOS] missing data-tessera-site'); return; }
 
