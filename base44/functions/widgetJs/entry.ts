@@ -12,8 +12,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   if (req.method !== 'GET') return new Response('Method Not Allowed', { status: 405, headers: CORS });
 
-  const reqUrl = new URL(req.url);
-  const API = `${reqUrl.protocol}//${reqUrl.host}/api/functions`;
+  const APP_ID = 'VITE_BASE44_APP_ID' in Deno.env ? Deno.env.get('VITE_BASE44_APP_ID') : (Deno.env.get('BASE44_APP_ID') || '6a3735f4f27dcb14405892ae');
+  const API = `https://api.base44.app/api/apps/${APP_ID}/functions`;
 
   const widgetCode = `/* ===== Data Rights OS widget.js ===== */
 (function () {
@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     var s = document.getElementsByTagName('script'); return s[s.length - 1];
   })();
   var SITE = script.getAttribute('data-tessera-site');
-  var API = script.src.replace(/\\/widgetJs.*$/, '');
+  var API = '${API}';
 
   if (!SITE) { console.warn('[DataRightsOS] missing data-tessera-site'); return; }
 
