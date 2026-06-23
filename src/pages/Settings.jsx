@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Check, Building2, Users, CreditCard, Trash2, Lock } from 'lucide-react';
+import { Check, Building2, Users, CreditCard, Trash2, Lock, Upload } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import BillingTab from '@/components/settings/BillingTab';
@@ -113,7 +113,10 @@ function ReadOnlyBranding({ org }) {
       <CardContent className="space-y-3 max-w-lg">
         <InfoRow label="Organization Name" value={org.name} />
         <InfoRow label="Product Name" value={org.white_label_product_name} />
-        <InfoRow label="Logo URL" value={org.brand_logo_url || '—'} />
+        {org.brand_logo_url
+          ? <div><p className="text-xs text-muted-foreground mb-1">Logo</p><img src={org.brand_logo_url} alt="Logo" className="h-8 object-contain rounded" /></div>
+          : <InfoRow label="Logo" value="—" />
+        }
         <div>
           <p className="text-xs text-muted-foreground mb-1">Primary Color</p>
           <div className="flex items-center gap-2">
@@ -143,6 +146,16 @@ function BrandingTab({ org }) {
     brand_logo_url: org.brand_logo_url || '',
     brand_primary_color: org.brand_primary_color || '#0d7d74',
   });
+  const [uploading, setUploading] = useState(false);
+
+  async function handleLogoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm(f => ({ ...f, brand_logo_url: file_url }));
+    setUploading(false);
+  }
 
   const updateMutation = useMutation({
     mutationFn: (data) => base44.entities.Organization.update(org.id, data),
@@ -168,11 +181,17 @@ function BrandingTab({ org }) {
           <Input value={form.white_label_product_name} onChange={e => setForm({ ...form, white_label_product_name: e.target.value })} className="h-9 text-sm" placeholder="Privacy & Data Rights Center" />
         </div>
         <div>
-          <Label className="text-xs text-muted-foreground mb-1.5 block">Brand Logo URL</Label>
-          <Input value={form.brand_logo_url} onChange={e => setForm({ ...form, brand_logo_url: e.target.value })} className="h-9 text-sm" placeholder="https://..." />
-          {form.brand_logo_url && (
-            <img src={form.brand_logo_url} alt="Logo preview" className="mt-2 h-8 object-contain rounded" onError={e => e.target.style.display = 'none'} />
-          )}
+          <Label className="text-xs text-muted-foreground mb-1.5 block">Brand Logo</Label>
+          <div className="flex items-center gap-3">
+            {form.brand_logo_url && (
+              <img src={form.brand_logo_url} alt="Logo preview" className="h-10 w-10 object-contain rounded border border-border bg-muted/40 p-0.5" onError={e => e.target.style.display = 'none'} />
+            )}
+            <label className="flex items-center gap-2 cursor-pointer h-9 px-3 rounded-md border border-border bg-white text-sm text-muted-foreground hover:bg-muted/40 transition-colors">
+              <Upload className="w-3.5 h-3.5" />
+              {uploading ? 'Uploading…' : form.brand_logo_url ? 'Replace logo' : 'Upload logo'}
+              <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploading} />
+            </label>
+          </div>
         </div>
         <div>
           <Label className="text-xs text-muted-foreground mb-1.5 block">Primary Brand Color</Label>
