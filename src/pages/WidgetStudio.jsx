@@ -20,7 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 export default function WidgetStudio() {
-  const { orgId } = useCurrentUser();
+  const { orgId, user } = useCurrentUser();
   const queryClient = useQueryClient();
 
   const { data: org } = useQuery({
@@ -39,7 +39,7 @@ export default function WidgetStudio() {
   const { data: sites = [], isLoading } = useQuery({
     queryKey: ['sites', orgId],
     queryFn: () => orgId ? base44.entities.Site.filter({ organization: orgId }) : [],
-    enabled: !!orgId,
+    enabled: true,
   });
 
   const selectedSite = sites.find(s => s.id === selectedSiteId) || sites[0];
@@ -63,10 +63,30 @@ export default function WidgetStudio() {
     },
   });
 
-  const handleCreateSite = () => {
+  const handleCreateSite = async () => {
     if (!newDomain.trim()) return;
+
+    let effectiveOrgId = orgId;
+
+    // If user has no org yet, create one automatically
+    if (!effectiveOrgId) {
+      try {
+        const newOrg = await base44.entities.Organization.create({
+          name: user?.full_name ? `${user.full_name}'s Organization` : 'My Organization',
+          plan: 'trial',
+          billing_status: 'active',
+        });
+        await base44.auth.updateMe({ organization: newOrg.id });
+        effectiveOrgId = newOrg.id;
+        queryClient.invalidateQueries({ queryKey: ['organization'] });
+      } catch (err) {
+        toast.error('Could not create organization. Please try again.');
+        return;
+      }
+    }
+
     createSiteMutation.mutate({
-      organization: orgId,
+      organization: effectiveOrgId,
       domain: newDomain.trim(),
       site_key: generateKey('sk'),
       install_status: 'pending',
