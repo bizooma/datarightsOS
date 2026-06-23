@@ -35,6 +35,7 @@ export default function WidgetStudio() {
   const [selectedSiteId, setSelectedSiteId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDomain, setNewDomain] = useState('');
+  const [liveFormData, setLiveFormData] = useState(null);
 
   const { data: sites = [], isLoading } = useQuery({
     queryKey: ['sites', orgId],
@@ -163,10 +164,10 @@ export default function WidgetStudio() {
           {/* Site config form + embed + preview */}
           {selectedSite && (
             <div className="col-span-3 space-y-6">
-              <SiteConfigForm site={selectedSite} onUpdate={updateSiteMutation.mutate} />
+              <SiteConfigForm site={selectedSite} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
               <div className="border-t border-border pt-6 space-y-6">
                 <EmbedSnippet site={selectedSite} />
-                <PrivacyCenterPreview site={selectedSite} />
+                <PrivacyCenterPreview site={liveFormData || selectedSite} />
               </div>
             </div>
           )}
@@ -176,11 +177,15 @@ export default function WidgetStudio() {
   );
 }
 
-function SiteConfigForm({ site, onUpdate }) {
+function SiteConfigForm({ site, onUpdate, onFormChange }) {
   const [form, setForm] = useState(site);
 
   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm(prev => {
+      const updated = { ...prev, [field]: value };
+      onFormChange?.(updated);
+      return updated;
+    });
   };
 
   const handleDrawerToggle = (drawer) => {

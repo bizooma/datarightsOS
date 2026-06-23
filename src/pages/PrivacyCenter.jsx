@@ -82,7 +82,11 @@ export default function PrivacyCenter() {
   const primaryColor = org?.brand_primary_color || '#0d7d74';
   const productName = org?.white_label_product_name || 'Privacy & Data Rights Center';
   const logoUrl = org?.brand_logo_url;
-  const drawers = site.enabled_drawers || [];
+  // Allow preview override via query param (used by WidgetStudio live preview)
+  const drawersParam = params.get('drawers');
+  const drawers = drawersParam !== null
+    ? (drawersParam ? drawersParam.split(',') : [])
+    : (site.enabled_drawers || []);
 
   const drawerConfig = [
     { key: 'cookies', label: 'Cookie Preferences', icon: '🍪' },

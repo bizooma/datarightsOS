@@ -1,7 +1,8 @@
 import { ExternalLink } from 'lucide-react';
 
 export default function PrivacyCenterPreview({ site }) {
-  const previewUrl = `/privacy-center?site=${site.site_key}`;
+  const drawers = (site.enabled_drawers || []).join(',');
+  const previewUrl = `/privacy-center?site=${site.site_key}&drawers=${encodeURIComponent(drawers)}`;
 
   return (
     <div className="space-y-2">
@@ -19,6 +20,7 @@ export default function PrivacyCenterPreview({ site }) {
       </div>
       <div className="rounded-xl border border-border overflow-hidden shadow-sm bg-white" style={{ height: 520 }}>
         <iframe
+          key={previewUrl}
           src={previewUrl}
           title="Privacy Center Preview"
           className="w-full h-full border-0"
