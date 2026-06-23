@@ -13,7 +13,8 @@ Deno.serve(async (req) => {
   if (req.method !== 'GET') return new Response('Method Not Allowed', { status: 405, headers: CORS });
 
   const url = new URL(req.url);
-  const API = url.origin;
+  const appId = Deno.env.get('BASE44_APP_ID');
+  const API = `https://app.base44.com/api/apps/${appId}/functions`;
 
   const widgetCode = `/* ===== Data Rights OS widget.js ===== */
 (function () {
@@ -32,7 +33,7 @@ Deno.serve(async (req) => {
 
   function post(payload) {
     payload.site_key = SITE; payload.visitor_id = vid; payload.gpc_detected = GPC;
-    return fetch(API + '/api/widgetEvent', {
+    return fetch(API + '/widgetEvent', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     });
   }
@@ -41,7 +42,7 @@ Deno.serve(async (req) => {
     enabled_drawers: ['privacy_rights', 'cookies', 'accessibility'], honor_gpc: true,
     intro_video_url: '', accessibility_statement_url: '', privacy_policy_url: '', policy_version: '1.0' };
 
-  fetch(API + '/api/widgetConfig?site=' + encodeURIComponent(SITE))
+  fetch(API + '/widgetConfig?site=' + encodeURIComponent(SITE))
     .then(function (r) { return r.ok ? r.json() : DEFAULT; })
     .then(render).catch(function () { render(DEFAULT); });
 
