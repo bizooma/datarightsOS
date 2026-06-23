@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
         + '<div class="row"><div class="lbl">Reduce motion</div><label class="sw"><input type="checkbox" id="pm"><span class="tr"></span><span class="kn"></span></label></div>'
         + '</div></div>' : '')
       + '</div>'
-      + '<div class="foot">Powered by Tessera Privacy</div>'
+      + '<div class="foot">Powered by <a href="https://bizooma.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Bizooma, LLC</a></div>'
       + '</div>'
       + '<div class="toast" id="T"></div>';
 
