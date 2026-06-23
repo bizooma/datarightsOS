@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { appParams } from '@/lib/app-params';
 
 export default function EmbedSnippet({ site }) {
   const [copied, setCopied] = useState(false);
-  const appDomain = window.location.host;
-  const snippet = `<script src="https://${appDomain}/api/widgetJs" data-tessera-site="${site.site_key}"></script>`;
+  const baseUrl = (appParams.appBaseUrl || window.location.origin).replace(/\/$/, '');
+  const snippet = `<script src="${baseUrl}/api/widgetJs" data-tessera-site="${site.site_key}"></script>`;
 
   function copy() {
     navigator.clipboard.writeText(snippet);
