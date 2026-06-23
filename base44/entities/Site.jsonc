@@ -39,6 +39,17 @@
       ],
       "description": "Which drawers are enabled in the widget"
     },
+    "widget_position": {
+      "type": "string",
+      "enum": [
+        "bottom-right",
+        "bottom-left",
+        "top-right",
+        "top-left"
+      ],
+      "default": "bottom-right",
+      "description": "Corner position of the widget launcher button"
+    },
     "honor_gpc": {
       "type": "boolean",
       "default": true,

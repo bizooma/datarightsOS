@@ -218,6 +218,18 @@ function SiteConfigForm({ site, onUpdate }) {
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">Widget Position</Label>
+            <Select value={form.widget_position || 'bottom-right'} onValueChange={v => handleChange('widget_position', v)}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                <SelectItem value="top-right">Top Right</SelectItem>
+                <SelectItem value="top-left">Top Left</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 
