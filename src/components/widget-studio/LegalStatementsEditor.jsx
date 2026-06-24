@@ -128,7 +128,7 @@ function StatementForm({ site, statementType, existing, onSaved }) {
             <CardTitle className="text-sm font-semibold">{statementType.label}</CardTitle>
             <p className="text-[11px] text-muted-foreground mt-1 max-w-xl">{statementType.description}</p>
             <div className="mt-2">
-              <SampleStatementDialog statementType={statementType} />
+              <SampleStatementDialog statementType={statementType} onInsert={setBody} />
             </div>
           </div>
           {existing && (
