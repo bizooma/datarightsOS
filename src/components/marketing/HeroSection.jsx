@@ -55,7 +55,7 @@ export default function HeroSection() {
               </div>
             </div>
             <div className="p-3 space-y-2">
-              {['Your privacy rights', 'Cookie preferences', 'Accessibility'].map((label, i) => (
+              {['Your privacy rights', 'Cookie preferences', 'Accessibility', 'AI Use Disclosure'].map((label, i) => (
                 <div key={i} className="border border-slate-100 rounded-lg px-3 py-2.5 flex items-center justify-between">
                   <span className="text-[12px] font-semibold text-[#14202b]">{label}</span>
                   <span className="text-slate-400 text-xs">›</span>
