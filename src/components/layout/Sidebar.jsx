@@ -68,7 +68,7 @@ export default function Sidebar() {
       style={{ backgroundColor: 'hsl(210, 40%, 11%)' }}
     >
       {/* Logo / Brand Header */}
-      <div className="flex items-center gap-2.5 px-4 h-16 border-b border-white/10 shrink-0">
+      <Link to="/" className="flex items-center gap-2.5 px-4 h-16 border-b border-white/10 shrink-0 hover:bg-white/5 transition-colors" title="Go to home page">
         {!collapsed ? (
           <img
             src={logoUrl || "https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9664d0c97_datarights.png"}
@@ -85,7 +85,7 @@ export default function Sidebar() {
             <Shield className="w-4 h-4 text-white" />
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Impersonation banner */}
       {!collapsed && impersonateOrgId && (
