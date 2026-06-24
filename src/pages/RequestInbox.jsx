@@ -11,6 +11,7 @@ import { Inbox, Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import OnboardingChecklist from '@/components/onboarding/OnboardingChecklist';
 
 export default function RequestInbox() {
   const { user, orgId, isSuperAdmin } = useCurrentUser();
@@ -72,6 +73,8 @@ export default function RequestInbox() {
         title="Request Inbox"
         description="Manage incoming data rights requests"
       />
+
+      {!isSuperAdmin && <OnboardingChecklist sites={sites} />}
 
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4">
