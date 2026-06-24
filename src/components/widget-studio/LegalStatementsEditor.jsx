@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Check, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import SampleStatementDialog from './SampleStatementDialog';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -126,6 +127,9 @@ function StatementForm({ site, statementType, existing, onSaved }) {
           <div>
             <CardTitle className="text-sm font-semibold">{statementType.label}</CardTitle>
             <p className="text-[11px] text-muted-foreground mt-1 max-w-xl">{statementType.description}</p>
+            <div className="mt-2">
+              <SampleStatementDialog statementType={statementType} />
+            </div>
           </div>
           {existing && (
             <Badge variant="outline" className="text-[10px] text-green-600 border-green-300">
