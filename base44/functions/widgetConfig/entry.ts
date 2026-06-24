@@ -20,8 +20,16 @@ Deno.serve(async (req) => {
   if (!sites || sites.length === 0) return Response.json({ error: 'not found' }, { status: 404, headers: CORS });
   const site = sites[0];
 
-  const orgs = await base44.asServiceRole.entities.Organization.filter({ id: site.organization });
+  const [orgs, statements] = await Promise.all([
+    base44.asServiceRole.entities.Organization.filter({ id: site.organization }),
+    base44.asServiceRole.entities.LegalStatement.filter({ site: site.id, is_active: true }),
+  ]);
   const org = orgs[0] || {};
+
+  const getStatement = (type) => statements.find(s => s.statement_type === type);
+  const privacyStmt = getStatement('privacy_policy');
+  const cookieStmt = getStatement('cookie_policy');
+  const a11yStmt = getStatement('accessibility_statement');
 
   const payload = {
     product_name: org.white_label_product_name || 'Privacy & Data Rights Center',
@@ -35,6 +43,11 @@ Deno.serve(async (req) => {
     accessibility_statement_url: site.accessibility_statement_url || '',
     privacy_policy_url: site.privacy_policy_url || '',
     policy_version: site.policy_version || '1.0',
+    statements: {
+      privacy_policy: privacyStmt ? { title: privacyStmt.title, body: privacyStmt.body, version: privacyStmt.version, effective_date: privacyStmt.effective_date } : null,
+      cookie_policy: cookieStmt ? { title: cookieStmt.title, body: cookieStmt.body, version: cookieStmt.version, effective_date: cookieStmt.effective_date } : null,
+      accessibility_statement: a11yStmt ? { title: a11yStmt.title, body: a11yStmt.body, version: a11yStmt.version, effective_date: a11yStmt.effective_date } : null,
+    },
   };
 
   return Response.json(payload, { status: 200, headers: CORS });

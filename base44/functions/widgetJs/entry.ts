@@ -128,7 +128,18 @@ Deno.serve(async (req) => {
       + '.note{font-size:11px;color:' + panelSubText + ';background:' + (isDark ? '#1c2c3a' : '#f6f8f9') + ';border:1px solid ' + divider + ';border-radius:8px;padding:10px;margin-bottom:11px;line-height:1.45}'
       + '.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:' + panelSubText + ';font-weight:700;margin:8px 0 2px}'
       + '.foot{border-top:1px solid ' + divider + ';padding:9px 16px;font-size:10.5px;color:' + panelSubText + ';background:' + footerBg + '}'
-      + '.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);z-index:2147483002;background:#14202b;color:#fff;padding:10px 15px;border-radius:9px;font-size:12.5px;font-weight:600;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1}';
+      + '.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);z-index:2147483002;background:#14202b;color:#fff;padding:10px 15px;border-radius:9px;font-size:12.5px;font-weight:600;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1}'
+      + '.stmtlinks{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;border-top:1px solid ' + divider + ';background:' + footerBg + '}'
+      + '.stmtlink{font-size:10px;color:' + accent + ';background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;font-family:inherit}'
+      + '.modal-overlay{position:fixed;inset:0;z-index:2147483010;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center}'
+      + '.modal{width:100%;max-width:480px;max-height:80vh;background:' + panelBg + ';border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 40px rgba(0,0,0,0.3)}'
+      + '.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid ' + divider + ';flex-shrink:0}'
+      + '.modal-head h3{margin:0;font-size:14px;font-weight:700;color:' + panelText + '}'
+      + '.modal-meta{font-size:10px;color:' + panelSubText + ';margin-top:2px}'
+      + '.modal-body{overflow-y:auto;padding:14px 16px;font-size:12.5px;color:' + panelText + ';line-height:1.6}'
+      + '.modal-body h1,.modal-body h2,.modal-body h3{color:' + panelText + ';margin:12px 0 4px}'
+      + '.modal-body p{margin:0 0 8px}.modal-body ul,.modal-body ol{padding-left:18px;margin:0 0 8px}'
+      + '.modal-body a{color:' + accent + '}';
 
     function ytEmbed(url) {
       var m = (url || '').match(/(?:youtu\\.be\\/|v=)([\\w-]{11})/); return m ? 'https://www.youtube.com/embed/' + m[1] + '?rel=0' : '';
@@ -173,8 +184,17 @@ Deno.serve(async (req) => {
         + '<div class="row"><div class="lbl">Reduce motion</div><label class="sw"><input type="checkbox" id="pm"><span class="tr"></span><span class="kn"></span></label></div>'
         + '</div></div>' : '')
       + '</div>'
+      + (function() {
+          var stmts = cfg.statements || {};
+          var links = [];
+          if (stmts.privacy_policy) links.push('<button class="stmtlink" data-stmt="privacy_policy">' + esc(stmts.privacy_policy.title || 'Privacy Policy') + '</button>');
+          if (stmts.cookie_policy) links.push('<button class="stmtlink" data-stmt="cookie_policy">' + esc(stmts.cookie_policy.title || 'Cookie Policy') + '</button>');
+          if (stmts.accessibility_statement) links.push('<button class="stmtlink" data-stmt="accessibility_statement">' + esc(stmts.accessibility_statement.title || 'Accessibility Statement') + '</button>');
+          return links.length ? '<div class="stmtlinks">' + links.join('<span style="color:' + panelSubText + ';font-size:10px">·</span>') + '</div>' : '';
+        })()
       + '<div class="foot">Powered by <a href="https://bizooma.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Bizooma, LLC</a></div>'
       + '</div>'
+      + '<div class="modal-overlay hidden" id="MO"><div class="modal"><div class="modal-head"><div><h3 id="MT"></h3><div class="modal-meta" id="MM"></div></div><button class="x" id="MX">&times;</button></div><div class="modal-body" id="MB"></div></div></div>'
       + '<div class="toast" id="T"></div>';
 
     root.innerHTML = html;
@@ -216,6 +236,24 @@ Deno.serve(async (req) => {
       $('pf').onchange = function () { document.documentElement.style.fontSize = this.checked ? '112%' : ''; localStorage.setItem('dros_pf', this.checked ? '1' : ''); };
       $('pm').onchange = function () { document.documentElement.style.scrollBehavior = this.checked ? 'auto' : ''; localStorage.setItem('dros_pm', this.checked ? '1' : ''); };
       if (localStorage.getItem('dros_pf')) { $('pf').checked = true; document.documentElement.style.fontSize = '112%'; }
+    }
+
+    // Statement modal
+    var MO = $('MO'), MT = $('MT'), MM = $('MM'), MB = $('MB');
+    if (MO) {
+      $('MX').onclick = function () { MO.classList.add('hidden'); };
+      MO.onclick = function (e) { if (e.target === MO) MO.classList.add('hidden'); };
+      q('[data-stmt]').forEach(function (btn) {
+        btn.onclick = function () {
+          var key = btn.getAttribute('data-stmt');
+          var s = (cfg.statements || {})[key];
+          if (!s) return;
+          MT.textContent = s.title || key;
+          MM.textContent = (s.effective_date ? 'Effective: ' + s.effective_date : '') + (s.version ? '  ·  v' + s.version : '');
+          MB.innerHTML = s.body || '';
+          MO.classList.remove('hidden');
+        };
+      });
     }
   }
 })();

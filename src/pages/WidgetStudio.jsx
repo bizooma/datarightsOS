@@ -9,6 +9,8 @@ import EmptyState from '@/components/shared/EmptyState';
 import { FileText, Plus, Globe, Check } from 'lucide-react';
 import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
 import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
+import LegalStatementsEditor from '@/components/widget-studio/LegalStatementsEditor';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -164,11 +166,22 @@ export default function WidgetStudio() {
           {/* Site config form + embed + preview */}
           {selectedSite && (
             <div className="col-span-3 space-y-6">
-              <SiteConfigForm site={selectedSite} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
-              <div className="border-t border-border pt-6 space-y-6">
-                <EmbedSnippet site={selectedSite} />
-                <PrivacyCenterPreview site={liveFormData || selectedSite} />
-              </div>
+              <Tabs defaultValue="config">
+                <TabsList className="h-9 mb-4">
+                  <TabsTrigger value="config" className="text-xs">Widget Config</TabsTrigger>
+                  <TabsTrigger value="legal" className="text-xs">Legal Statements</TabsTrigger>
+                </TabsList>
+                <TabsContent value="config">
+                  <SiteConfigForm site={selectedSite} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
+                  <div className="border-t border-border pt-6 mt-6 space-y-6">
+                    <EmbedSnippet site={selectedSite} />
+                    <PrivacyCenterPreview site={liveFormData || selectedSite} />
+                  </div>
+                </TabsContent>
+                <TabsContent value="legal">
+                  <LegalStatementsEditor site={selectedSite} />
+                </TabsContent>
+              </Tabs>
             </div>
           )}
         </div>

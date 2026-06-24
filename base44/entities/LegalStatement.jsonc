@@ -1,0 +1,52 @@
+{
+  "name": "LegalStatement",
+  "type": "object",
+  "properties": {
+    "site": {
+      "type": "string",
+      "description": "Reference to Site"
+    },
+    "organization": {
+      "type": "string",
+      "description": "Reference to Organization"
+    },
+    "statement_type": {
+      "type": "string",
+      "enum": [
+        "privacy_policy",
+        "cookie_policy",
+        "accessibility_statement"
+      ],
+      "description": "Type of legal statement"
+    },
+    "title": {
+      "type": "string",
+      "description": "Display title for this statement"
+    },
+    "body": {
+      "type": "string",
+      "description": "Full HTML/rich-text body of the statement"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0",
+      "description": "Version of this statement"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this is the currently active version"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this version became effective"
+    }
+  },
+  "required": [
+    "site",
+    "organization",
+    "statement_type",
+    "body"
+  ]
+}
