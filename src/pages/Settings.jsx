@@ -10,10 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Check, Building2, Users, CreditCard, Trash2, Lock, Upload } from 'lucide-react';
+import { Check, Building2, Users, CreditCard, Trash2, Lock, Upload, UserCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 import BillingTab from '@/components/settings/BillingTab';
+import ProfileTab from '@/components/settings/ProfileTab';
 import { canAddMember } from '@/lib/planLimits';
 
 export default function Settings() {
@@ -49,8 +50,12 @@ export default function Settings() {
     <div>
       <PageHeader title="Settings" description="Manage your organization settings" />
 
-      <Tabs defaultValue="branding" className="space-y-6">
+      <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="bg-white border border-border">
+          <TabsTrigger value="profile" className="text-sm gap-1.5">
+            <UserCircle className="w-3.5 h-3.5" />
+            Profile
+          </TabsTrigger>
           <TabsTrigger value="branding" className="text-sm gap-1.5">
             <Building2 className="w-3.5 h-3.5" />
             Branding
@@ -64,6 +69,10 @@ export default function Settings() {
             Plan
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="profile">
+          <ProfileTab user={user} />
+        </TabsContent>
 
         <TabsContent value="branding">
           {org && (
