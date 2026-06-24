@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Sidebar from './Sidebar';
 import TrialExpiredWall from './TrialExpiredWall';
+import TrialCountdownBanner from './TrialCountdownBanner';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import { base44 } from '@/api/base44Client';
 import { isTrialExpired } from '@/lib/planLimits';
@@ -37,6 +38,7 @@ export default function AppLayout() {
       <Sidebar />
       <main className="ml-60 min-h-screen">
         <div className="max-w-[1400px] mx-auto px-8 py-6">
+          <TrialCountdownBanner org={org} />
           <Outlet />
         </div>
       </main>

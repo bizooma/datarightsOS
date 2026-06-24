@@ -19,11 +19,10 @@ export default function TrialExpiredWall() {
         </div>
         <div className="bg-muted rounded-xl p-4 text-left space-y-2">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Plans start at</p>
-          <p className="text-2xl font-bold text-foreground">$49<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+          <p className="text-2xl font-bold text-foreground">$99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
           <ul className="text-sm text-muted-foreground space-y-1 mt-2">
-            <li>✓ 3 sites</li>
-            <li>✓ 5,000 consent records/mo</li>
-            <li>✓ Full audit trail &amp; CSV export</li>
+            <li>✓ Core — $99/mo: cookie consent widget, data-rights intake, 90-day audit trail</li>
+            <li>✓ Proof — $299/mo: up to 10 sites, unlimited audit retention, CSV export, white-label</li>
           </ul>
         </div>
         <div className="flex flex-col gap-3">
