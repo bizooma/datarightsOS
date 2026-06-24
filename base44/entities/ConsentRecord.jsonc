@@ -6,6 +6,11 @@
       "type": "string",
       "description": "Reference to Site"
     },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional description or note about the consent record"
+    },
     "visitor_id": {
       "type": "string",
       "description": "Anonymous visitor identifier from the widget"

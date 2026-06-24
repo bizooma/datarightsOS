@@ -24,6 +24,8 @@ import Organizations from '@/pages/Organizations';
 import PrivacyCenter from '@/pages/PrivacyCenter';
 import Home from '@/pages/Home';
 import AdminUsers from '@/pages/AdminUsers';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
 
 const AuthenticatedApp = () => {
   const { authError } = useAuth();
@@ -56,6 +58,8 @@ const AuthenticatedApp = () => {
         </Route>
       </Route>
       <Route path="/privacy-center" element={<PrivacyCenter />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -20,6 +20,12 @@ export default function MarketingFooter() {
           </div>
 
           <nav className="flex flex-wrap gap-x-7 gap-y-2">
+            <Link to="/about" className="text-slate-400 hover:text-white text-sm transition-colors">
+              About
+            </Link>
+            <Link to="/contact" className="text-slate-400 hover:text-white text-sm transition-colors">
+              Contact
+            </Link>
             <Link to="/login" className="text-slate-400 hover:text-white text-sm transition-colors">
               Log in
             </Link>

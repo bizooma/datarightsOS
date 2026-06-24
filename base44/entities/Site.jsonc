@@ -6,6 +6,11 @@
       "type": "string",
       "description": "Reference to Organization"
     },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional description of the site"
+    },
     "domain": {
       "type": "string",
       "description": "Website domain, e.g. clientfirm.com"
