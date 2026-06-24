@@ -184,8 +184,9 @@ Deno.serve(async (req) => {
         + '<div class="row"><div class="lbl">Larger text</div><label class="sw"><input type="checkbox" id="pf"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="row"><div class="lbl">Reduce motion</div><label class="sw"><input type="checkbox" id="pm"><span class="tr"></span><span class="kn"></span></label></div>'
         + '</div></div>' : '')
-      + (showAI ? '<div class="drawer" data-d><button class="dh" data-t>AI Use Disclosure<span>&#9662;</span></button><div class="db" id="AID">'
+      + (showAI ? '<div class="drawer" data-d><button class="dh" data-t>AI Use Disclosure<span>&#9662;</span></button><div class="db">'
         + '<div class="note">In compliance with FTC guidelines and California AB 302, this site discloses when and how artificial intelligence is used to interact with you.</div>'
+        + (((cfg.statements || {}).ai_use_statement || {}).body ? '<p style="font-size:12px;line-height:1.6;margin:8px 0 0">' + esc(((cfg.statements || {}).ai_use_statement || {}).body.replace(/<[^>]*>/g, '')) + '</p>' : '')
         + '</div></div>' : '')
       + '</div>'
       + (function() {
@@ -241,23 +242,6 @@ Deno.serve(async (req) => {
       $('pf').onchange = function () { document.documentElement.style.fontSize = this.checked ? '112%' : ''; localStorage.setItem('dros_pf', this.checked ? '1' : ''); };
       $('pm').onchange = function () { document.documentElement.style.scrollBehavior = this.checked ? 'auto' : ''; localStorage.setItem('dros_pm', this.checked ? '1' : ''); };
       if (localStorage.getItem('dros_pf')) { $('pf').checked = true; document.documentElement.style.fontSize = '112%'; }
-    }
-
-    // AI disclosure body — injected via DOM to avoid HTML injection in the widget string
-    if (showAI) {
-      var AID = $('AID');
-      if (AID) {
-        var aiStmt = (cfg.statements || {}).ai_use_statement;
-        var aiP = document.createElement('div');
-        aiP.style.cssText = 'font-size:12px;line-height:1.6;color:' + panelText + ';margin:8px 0 0';
-        if (aiStmt && aiStmt.body) {
-          aiP.innerHTML = aiStmt.body;
-        } else {
-          aiP.textContent = 'No AI use statement has been configured for this site.';
-          aiP.style.color = panelSubText;
-        }
-        AID.appendChild(aiP);
-      }
     }
 
     // Statement modal
