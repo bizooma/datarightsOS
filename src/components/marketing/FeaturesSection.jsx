@@ -1,4 +1,4 @@
-import { Cookie, Inbox, Shield } from 'lucide-react';
+import { Cookie, Inbox, Shield, Bot } from 'lucide-react';
 
 const features = [
   {
@@ -25,6 +25,14 @@ const features = [
       'Every consent choice and every request event is written to a tamper-evident log. Export it as a timestamped CSV any time — your proof of compliance in a regulatory inquiry or litigation hold.',
     details: ['Timestamped event log per request', 'Consent receipt archive', 'CSV and report export', 'Organization-level isolation'],
   },
+  {
+    icon: Bot,
+    color: '#0d7d74',
+    title: 'AI use disclosure',
+    description:
+      "Tell visitors when and how you use artificial intelligence to interact with them. Required by the FTC's guidance against deceptive AI claims and California's AB 302 (Bolts Act, 2024), with similar bot-disclosure rules in California's B.O.T. Act (SB 1001) and the EU AI Act now in effect.",
+    details: ['Plain-language AI use statement', 'Surfaced in the widget disclosure drawer', 'FTC & California AB 302 aligned', 'Versioned with effective dates'],
+  },
 ];
 
 export default function FeaturesSection() {
@@ -36,11 +44,11 @@ export default function FeaturesSection() {
             Everything a compliant site needs. Nothing it doesn't.
           </h2>
           <p className="text-slate-500 max-w-xl mx-auto">
-            Three focused modules, deployed with one embed snippet.
+            Four focused modules, deployed with one embed snippet.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {features.map((f) => (
             <div key={f.title} className="flex flex-col">
               <div
