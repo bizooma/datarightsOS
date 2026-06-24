@@ -57,8 +57,8 @@ export default function Organizations() {
 
   const planColors = {
     trial: 'bg-gray-100 text-gray-600',
-    starter: 'bg-blue-50 text-blue-700',
-    pro: 'bg-primary/10 text-primary',
+    core: 'bg-blue-50 text-blue-700',
+    proof: 'bg-primary/10 text-primary',
     agency: 'bg-amber-50 text-amber-700',
   };
 
@@ -204,8 +204,8 @@ function CreateOrgForm({ onSubmit, onCancel, isPending }) {
             <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="trial">Trial</SelectItem>
-              <SelectItem value="starter">Starter</SelectItem>
-              <SelectItem value="pro">Pro</SelectItem>
+              <SelectItem value="core">Core</SelectItem>
+              <SelectItem value="proof">Proof</SelectItem>
               <SelectItem value="agency">Agency</SelectItem>
             </SelectContent>
           </Select>

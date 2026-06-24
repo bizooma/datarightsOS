@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Check, AlertTriangle, ExternalLink } from 'lucide-react';
 
-const UPGRADE_ORDER = ['trial', 'starter', 'pro', 'agency'];
+const UPGRADE_ORDER = ['trial', 'core', 'proof', 'agency'];
 
 export default function BillingTab({ org, siteCount, memberCount }) {
   const limits = PLAN_LIMITS[org.plan] || PLAN_LIMITS.trial;

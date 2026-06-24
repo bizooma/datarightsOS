@@ -10,8 +10,8 @@
       "type": "string",
       "enum": [
         "trial",
-        "starter",
-        "pro",
+        "core",
+        "proof",
         "agency"
       ],
       "default": "trial",
