@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const plans = [
   {
@@ -7,8 +9,8 @@ const plans = [
     price: '$99',
     period: '/mo',
     description: 'For a single site that needs solid privacy compliance.',
-    cta: 'Start free trial',
-    ctaTo: '/register',
+    cta: 'Get started',
+    planKey: 'core',
     highlight: false,
     features: [
       '1 site / 1 domain',
@@ -24,8 +26,8 @@ const plans = [
     price: '$299',
     period: '/mo',
     description: 'For firms and agencies running multiple client sites.',
-    cta: 'Start free trial',
-    ctaTo: '/register',
+    cta: 'Get started',
+    planKey: 'proof',
     highlight: true,
     badge: 'Most popular',
     features: [
@@ -59,6 +61,28 @@ const plans = [
 ];
 
 export default function PricingSection() {
+  const [loadingPlan, setLoadingPlan] = useState(null);
+
+  const handleCheckout = async (planKey) => {
+    if (window.self !== window.top) {
+      alert('Checkout works only from the published app. Please open the live site in a new tab to subscribe.');
+      return;
+    }
+    setLoadingPlan(planKey);
+    try {
+      const { data } = await base44.functions.invoke('createCheckoutSession', {
+        plan: planKey,
+        success_url: `${window.location.origin}/dashboard?checkout=success`,
+        cancel_url: `${window.location.origin}/?checkout=canceled`,
+      });
+      if (data?.url) window.location.href = data.url;
+      else { alert('Unable to start checkout. Please try again.'); setLoadingPlan(null); }
+    } catch {
+      alert('Unable to start checkout. Please try again.');
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <section id="pricing" className="bg-slate-50 border-t border-slate-100 py-20 px-6">
       <div className="max-w-5xl mx-auto">
@@ -124,16 +148,18 @@ export default function PricingSection() {
                   {plan.cta}
                 </a>
               ) : (
-                <Link
-                  to={plan.ctaTo}
-                  className={`w-full text-center text-sm font-semibold py-2.5 rounded-lg transition-colors ${
+                <button
+                  onClick={() => handleCheckout(plan.planKey)}
+                  disabled={loadingPlan === plan.planKey}
+                  className={`w-full inline-flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-60 ${
                     plan.highlight
                       ? 'bg-[#0d7d74] text-white hover:bg-[#0a6b63]'
                       : 'border border-slate-200 text-[#14202b] hover:bg-slate-50'
                   }`}
                 >
+                  {loadingPlan === plan.planKey && <Loader2 className="w-4 h-4 animate-spin" />}
                   {plan.cta}
-                </Link>
+                </button>
               )}
             </div>
           ))}
