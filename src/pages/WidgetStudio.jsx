@@ -323,6 +323,34 @@ function SiteConfigForm({ site, onUpdate, onFormChange }) {
 
       <Card>
         <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Branding</CardTitle>
+          <p className="text-[11px] text-muted-foreground">Specific to this site. Leave blank to inherit your organization's default branding.</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <FormField label="Product Name" value={form.brand_product_name} onChange={v => handleChange('brand_product_name', v)} placeholder="e.g. Acme Privacy Center" />
+          <FormField label="Logo URL" value={form.brand_logo_url} onChange={v => handleChange('brand_logo_url', v)} placeholder="https://…/logo.png" />
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">Primary Color</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={form.brand_primary_color || '#0d7d74'}
+                onChange={e => handleChange('brand_primary_color', e.target.value)}
+                className="h-9 w-12 rounded-md border border-input bg-transparent cursor-pointer p-1"
+              />
+              <Input
+                value={form.brand_primary_color || ''}
+                onChange={e => handleChange('brand_primary_color', e.target.value)}
+                placeholder="#0d7d74"
+                className="h-9 text-sm font-mono flex-1"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">Widget Drawers</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">

@@ -28,6 +28,18 @@
       "default": "pending",
       "description": "Widget installation status"
     },
+    "brand_product_name": {
+      "type": "string",
+      "description": "Site-specific white-label product name shown in the widget. Falls back to organization name if empty."
+    },
+    "brand_logo_url": {
+      "type": "string",
+      "description": "Site-specific brand logo URL shown in the widget. Falls back to organization logo if empty."
+    },
+    "brand_primary_color": {
+      "type": "string",
+      "description": "Site-specific primary brand color for the widget. Falls back to organization color if empty."
+    },
     "enabled_drawers": {
       "type": "array",
       "items": {
