@@ -7,7 +7,8 @@ import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
 import { Link } from 'react-router-dom';
-import { Inbox, Search, Filter } from 'lucide-react';
+import { Inbox, Search, Filter, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -67,11 +68,54 @@ export default function RequestInbox() {
     return new Date(a.statutory_deadline) - new Date(b.statutory_deadline);
   });
 
+  function handleExportCsv() {
+    const headers = [
+      'Requester Name', 'Requester Email', 'Request Type', 'Status', 'Verification',
+      'Received Date', 'Statutory Deadline', 'Assigned To', 'Site', 'State',
+    ];
+    const escape = (v) => {
+      const s = v == null ? '' : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = sorted.map(r => [
+      r.requester_name,
+      r.requester_email,
+      formatRequestType(r.request_type),
+      formatStatus(r.request_status),
+      formatStatus(r.verification_status),
+      r.received_date ? new Date(r.received_date).toISOString() : '',
+      r.statutory_deadline ? new Date(r.statutory_deadline).toISOString() : '',
+      userMap[r.assigned_to]?.full_name || '',
+      siteMap[r.site]?.domain || '',
+      r.requester_state || '',
+    ].map(escape).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `data-rights-requests-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div>
       <PageHeader
         title="Request Inbox"
         description="Manage incoming data rights requests"
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5"
+            onClick={handleExportCsv}
+            disabled={sorted.length === 0}
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </Button>
+        }
       />
 
       {!isSuperAdmin && <OnboardingChecklist sites={sites} />}
