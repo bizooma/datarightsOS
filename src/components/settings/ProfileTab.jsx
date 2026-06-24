@@ -28,17 +28,31 @@ export default function ProfileTab({ user }) {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setAvatarUrl(file_url);
-    setUploading(false);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setAvatarUrl(file_url);
+      await base44.auth.updateMe({ avatar_url: file_url });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      toast({ title: 'Photo updated', description: 'Your profile picture has been saved.' });
+    } catch (err) {
+      toast({ title: 'Upload failed', description: err?.message || 'Could not upload your photo. Please try again.', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   }
 
   async function handleSave() {
     setSaving(true);
-    await base44.auth.updateMe({ full_name: fullName, avatar_url: avatarUrl });
-    queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    toast({ title: 'Profile saved', description: 'Your profile has been updated.' });
-    setSaving(false);
+    try {
+      await base44.auth.updateMe({ full_name: fullName, avatar_url: avatarUrl });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      toast({ title: 'Profile saved', description: 'Your profile has been updated.' });
+    } catch (err) {
+      toast({ title: 'Save failed', description: err?.message || 'Could not save your profile.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handlePasswordReset() {
