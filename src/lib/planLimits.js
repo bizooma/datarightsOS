@@ -1,4 +1,4 @@
-// Plan limits and features for Tessera Privacy
+// Plan limits and features for Data Rights OS
 export const PLAN_LIMITS = {
   trial: {
     sites: 1,

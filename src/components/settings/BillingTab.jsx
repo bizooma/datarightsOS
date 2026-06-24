@@ -140,7 +140,7 @@ export default function BillingTab({ org, siteCount, memberCount }) {
                     </ul>
                     {plan === 'agency' ? (
                       <Button size="sm" variant="outline" className="h-8 text-xs w-full" asChild>
-                        <a href="mailto:sales@tesseraprivacy.com?subject=Agency%20Plan%20Inquiry">Contact Sales</a>
+                        <a href="mailto:sales@datarightsos.com?subject=Agency%20Plan%20Inquiry">Contact Sales</a>
                       </Button>
                     ) : (
                       <Button size="sm" className="h-8 text-xs w-full" onClick={() => handleUpgrade(plan)} disabled={loadingPlan === plan}>
@@ -152,7 +152,7 @@ export default function BillingTab({ org, siteCount, memberCount }) {
               })}
             </div>
             <p className="text-[11px] text-muted-foreground mt-3">
-              To upgrade your plan, contact <a href="mailto:sales@tesseraprivacy.com" className="underline">sales@tesseraprivacy.com</a>.
+              To upgrade your plan, contact <a href="mailto:sales@datarightsos.com" className="underline">sales@datarightsos.com</a>.
             </p>
           </CardContent>
         </Card>
