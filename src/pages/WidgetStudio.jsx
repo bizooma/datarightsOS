@@ -105,7 +105,7 @@ export default function WidgetStudio() {
           billing_status: 'active',
           trial_started_at: new Date().toISOString(),
         });
-        await base44.auth.updateMe({ organization: newOrg.id });
+        await base44.auth.updateMe({ organization: newOrg.id, role: 'owner' });
         effectiveOrgId = newOrg.id;
         queryClient.invalidateQueries({ queryKey: ['organization'] });
       } catch (err) {
