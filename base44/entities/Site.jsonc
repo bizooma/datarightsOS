@@ -30,7 +30,8 @@
         "enum": [
           "cookies",
           "privacy_rights",
-          "accessibility"
+          "accessibility",
+          "ai_disclosure"
         ]
       },
       "default": [

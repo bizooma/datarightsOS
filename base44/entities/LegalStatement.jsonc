@@ -15,7 +15,8 @@
       "enum": [
         "privacy_policy",
         "cookie_policy",
-        "accessibility_statement"
+        "accessibility_statement",
+        "ai_use_statement"
       ],
       "description": "Type of legal statement"
     },

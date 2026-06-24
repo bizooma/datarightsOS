@@ -34,6 +34,13 @@ const STATEMENT_TYPES = [
     defaultTitle: 'Accessibility Statement',
     required: false,
   },
+  {
+    key: 'ai_use_statement',
+    label: 'AI Use Statement',
+    description: 'Recommended under FTC guidelines and required in California (AB 13 / AICPA). Discloses when visitors interact with AI, the purpose of the AI, and any human-in-the-loop protocols.',
+    defaultTitle: 'AI Use Statement',
+    required: false,
+  },
 ];
 
 export default function LegalStatementsEditor({ site }) {
@@ -52,7 +59,7 @@ export default function LegalStatementsEditor({ site }) {
       <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
         <Info className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
         <p className="text-xs text-amber-800">
-          These statements are served directly inside your widget as a modal. Visitors from any US state will see the applicable statement — no separate page needed. Keeping them updated is critical for multi-state compliance.
+          These statements are served directly inside your widget as a modal. Visitors from any US state will see the applicable statement — no separate page needed. Keeping them current is critical for multi-state compliance, including the new AI disclosure requirements in California and under FTC guidelines.
         </p>
       </div>
 

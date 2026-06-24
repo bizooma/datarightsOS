@@ -30,6 +30,7 @@ Deno.serve(async (req) => {
   const privacyStmt = getStatement('privacy_policy');
   const cookieStmt = getStatement('cookie_policy');
   const a11yStmt = getStatement('accessibility_statement');
+  const aiStmt = getStatement('ai_use_statement');
 
   const payload = {
     product_name: org.white_label_product_name || 'Privacy & Data Rights Center',
@@ -47,6 +48,7 @@ Deno.serve(async (req) => {
       privacy_policy: privacyStmt ? { title: privacyStmt.title, body: privacyStmt.body, version: privacyStmt.version, effective_date: privacyStmt.effective_date } : null,
       cookie_policy: cookieStmt ? { title: cookieStmt.title, body: cookieStmt.body, version: cookieStmt.version, effective_date: cookieStmt.effective_date } : null,
       accessibility_statement: a11yStmt ? { title: a11yStmt.title, body: a11yStmt.body, version: a11yStmt.version, effective_date: a11yStmt.effective_date } : null,
+      ai_use_statement: aiStmt ? { title: aiStmt.title, body: aiStmt.body, version: aiStmt.version, effective_date: aiStmt.effective_date } : null,
     },
   };
 

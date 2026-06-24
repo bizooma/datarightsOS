@@ -267,13 +267,13 @@ function SiteConfigForm({ site, onUpdate, onFormChange }) {
           <CardTitle className="text-sm font-semibold">Widget Drawers</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {['cookies', 'privacy_rights', 'accessibility'].map(d => (
+          {['cookies', 'privacy_rights', 'accessibility', 'ai_disclosure'].map(d => (
             <div key={d} className="flex items-center gap-2">
               <Checkbox
                 checked={(form.enabled_drawers || []).includes(d)}
                 onCheckedChange={() => handleDrawerToggle(d)}
               />
-              <span className="text-sm capitalize">{d.replace('_', ' ')}</span>
+              <span className="text-sm capitalize">{d === 'ai_disclosure' ? 'AI Use Statement' : d.replace('_', ' ')}</span>
             </div>
           ))}
         </CardContent>

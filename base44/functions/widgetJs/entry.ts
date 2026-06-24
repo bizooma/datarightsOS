@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
     var showCookies = drawers.indexOf('cookies') > -1;
     var showRights = drawers.indexOf('privacy_rights') > -1;
     var showA11y = drawers.indexOf('accessibility') > -1;
+    var showAI = drawers.indexOf('ai_disclosure') > -1;
 
     var pos = cfg.widget_position || 'bottom-right';
     var posCSS = pos === 'bottom-left' ? 'left:22px;bottom:22px;right:auto;top:auto'
@@ -183,6 +184,12 @@ Deno.serve(async (req) => {
         + '<div class="row"><div class="lbl">Larger text</div><label class="sw"><input type="checkbox" id="pf"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="row"><div class="lbl">Reduce motion</div><label class="sw"><input type="checkbox" id="pm"><span class="tr"></span><span class="kn"></span></label></div>'
         + '</div></div>' : '')
+      + (showAI ? '<div class="drawer" data-d><button class="dh" data-t>AI Use Disclosure<span>&#9662;</span></button><div class="db">'
+        + '<div class="note">In compliance with the FTC Act and California AB 302, this site discloses when and how artificial intelligence is used to interact with you.</div>'
+        + ((cfg.statements || {}).ai_use_statement
+            ? '<p style="font-size:12px;line-height:1.6;color:' + panelText + ';margin:8px 0 0">' + (cfg.statements.ai_use_statement.body || '') + '</p>'
+            : '<p style="font-size:12px;color:' + panelSubText + ';margin:8px 0 0">No AI use statement has been configured for this site.</p>')
+        + '</div></div>' : '')
       + '</div>'
       + (function() {
           var stmts = cfg.statements || {};
@@ -190,6 +197,7 @@ Deno.serve(async (req) => {
           if (stmts.privacy_policy) links.push('<button class="stmtlink" data-stmt="privacy_policy">' + esc(stmts.privacy_policy.title || 'Privacy Policy') + '</button>');
           if (stmts.cookie_policy) links.push('<button class="stmtlink" data-stmt="cookie_policy">' + esc(stmts.cookie_policy.title || 'Cookie Policy') + '</button>');
           if (stmts.accessibility_statement) links.push('<button class="stmtlink" data-stmt="accessibility_statement">' + esc(stmts.accessibility_statement.title || 'Accessibility Statement') + '</button>');
+          if (stmts.ai_use_statement) links.push('<button class="stmtlink" data-stmt="ai_use_statement">' + esc(stmts.ai_use_statement.title || 'AI Use Statement') + '</button>');
           return links.length ? '<div class="stmtlinks">' + links.join('<span style="color:' + panelSubText + ';font-size:10px">·</span>') + '</div>' : '';
         })()
       + '<div class="foot">Powered by <a href="https://bizooma.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Bizooma, LLC</a></div>'
