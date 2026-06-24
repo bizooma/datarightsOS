@@ -6,7 +6,7 @@ Deno.serve(async (req) => {
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/javascript; charset=utf-8',
-    'Cache-Control': 'public, max-age=300',
+    'Cache-Control': 'public, max-age=30',
   };
 
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
