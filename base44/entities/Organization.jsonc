@@ -45,6 +45,14 @@
       ],
       "default": "active",
       "description": "Current billing status"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID for this organization"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription ID for this organization"
     }
   },
   "required": [

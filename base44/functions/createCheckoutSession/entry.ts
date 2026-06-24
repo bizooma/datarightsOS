@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return Response.json({ error: 'Method Not Allowed' }, { status: 405, headers: CORS });
 
   try {
-    const { plan, success_url, cancel_url } = await req.json();
+    const { plan, organization_id, success_url, cancel_url } = await req.json();
     const priceId = PRICE_IDS[plan];
     if (!priceId) {
       return Response.json({ error: 'Invalid plan' }, { status: 400, headers: CORS });
@@ -28,10 +28,17 @@ Deno.serve(async (req) => {
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: success_url || `${req.headers.get('origin') || ''}/dashboard?checkout=success`,
-      cancel_url: cancel_url || `${req.headers.get('origin') || ''}/?checkout=canceled`,
+      cancel_url: cancel_url || `${req.headers.get('origin') || ''}/settings?checkout=canceled`,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
         plan,
+        organization_id: organization_id || '',
+      },
+      subscription_data: {
+        metadata: {
+          plan,
+          organization_id: organization_id || '',
+        },
       },
     });
 

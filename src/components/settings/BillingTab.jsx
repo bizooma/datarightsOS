@@ -20,8 +20,9 @@ export default function BillingTab({ org, siteCount, memberCount }) {
     try {
       const { data } = await base44.functions.invoke('createCheckoutSession', {
         plan,
-        success_url: `${window.location.origin}/settings?checkout=success`,
-        cancel_url: `${window.location.origin}/settings?checkout=canceled`,
+        organization_id: org.id,
+        success_url: `${window.location.origin}/dashboard?checkout=success`,
+        cancel_url: `${window.location.origin}/dashboard?checkout=canceled`,
       });
       if (data?.url) window.location.href = data.url;
       else { alert('Could not start checkout. Please try again.'); setLoadingPlan(null); }
