@@ -186,7 +186,6 @@ Deno.serve(async (req) => {
         + '</div></div>' : '')
       + (showAI ? '<div class="drawer" data-d><button class="dh" data-t>AI Use Disclosure<span>&#9662;</span></button><div class="db">'
         + '<div class="note">In compliance with FTC guidelines and California AB 302, this site discloses when and how artificial intelligence is used to interact with you.</div>'
-        + (((cfg.statements || {}).ai_use_statement || {}).body ? '<p style="font-size:12px;line-height:1.6;margin:8px 0 0">' + esc(((cfg.statements || {}).ai_use_statement || {}).body.replace(/<[^>]*>/g, '')) + '</p>' : '')
         + '</div></div>' : '')
       + '</div>'
       + (function() {
