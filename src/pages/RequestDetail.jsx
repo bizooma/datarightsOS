@@ -7,6 +7,7 @@ import { daysUntilDeadline, deadlineBgColor, formatRequestType, formatStatus } f
 import StatusBadge from '@/components/shared/StatusBadge';
 import VerificationPanel from '@/components/request/VerificationPanel';
 import StatusWorkflowPanel from '@/components/request/StatusWorkflowPanel';
+import QuickStatusPanel from '@/components/request/QuickStatusPanel';
 import NotesPanel from '@/components/request/NotesPanel';
 import AssignPanel from '@/components/request/AssignPanel';
 import AuditTimeline from '@/components/request/AuditTimeline';
@@ -124,6 +125,12 @@ export default function RequestDetail() {
             request={request}
             onMarkVerified={actions.markVerified}
             onRejectRequest={actions.rejectRequest}
+          />
+
+          {/* Quick Status */}
+          <QuickStatusPanel
+            request={request}
+            onChangeStatus={(newStatus) => actions.changeStatus(request, newStatus)}
           />
 
           {/* Status Workflow */}
