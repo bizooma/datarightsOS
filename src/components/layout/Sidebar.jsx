@@ -5,6 +5,7 @@ import {
   Cookie,
   Settings as SettingsIcon,
   Shield,
+  BarChart3,
   Building2,
   Accessibility,
   LogOut,
@@ -19,6 +20,7 @@ import { useCurrentUser } from '@/lib/useCurrentUser';
 
 const navItems = [
   { path: '/dashboard', label: 'Request Inbox', icon: Inbox },
+  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/consent-log', label: 'Consent Log', icon: Cookie },
   { path: '/widget-studio', label: 'Widget Studio', icon: FileText },
   { path: '/audit-trail', label: 'Audit Trail', icon: Shield },

@@ -14,6 +14,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import AppLayout from '@/components/layout/AppLayout';
 import RequestInbox from '@/pages/RequestInbox';
+import Analytics from '@/pages/Analytics';
 import RequestDetail from '@/pages/RequestDetail';
 import ConsentLog from '@/pages/ConsentLog';
 import WidgetStudio from '@/pages/WidgetStudio';
@@ -47,6 +48,7 @@ const AuthenticatedApp = () => {
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<RequestInbox />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/request/:id" element={<RequestDetail />} />
           <Route path="/consent-log" element={<ConsentLog />} />
           <Route path="/widget-studio" element={<WidgetStudio />} />
