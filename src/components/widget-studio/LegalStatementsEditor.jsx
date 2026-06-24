@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -95,6 +95,16 @@ function StatementForm({ site, statementType, existing, onSaved }) {
   const [body, setBody] = useState(existing?.body || '');
   const [version, setVersion] = useState(existing?.version || '1.0');
   const [effectiveDate, setEffectiveDate] = useState(existing?.effective_date || new Date().toISOString().split('T')[0]);
+
+  // Sync form fields when the existing statement loads/changes (e.g. after the query resolves on remount)
+  useEffect(() => {
+    if (existing) {
+      setTitle(existing.title || statementType.defaultTitle);
+      setBody(existing.body || '');
+      setVersion(existing.version || '1.0');
+      setEffectiveDate(existing.effective_date || new Date().toISOString().split('T')[0]);
+    }
+  }, [existing?.id]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
