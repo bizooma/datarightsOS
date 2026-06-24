@@ -1,12 +1,36 @@
+import { useState } from 'react';
+import { base44 } from '@/api/base44Client';
 import { PLAN_LIMITS } from '@/lib/planLimits';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Check, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Check, AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
 
 const UPGRADE_ORDER = ['trial', 'core', 'proof', 'agency'];
 
 export default function BillingTab({ org, siteCount, memberCount }) {
+  const [loadingPlan, setLoadingPlan] = useState(null);
+
+  async function handleUpgrade(plan) {
+    if (window.self !== window.top) {
+      alert('Checkout only works from the published app. Please open your live site to upgrade.');
+      return;
+    }
+    setLoadingPlan(plan);
+    try {
+      const { data } = await base44.functions.invoke('createCheckoutSession', {
+        plan,
+        success_url: `${window.location.origin}/settings?checkout=success`,
+        cancel_url: `${window.location.origin}/settings?checkout=canceled`,
+      });
+      if (data?.url) window.location.href = data.url;
+      else { alert('Could not start checkout. Please try again.'); setLoadingPlan(null); }
+    } catch (e) {
+      alert('Could not start checkout. Please try again.');
+      setLoadingPlan(null);
+    }
+  }
+
   const limits = PLAN_LIMITS[org.plan] || PLAN_LIMITS.trial;
   const isActive = org.billing_status === 'active';
   const isPastDue = org.billing_status === 'past_due';
@@ -113,9 +137,15 @@ export default function BillingTab({ org, siteCount, memberCount }) {
                         </li>
                       ))}
                     </ul>
-                    <Button size="sm" variant="outline" className="h-8 text-xs w-full" disabled>
-                      Contact Sales
-                    </Button>
+                    {plan === 'agency' ? (
+                      <Button size="sm" variant="outline" className="h-8 text-xs w-full" asChild>
+                        <a href="mailto:sales@tesseraprivacy.com?subject=Agency%20Plan%20Inquiry">Contact Sales</a>
+                      </Button>
+                    ) : (
+                      <Button size="sm" className="h-8 text-xs w-full" onClick={() => handleUpgrade(plan)} disabled={loadingPlan === plan}>
+                        {loadingPlan === plan ? <Loader2 className="w-3 h-3 animate-spin" /> : `Upgrade to ${pl.label}`}
+                      </Button>
+                    )}
                   </div>
                 );
               })}
