@@ -1,8 +1,8 @@
 import Stripe from 'npm:stripe@17.3.1';
 
 const PRICE_IDS = {
-  core: 'price_1TlqqhPVRIZOMWziK37kGeae',
-  proof: 'price_1TlqqhPVRIZOMWzi6HymX1Eu',
+  core: 'price_1TlqlJEV6sbsDlR8DGP4QpH6',
+  proof: 'price_1TlqnTEV6sbsDlR8JPOeWIEz',
 };
 
 Deno.serve(async (req) => {
