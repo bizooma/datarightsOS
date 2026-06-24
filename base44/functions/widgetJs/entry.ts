@@ -41,13 +41,14 @@ Deno.serve(async (req) => {
     enabled_drawers: ['privacy_rights', 'cookies', 'accessibility'], honor_gpc: true,
     intro_video_url: '', accessibility_statement_url: '', privacy_policy_url: '', policy_version: '1.0' };
 
-  fetch(API + '/widgetConfig?site=' + encodeURIComponent(SITE))
+  fetch(API + '/widgetConfig?site=' + encodeURIComponent(SITE) + '&t=' + Date.now(), { cache: 'no-store' })
     .then(function (r) { return r.ok ? r.json() : DEFAULT; })
     .then(render).catch(function () { render(DEFAULT); });
 
   function esc(s) { return (s || '').replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
 
   function render(cfg) {
+    if (cfg.install_status && cfg.install_status !== 'active') { return; }
     var accent = cfg.primary_color || '#0d7d74';
     var isDark = (cfg.widget_theme || 'dark') !== 'light';
     // Theme tokens
