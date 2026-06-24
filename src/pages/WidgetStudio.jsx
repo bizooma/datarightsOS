@@ -6,7 +6,17 @@ import { generateKey } from '@/lib/tenantUtils';
 import { canAddSite } from '@/lib/planLimits';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
-import { FileText, Plus, Globe, Check } from 'lucide-react';
+import { FileText, Plus, Globe, Check, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
 import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
 import LegalStatementsEditor from '@/components/widget-studio/LegalStatementsEditor';
@@ -38,6 +48,7 @@ export default function WidgetStudio() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDomain, setNewDomain] = useState('');
   const [liveFormData, setLiveFormData] = useState(null);
+  const [siteToDelete, setSiteToDelete] = useState(null);
 
   const { data: sites = [], isLoading } = useQuery({
     queryKey: ['sites', orgId],
@@ -63,6 +74,20 @@ export default function WidgetStudio() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       toast.success('Site updated');
+    },
+  });
+
+  const deleteSiteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Site.delete(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+      if (selectedSiteId === id) setSelectedSiteId(null);
+      setSiteToDelete(null);
+      toast.success('Site deleted');
+    },
+    onError: () => {
+      setSiteToDelete(null);
+      toast.error('Could not delete site. Please try again.');
     },
   });
 
@@ -147,20 +172,34 @@ export default function WidgetStudio() {
           {/* Site list */}
           <div className="space-y-1">
             {sites.map(s => (
-              <button
+              <div
                 key={s.id}
-                onClick={() => setSelectedSiteId(s.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-md text-sm transition-colors ${
+                className={`group flex items-center rounded-md transition-colors ${
                   selectedSite?.id === s.id
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-foreground hover:bg-muted'
+                    ? 'bg-primary/10'
+                    : 'hover:bg-muted'
                 }`}
               >
-                <p className="truncate">{s.domain}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {s.install_status === 'active' ? '● Active' : '○ Pending'}
-                </p>
-              </button>
+                <button
+                  onClick={() => setSelectedSiteId(s.id)}
+                  className={`flex-1 min-w-0 text-left px-3 py-2.5 text-sm ${
+                    selectedSite?.id === s.id ? 'text-primary font-medium' : 'text-foreground'
+                  }`}
+                >
+                  <p className="truncate">{s.domain}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {s.install_status === 'active' ? '● Active' : '○ Pending'}
+                  </p>
+                </button>
+                <button
+                  onClick={() => setSiteToDelete(s)}
+                  className="shrink-0 p-2 mr-1 rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all"
+                  title="Delete site"
+                  aria-label={`Delete ${s.domain}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             ))}
           </div>
 
@@ -187,6 +226,26 @@ export default function WidgetStudio() {
           )}
         </div>
       )}
+
+      <AlertDialog open={!!siteToDelete} onOpenChange={(open) => !open && setSiteToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete site?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{siteToDelete?.domain}</span> and its widget configuration. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => siteToDelete && deleteSiteMutation.mutate(siteToDelete.id)}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
