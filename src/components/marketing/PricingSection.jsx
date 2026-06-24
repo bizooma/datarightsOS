@@ -70,14 +70,21 @@ export default function PricingSection() {
     }
     setLoadingPlan(planKey);
     try {
-      const { data } = await base44.functions.invoke('createCheckoutSession', {
+      const res = await base44.functions.invoke('createCheckoutSession', {
         plan: planKey,
         success_url: `${window.location.origin}/dashboard?checkout=success`,
         cancel_url: `${window.location.origin}/?checkout=canceled`,
       });
-      if (data?.url) window.location.href = data.url;
-      else { alert('Unable to start checkout. Please try again.'); setLoadingPlan(null); }
-    } catch {
+      const url = res?.data?.url || res?.url;
+      if (url) {
+        window.location.href = url;
+      } else {
+        console.error('No checkout URL in response', res);
+        alert('Unable to start checkout. Please try again.');
+        setLoadingPlan(null);
+      }
+    } catch (err) {
+      console.error('Checkout error', err);
       alert('Unable to start checkout. Please try again.');
       setLoadingPlan(null);
     }
