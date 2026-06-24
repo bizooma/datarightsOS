@@ -78,6 +78,7 @@ export default function WidgetStudio() {
           name: user?.full_name ? `${user.full_name}'s Organization` : 'My Organization',
           plan: 'trial',
           billing_status: 'active',
+          trial_started_at: new Date().toISOString(),
         });
         await base44.auth.updateMe({ organization: newOrg.id });
         effectiveOrgId = newOrg.id;

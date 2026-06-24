@@ -65,3 +65,21 @@ export function canAddSite(plan, currentCount) {
 export function canAddMember(plan, currentCount) {
   return currentCount < getPlanLimits(plan).teamMembers;
 }
+
+const TRIAL_DAYS = 7;
+
+export function isTrialExpired(org) {
+  if (!org || org.plan !== 'trial') return false;
+  const started = org.trial_started_at ? new Date(org.trial_started_at) : null;
+  if (!started) return false;
+  const daysSinceStart = (Date.now() - started.getTime()) / (1000 * 60 * 60 * 24);
+  return daysSinceStart > TRIAL_DAYS;
+}
+
+export function trialDaysRemaining(org) {
+  if (!org || org.plan !== 'trial') return null;
+  const started = org.trial_started_at ? new Date(org.trial_started_at) : null;
+  if (!started) return TRIAL_DAYS;
+  const elapsed = (Date.now() - started.getTime()) / (1000 * 60 * 60 * 24);
+  return Math.max(0, Math.ceil(TRIAL_DAYS - elapsed));
+}

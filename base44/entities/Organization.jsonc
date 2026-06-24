@@ -17,6 +17,11 @@
       "default": "trial",
       "description": "Subscription plan"
     },
+    "trial_started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the trial started (set on org creation)"
+    },
     "white_label_product_name": {
       "type": "string",
       "default": "Privacy & Data Rights Center",
