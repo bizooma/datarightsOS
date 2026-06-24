@@ -43,7 +43,8 @@ Deno.serve(async (req) => {
 
   fetch(API + '/widgetConfig?site=' + encodeURIComponent(SITE) + '&t=' + Date.now(), { cache: 'no-store' })
     .then(function (r) { return r.ok ? r.json() : DEFAULT; })
-    .then(render).catch(function () { render(DEFAULT); });
+    .then(function (res) { render((res && res.data) ? res.data : res); })
+    .catch(function () { render(DEFAULT); });
 
   function esc(s) { return (s || '').replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
 
