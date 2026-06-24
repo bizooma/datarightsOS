@@ -212,7 +212,7 @@ export default function WidgetStudio() {
                   <TabsTrigger value="legal" className="text-xs">Legal Statements</TabsTrigger>
                 </TabsList>
                 <TabsContent value="config">
-                  <SiteConfigForm site={selectedSite} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
+                  <SiteConfigForm key={selectedSite.id} site={selectedSite} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
                   <div className="border-t border-border pt-6 mt-6 space-y-6">
                     <EmbedSnippet site={selectedSite} />
                     <PrivacyCenterPreview site={liveFormData || selectedSite} />
