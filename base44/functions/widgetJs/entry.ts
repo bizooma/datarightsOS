@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       + '.launcher{position:fixed;' + posCSS + ';z-index:2147483000;display:flex;align-items:center;gap:8px;background:' + launcherBg + ';color:' + launcherColor + ';border:' + launcherBorder + ';cursor:pointer;padding:11px 15px;border-radius:999px;box-shadow:0 14px 40px -10px rgba(20,32,43,.45);font-size:13px;font-weight:600}'
       + '.launcher .dot{width:7px;height:7px;border-radius:50%;background:' + accent + '}'
       + '.panel{position:fixed;' + panelCSS + ';z-index:2147483001;width:380px;max-width:calc(100vw - 28px);max-height:86vh;background:' + panelBg + ';border-radius:16px;box-shadow:0 18px 50px -12px rgba(20,32,43,.4);display:flex;flex-direction:column;overflow:hidden;border:1px solid ' + panelBorder + '}'
-      + '.hidden{display:none}'
+      + '.hidden{display:none !important}'
       + '.phead{padding:15px 16px;border-bottom:1px solid ' + divider + ';display:flex;align-items:center;gap:10px;position:relative}'
       + '.crest{width:36px;height:36px;border-radius:8px;background:' + crestBg + ';border:1px solid ' + divider + ';display:flex;align-items:center;justify-content:center;color:' + crestColor + ';font-weight:700;overflow:hidden}'
       + '.crest img{width:100%;height:100%;object-fit:contain;padding:2px}'
