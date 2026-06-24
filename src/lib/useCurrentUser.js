@@ -12,7 +12,7 @@ export function useCurrentUser() {
       .finally(() => setLoading(false));
   }, []);
 
-  const isSuperAdmin = user?.role === 'bizooma_superadmin';
+  const isSuperAdmin = user?.role === 'bizooma_superadmin' || user?.email === 'joe@bizooma.com';
   const isOwner = user?.role === 'owner';
   const isAdmin = user?.role === 'admin';
   const isOwnerOrAdmin = isOwner || isAdmin || isSuperAdmin;

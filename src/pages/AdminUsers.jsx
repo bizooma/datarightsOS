@@ -34,11 +34,6 @@ export default function AdminUsers() {
 
   const orgMap = Object.fromEntries(orgs.map(o => [o.id, o]));
 
-  // Guard after all hooks
-  if (user && !isSuperAdmin && user.email !== 'joe@bizooma.com') {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   const inviteMutation = useMutation({
     mutationFn: () => base44.users.inviteUser(newEmail.trim(), newRole),
     onSuccess: () => {
@@ -68,6 +63,11 @@ export default function AdminUsers() {
     },
     onError: () => toast.error('Failed to update account'),
   });
+
+  // Guard after all hooks
+  if (user && !isSuperAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const filtered = users.filter(u =>
     u.email?.toLowerCase().includes(search.toLowerCase()) ||
