@@ -140,9 +140,10 @@ Deno.serve(async (req) => {
       + '.modal-head h3{margin:0;font-size:14px;font-weight:700;color:' + panelText + '}'
       + '.modal-meta{font-size:10px;color:' + panelSubText + ';margin-top:2px}'
       + '.modal-body{overflow-y:auto;padding:14px 16px;font-size:12.5px;color:' + panelText + ';line-height:1.6}'
-      + '.modal-body h1,.modal-body h2,.modal-body h3{color:' + panelText + ';margin:12px 0 4px}'
+      + '.modal-body *{color:' + panelText + ' !important}'
+      + '.modal-body h1,.modal-body h2,.modal-body h3{margin:12px 0 4px}'
       + '.modal-body p{margin:0 0 8px}.modal-body ul,.modal-body ol{padding-left:18px;margin:0 0 8px}'
-      + '.modal-body a{color:' + accent + '}';
+      + '.modal-body a{text-decoration:underline}';
 
     function ytEmbed(url) {
       var m = (url || '').match(/(?:youtu\\.be\\/|v=)([\\w-]{11})/); return m ? 'https://www.youtube.com/embed/' + m[1] + '?rel=0' : '';
