@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 const plans = [
   {
     name: 'Core',
-    price: '$49',
+    price: '$99',
     period: '/mo',
     description: 'For a single site that needs solid privacy compliance.',
     cta: 'Start free trial',
@@ -21,7 +21,7 @@ const plans = [
   },
   {
     name: 'Proof',
-    price: '$129',
+    price: '$299',
     period: '/mo',
     description: 'For firms and agencies running multiple client sites.',
     cta: 'Start free trial',
@@ -43,8 +43,8 @@ const plans = [
     price: 'Custom',
     period: '',
     description: 'Resellers and large agencies with dozens of client organizations.',
-    cta: 'Talk to us',
-    ctaTo: '/register',
+    cta: 'Contact us',
+    contact: true,
     highlight: false,
     features: [
       'Unlimited sites & organizations',
@@ -116,16 +116,25 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <Link
-                to={plan.ctaTo}
-                className={`w-full text-center text-sm font-semibold py-2.5 rounded-lg transition-colors ${
-                  plan.highlight
-                    ? 'bg-[#0d7d74] text-white hover:bg-[#0a6b63]'
-                    : 'border border-slate-200 text-[#14202b] hover:bg-slate-50'
-                }`}
-              >
-                {plan.cta}
-              </Link>
+              {plan.contact ? (
+                <a
+                  href="mailto:sales@bizooma.com?subject=Agency%20plan%20inquiry"
+                  className="w-full text-center text-sm font-semibold py-2.5 rounded-lg transition-colors border border-slate-200 text-[#14202b] hover:bg-slate-50"
+                >
+                  {plan.cta}
+                </a>
+              ) : (
+                <Link
+                  to={plan.ctaTo}
+                  className={`w-full text-center text-sm font-semibold py-2.5 rounded-lg transition-colors ${
+                    plan.highlight
+                      ? 'bg-[#0d7d74] text-white hover:bg-[#0a6b63]'
+                      : 'border border-slate-200 text-[#14202b] hover:bg-slate-50'
+                  }`}
+                >
+                  {plan.cta}
+                </Link>
+              )}
             </div>
           ))}
         </div>
