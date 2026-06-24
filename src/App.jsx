@@ -22,6 +22,7 @@ import Settings from '@/pages/Settings';
 import Organizations from '@/pages/Organizations';
 import PrivacyCenter from '@/pages/PrivacyCenter';
 import Home from '@/pages/Home';
+import AdminUsers from '@/pages/AdminUsers';
 
 const AuthenticatedApp = () => {
   const { authError } = useAuth();
@@ -50,6 +51,7 @@ const AuthenticatedApp = () => {
           <Route path="/accessibility" element={<AccessibilityReports />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/organizations" element={<Organizations />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
         </Route>
       </Route>
       <Route path="/privacy-center" element={<PrivacyCenter />} />

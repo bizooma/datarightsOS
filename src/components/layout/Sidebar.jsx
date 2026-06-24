@@ -10,6 +10,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -27,6 +28,7 @@ const navItems = [
 
 const superAdminItems = [
   { path: '/organizations', label: 'Organizations', icon: Building2 },
+  { path: '/admin/users', label: 'User Management', icon: Users },
 ];
 
 export default function Sidebar() {
