@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 
-export default function MarketingNav() {
+export default function MarketingNav({ isAuthenticated }) {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -16,18 +16,29 @@ export default function MarketingNav() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link
-            to="/login"
-            className="text-sm font-medium text-slate-600 hover:text-[#14202b] transition-colors"
-          >
-            Log in
-          </Link>
-          <Link
-            to="/register"
-            className="text-sm font-semibold bg-[#0d7d74] text-white px-4 py-2 rounded-lg hover:bg-[#0a6b63] transition-colors"
-          >
-            Start free trial
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              to="/dashboard"
+              className="text-sm font-semibold bg-[#0d7d74] text-white px-4 py-2 rounded-lg hover:bg-[#0a6b63] transition-colors"
+            >
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-sm font-medium text-slate-600 hover:text-[#14202b] transition-colors"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/register"
+                className="text-sm font-semibold bg-[#0d7d74] text-white px-4 py-2 rounded-lg hover:bg-[#0a6b63] transition-colors"
+              >
+                Start free trial
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
