@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 
   const payload = {
     product_name: org.white_label_product_name || 'Privacy & Data Rights Center',
-    logo_url: org.brand_logo_url || '',
+    logo_url: org.brand_logo_url || 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/b5c7df386_vault.png',
     primary_color: org.brand_primary_color || '#0d7d74',
     enabled_drawers: site.enabled_drawers || ['cookies', 'privacy_rights'],
     widget_position: site.widget_position || 'bottom-right',

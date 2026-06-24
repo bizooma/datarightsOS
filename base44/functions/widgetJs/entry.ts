@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  var DEFAULT = { product_name: 'Privacy & Data Rights Center', logo_url: '', primary_color: '#0d7d74',
+  var DEFAULT = { product_name: 'Privacy & Data Rights Center', logo_url: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/b5c7df386_vault.png', primary_color: '#0d7d74',
     enabled_drawers: ['privacy_rights', 'cookies', 'accessibility'], honor_gpc: true,
     intro_video_url: '', accessibility_statement_url: '', privacy_policy_url: '', policy_version: '1.0' };
 

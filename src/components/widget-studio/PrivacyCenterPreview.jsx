@@ -12,7 +12,7 @@ export default function PrivacyCenterPreview({ site }) {
   if (!site) return null;
 
   const accent = org?.brand_primary_color || '#0d7d74';
-  const logoUrl = org?.brand_logo_url || '';
+  const logoUrl = org?.brand_logo_url || 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/b5c7df386_vault.png';
   const productName = org?.white_label_product_name || 'Privacy & Data Rights Center';
   const drawers = site.enabled_drawers || ['cookies', 'privacy_rights'];
   const isDark = (site.widget_theme || 'dark') !== 'light';
