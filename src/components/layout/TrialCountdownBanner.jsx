@@ -7,21 +7,17 @@ export default function TrialCountdownBanner({ org }) {
   const daysLeft = trialDaysRemaining(org);
   if (daysLeft === null) return null;
 
-  const urgent = daysLeft <= 2;
-
   return (
-    <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg text-sm mb-6 border ${
-      urgent ? 'bg-destructive/10 border-destructive/30 text-destructive' : 'bg-accent/10 border-accent/30 text-accent-foreground'
-    }`}>
+    <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg text-sm mb-6 bg-red-600 text-white">
       <div className="flex items-center gap-2">
-        <Clock className={`w-4 h-4 shrink-0 ${urgent ? 'text-destructive' : 'text-accent'}`} />
-        <span className="font-medium text-foreground">
+        <Clock className="w-4 h-4 shrink-0 text-white" />
+        <span className="font-medium text-white">
           {daysLeft === 0
             ? 'Your free trial ends today.'
             : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left in your free trial.`}
         </span>
       </div>
-      <Link to="/settings" className="font-semibold underline shrink-0 text-foreground hover:text-primary transition-colors">
+      <Link to="/settings" className="font-semibold underline shrink-0 text-white hover:text-white/80 transition-colors">
         Upgrade
       </Link>
     </div>
