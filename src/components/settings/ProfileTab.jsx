@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -20,6 +20,12 @@ export default function ProfileTab({ user }) {
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || '');
   const [uploading, setUploading] = useState(false);
+
+  // Keep local fields in sync when user data refreshes (e.g. after avatar upload)
+  useEffect(() => {
+    setFullName(user?.full_name || '');
+    setAvatarUrl(user?.avatar_url || '');
+  }, [user?.full_name, user?.avatar_url]);
   const [saving, setSaving] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
   const [canceling, setCanceling] = useState(false);
@@ -80,7 +86,7 @@ export default function ProfileTab({ user }) {
         <CardContent className="space-y-4 max-w-lg">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src={avatarUrl} alt="Profile" />
+              <AvatarImage src={avatarUrl} alt="Profile" className="object-cover" />
               <AvatarFallback className="text-sm">{initials}</AvatarFallback>
             </Avatar>
             <label className="flex items-center gap-2 cursor-pointer h-9 px-3 rounded-md border border-border bg-white text-sm text-muted-foreground hover:bg-muted/40 transition-colors">
