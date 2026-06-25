@@ -1,4 +1,5 @@
-import { Cookie, Inbox, Shield, Bot } from 'lucide-react';
+import { Cookie, Inbox, Shield, Bot, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const features = [
   {
@@ -8,6 +9,7 @@ const features = [
     description:
       'Branded widget handles strictly-necessary, functional, analytics, and advertising cookies. Automatically honors the Global Privacy Control signal — a legal requirement in California and growing states.',
     details: ['Accept / reject all or by category', 'GPC auto-opt-out with audit log entry', 'Custom brand color and logo', 'Per-visitor consent receipt IDs'],
+    link: '/cookie-consent',
   },
   {
     icon: Inbox,
@@ -59,7 +61,7 @@ export default function FeaturesSection() {
               </div>
               <h3 className="font-semibold text-[#14202b] mb-2">{f.title}</h3>
               <p className="text-sm text-slate-600 leading-relaxed mb-5">{f.description}</p>
-              <ul className="space-y-2 mt-auto">
+              <ul className="space-y-2">
                 {f.details.map((d) => (
                   <li key={d} className="flex items-start gap-2 text-xs text-slate-500">
                     <span className="mt-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${f.color}15` }}>
@@ -69,6 +71,15 @@ export default function FeaturesSection() {
                   </li>
                 ))}
               </ul>
+              {f.link && (
+                <Link
+                  to={f.link}
+                  className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#0d7d74] hover:gap-2.5 transition-all"
+                >
+                  Learn more
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
             </div>
           ))}
         </div>
