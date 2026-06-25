@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Check, Info } from 'lucide-react';
+import { Check, Info, Languages, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import SampleStatementDialog from './SampleStatementDialog';
 import ReactQuill from 'react-quill';
@@ -98,6 +98,36 @@ function StatementForm({ site, statementType, existing, onSaved }) {
   const [lang, setLang] = useState('en');
   const [version, setVersion] = useState(existing?.version || '1.0');
   const [effectiveDate, setEffectiveDate] = useState(existing?.effective_date || new Date().toISOString().split('T')[0]);
+  const [translating, setTranslating] = useState(false);
+
+  const handleTranslate = async () => {
+    if (!body.trim()) {
+      toast.error('Add the English statement first');
+      return;
+    }
+    setTranslating(true);
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Translate the following website legal statement into clear, natural Latin American Spanish suitable for a general audience. Preserve all HTML tags and structure exactly — only translate the human-readable text inside them. Do not add commentary.\n\nTITLE: ${title}\n\nBODY (HTML):\n${body}`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            title_es: { type: 'string' },
+            body_es: { type: 'string' },
+          },
+          required: ['title_es', 'body_es'],
+        },
+      });
+      setTitleEs(result.title_es || '');
+      setBodyEs(result.body_es || '');
+      setLang('es');
+      toast.success('Spanish translation generated — review and save');
+    } catch {
+      toast.error('Translation failed, please try again');
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   // Sync form fields when the existing statement loads/changes (e.g. after the query resolves on remount)
   useEffect(() => {
@@ -171,21 +201,34 @@ function StatementForm({ site, statementType, existing, onSaved }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 p-0.5 rounded-md bg-muted w-fit">
-          <button
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-1 p-0.5 rounded-md bg-muted w-fit">
+            <button
+              type="button"
+              onClick={() => setLang('en')}
+              className={`px-3 py-1 text-xs font-medium rounded ${lang === 'en' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
+            >
+              English
+            </button>
+            <button
+              type="button"
+              onClick={() => setLang('es')}
+              className={`px-3 py-1 text-xs font-medium rounded ${lang === 'es' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
+            >
+              Español
+            </button>
+          </div>
+          <Button
             type="button"
-            onClick={() => setLang('en')}
-            className={`px-3 py-1 text-xs font-medium rounded ${lang === 'en' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs"
+            onClick={handleTranslate}
+            disabled={translating || !body.trim()}
           >
-            English
-          </button>
-          <button
-            type="button"
-            onClick={() => setLang('es')}
-            className={`px-3 py-1 text-xs font-medium rounded ${lang === 'es' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
-          >
-            Español
-          </button>
+            {translating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Languages className="w-3.5 h-3.5 mr-1.5" />}
+            {translating ? 'Translating…' : 'Auto-translate to Spanish'}
+          </Button>
         </div>
 
         {lang === 'es' && (
