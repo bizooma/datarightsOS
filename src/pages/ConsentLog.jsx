@@ -5,6 +5,7 @@ import { useCurrentUser } from '@/lib/useCurrentUser';
 import { exportToCSV, formatStatus } from '@/lib/tenantUtils';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
+import GeoDeviceInsights from '@/components/consent-log/GeoDeviceInsights';
 import { Cookie, Download, Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -143,6 +144,9 @@ export default function ConsentLog() {
           {filtered.length} record{filtered.length !== 1 ? 's' : ''}
         </span>
       </div>
+
+      {/* Geographic & Device Insights */}
+      {!isLoading && <GeoDeviceInsights records={filtered} />}
 
       {/* Table */}
       <div className="bg-white rounded-lg border border-border overflow-hidden">

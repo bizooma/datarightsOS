@@ -56,6 +56,13 @@ Deno.serve(async (req) => {
   const site = sites[0];
 
   const userAgent = sanitize(req.headers.get('user-agent') || '', 500);
+  // Infer US state from edge geo headers (Cloudflare / common proxies). Best-effort, no widget change needed.
+  const regionState = sanitize(
+    req.headers.get('cf-region-code') ||
+    req.headers.get('x-vercel-ip-country-region') ||
+    req.headers.get('x-region-code') || '',
+    50
+  );
   const now = new Date().toISOString();
   const deadline = new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString();
   const type = body.type;
@@ -73,6 +80,7 @@ Deno.serve(async (req) => {
       advertising: body.advertising === true,
       gpc_detected: gpcDetected,
       user_agent: userAgent,
+      region_state: regionState,
       policy_version: site.policy_version || '1.0',
       consent_receipt_id: generateReceiptId(),
     });
