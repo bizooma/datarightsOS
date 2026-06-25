@@ -130,6 +130,9 @@ Deno.serve(async (req) => {
       + '.link{display:flex;align-items:center;justify-content:space-between;width:100%;background:' + itemBg + ';border:1px solid ' + divider + ';border-radius:8px;padding:11px;font-size:12.5px;font-weight:600;color:' + panelText + ';cursor:pointer;margin-bottom:8px;text-decoration:none}'
       + '.note{font-size:11px;color:' + panelSubText + ';background:' + (isDark ? '#1c2c3a' : '#f6f8f9') + ';border:1px solid ' + divider + ';border-radius:8px;padding:10px;margin-bottom:11px;line-height:1.45}'
       + '.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:' + panelSubText + ';font-weight:700;margin:8px 0 2px}'
+      + '.a11ygrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}'
+      + '.a11ycell{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid ' + divider + ';background:' + itemBg + ';border-radius:9px;padding:9px 10px}'
+      + '.a11ycell .lbl{font-size:11.5px;font-weight:600;color:' + panelText + ';line-height:1.25}'
       + '.foot{border-top:1px solid ' + divider + ';padding:9px 16px;font-size:10.5px;color:' + panelSubText + ';background:' + footerBg + '}'
       + '.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);z-index:2147483002;background:#14202b;color:#fff;padding:10px 15px;border-radius:9px;font-size:12.5px;font-weight:600;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1}'
       + '.stmtlinks{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;border-top:1px solid ' + divider + ';background:' + footerBg + '}'
@@ -184,8 +187,14 @@ Deno.serve(async (req) => {
         + '<button class="link" id="BR">Report an accessibility barrier &#8250;</button>'
         + '<div class="intake" id="BF"><input class="fld" id="bu" placeholder="Page URL"><textarea class="fld" id="bd" rows="2" placeholder="Describe the barrier"></textarea><input class="fld" id="be" type="email" placeholder="Your email (optional)"><button class="btn p" id="BS" style="width:100%">Send report</button></div>'
         + '<div class="cap">Display preferences (this browser only)</div>'
-        + '<div class="row"><div class="lbl">Larger text</div><label class="sw"><input type="checkbox" id="pf"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="row"><div class="lbl">Reduce motion</div><label class="sw"><input type="checkbox" id="pm"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ygrid">'
+        + '<div class="a11ycell"><div class="lbl">Larger text</div><label class="sw"><input type="checkbox" id="pf"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">High contrast</div><label class="sw"><input type="checkbox" id="phc"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">Monochrome</div><label class="sw"><input type="checkbox" id="pmo"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">Reduce motion</div><label class="sw"><input type="checkbox" id="pm"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">Oversize cursor</div><label class="sw"><input type="checkbox" id="poc"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">Screen reader optimized</div><label class="sw"><input type="checkbox" id="psr"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '</div>'
         + '</div></div>' : '')
       + (showAI ? '<div class="drawer" data-d><button class="dh" data-t>AI Use Disclosure<span>&#9662;</span></button><div class="db">'
         + '<div class="note">In compliance with FTC guidelines and California AB 302, this site discloses when and how artificial intelligence is used to interact with you.</div>'
@@ -241,9 +250,40 @@ Deno.serve(async (req) => {
     if (showA11y) {
       $('BR').onclick = function () { $('BF').classList.toggle('show'); };
       $('BS').onclick = function () { post({ type: 'accessibility_report', page_url: $('bu').value || location.href, description: $('bd').value, reporter_email: $('be').value }); $('BF').classList.remove('show'); toast('Report sent. Thank you.'); };
-      $('pf').onchange = function () { document.documentElement.style.fontSize = this.checked ? '112%' : ''; localStorage.setItem('dros_pf', this.checked ? '1' : ''); };
-      $('pm').onchange = function () { document.documentElement.style.scrollBehavior = this.checked ? 'auto' : ''; localStorage.setItem('dros_pm', this.checked ? '1' : ''); };
-      if (localStorage.getItem('dros_pf')) { $('pf').checked = true; document.documentElement.style.fontSize = '112%'; }
+
+      // Global stylesheet injected into the host page (outside shadow DOM) for visual a11y overrides.
+      var a11yStyle = document.getElementById('dros-a11y-style');
+      if (!a11yStyle) {
+        a11yStyle = document.createElement('style');
+        a11yStyle.id = 'dros-a11y-style';
+        a11yStyle.textContent =
+          'html.dros-bigtext{font-size:112% !important}'
+          + 'html.dros-contrast{filter:contrast(150%) !important}'
+          + 'html.dros-mono{filter:grayscale(100%) !important}'
+          + 'html.dros-contrast.dros-mono{filter:contrast(150%) grayscale(100%) !important}'
+          + 'html.dros-reduce-motion *{animation:none !important;transition:none !important;scroll-behavior:auto !important}'
+          + 'html.dros-bigcursor,html.dros-bigcursor *{cursor:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2748%27 height=%2748%27 viewBox=%270 0 24 24%27%3E%3Cpath fill=%27%23000%27 stroke=%27%23fff%27 stroke-width=%271%27 d=%27M5 2l14 9-6 1 4 7-3 1-4-7-5 4z%27/%3E%3C/svg%3E") 4 2,auto !important}'
+          + 'html.dros-screenreader :focus{outline:3px solid #1a73e8 !important;outline-offset:2px !important}'
+          + 'html.dros-screenreader a,html.dros-screenreader button{text-decoration:underline !important}';
+        document.head.appendChild(a11yStyle);
+      }
+
+      var prefs = [
+        { id: 'pf', key: 'dros_pf', cls: 'dros-bigtext' },
+        { id: 'phc', key: 'dros_hc', cls: 'dros-contrast' },
+        { id: 'pmo', key: 'dros_mono', cls: 'dros-mono' },
+        { id: 'pm', key: 'dros_pm', cls: 'dros-reduce-motion' },
+        { id: 'poc', key: 'dros_oc', cls: 'dros-bigcursor' },
+        { id: 'psr', key: 'dros_sr', cls: 'dros-screenreader' }
+      ];
+      prefs.forEach(function (p) {
+        var on = localStorage.getItem(p.key) === '1';
+        if (on) { $(p.id).checked = true; document.documentElement.classList.add(p.cls); }
+        $(p.id).onchange = function () {
+          document.documentElement.classList.toggle(p.cls, this.checked);
+          localStorage.setItem(p.key, this.checked ? '1' : '');
+        };
+      });
     }
 
     // Statement modal
