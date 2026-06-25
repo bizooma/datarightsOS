@@ -1,4 +1,4 @@
-import { Cookie, Inbox, Shield, Bot, ArrowRight } from 'lucide-react';
+import { Cookie, Inbox, Shield, Bot, Accessibility, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const features = [
@@ -34,6 +34,15 @@ const features = [
     description:
       "Tell visitors when and how you use artificial intelligence to interact with them. Required by the FTC's guidance against deceptive AI claims and California's AB 302 (Bolts Act, 2024), with similar bot-disclosure rules in California's B.O.T. Act (SB 1001) and the EU AI Act now in effect.",
     details: ['Plain-language AI use statement', 'Surfaced in the widget disclosure drawer', 'FTC & California AB 302 aligned', 'Versioned with effective dates'],
+  },
+  {
+    icon: Accessibility,
+    color: '#b58a2e',
+    title: 'Web accessibility',
+    description:
+      'Continuous monitoring and remediation guidance aligned to WCAG 2.1 Level AA — the standard courts and the DOJ actually use. No false "fully compliant" overlay promises that invite the next ADA lawsuit.',
+    details: ['WCAG 2.1 Level AA aligned', 'Continuous monitoring, not one-time scans', 'Barrier reporting built into the widget', 'Real remediation, no overlay snake oil'],
+    link: '/web-accessibility',
   },
 ];
 
