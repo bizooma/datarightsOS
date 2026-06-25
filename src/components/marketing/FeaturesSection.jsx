@@ -35,6 +35,7 @@ const features = [
     description:
       "Tell visitors when and how you use artificial intelligence to interact with them. Required by the FTC's guidance against deceptive AI claims and California's AB 302 (Bolts Act, 2024), with similar bot-disclosure rules in California's B.O.T. Act (SB 1001) and the EU AI Act now in effect.",
     details: ['Plain-language AI use statement', 'Surfaced in the widget disclosure drawer', 'FTC & California AB 302 aligned', 'Versioned with effective dates'],
+    link: '/ai-disclosure',
   },
   {
     icon: Accessibility,
