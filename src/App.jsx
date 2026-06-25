@@ -29,6 +29,7 @@ import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import CookieConsent from '@/pages/CookieConsent';
 import WebAccessibility from '@/pages/WebAccessibility';
+import DataPrivacy from '@/pages/DataPrivacy';
 
 const AuthenticatedApp = () => {
   const { authError } = useAuth();
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
       <Route path="/contact" element={<Contact />} />
       <Route path="/cookie-consent" element={<CookieConsent />} />
       <Route path="/web-accessibility" element={<WebAccessibility />} />
+      <Route path="/data-privacy" element={<DataPrivacy />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

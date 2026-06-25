@@ -18,6 +18,7 @@ const features = [
     description:
       'Consumers submit access, deletion, correction, and opt-out requests directly through the widget. Each request lands in your dashboard with a 45-day statutory clock running from the moment of receipt.',
     details: ['Access, delete, correct, opt-out flows', '45-day deadline auto-calculated', 'Identity verification workflow', 'Assignable to team members'],
+    link: '/data-privacy',
   },
   {
     icon: Shield,
