@@ -48,8 +48,65 @@ Deno.serve(async (req) => {
 
   function esc(s) { return (s || '').replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
 
-  function render(cfg) {
+  var I18N = {
+    en: {
+      launcher: 'Privacy & Data Rights',
+      headerSub: 'Manage cookies, your data, and access',
+      gpcTitle: 'Global Privacy Control detected',
+      gpcBody: "We've automatically opted you out of sale & sharing, as required in your state.",
+      rightsTitle: 'Your privacy rights',
+      reqAccess: 'Access my data', reqDelete: 'Delete my data', reqCorrect: 'Correct my data', reqOptOut: 'Opt out of sale/sharing',
+      fullName: 'Full name', emailOnFile: 'Email on file', state: 'State (e.g. TX)',
+      agentLabel: 'I am submitting as an authorized agent', submitReq: 'Submit verified request',
+      cookieTitle: 'Cookie preferences',
+      necessary: 'Strictly necessary', necessaryDesc: 'Required for the site. Always on.',
+      functional: 'Functional', analytics: 'Analytics', advertising: 'Advertising',
+      rejectAll: 'Reject all', saveChoices: 'Save choices',
+      a11yTitle: 'Accessibility',
+      a11yNote: 'This is a feedback & preferences tool, not a substitute for an accessible site.',
+      a11yStatement: 'Accessibility statement', reportBarrier: 'Report an accessibility barrier',
+      pageUrl: 'Page URL', describeBarrier: 'Describe the barrier', yourEmail: 'Your email (optional)', sendReport: 'Send report',
+      displayPrefs: 'Display preferences (this browser only)',
+      largerText: 'Larger text', highContrast: 'High contrast', monochrome: 'Monochrome',
+      reduceMotion: 'Reduce motion', oversizeCursor: 'Oversize cursor', screenReader: 'Screen reader optimized',
+      aiTitle: 'AI Use Disclosure',
+      aiNote: 'In compliance with FTC guidelines and California AB 302, this site discloses when and how artificial intelligence is used to interact with you.',
+      tPrefsSaved: 'Preferences saved', tRejected: 'All optional cookies rejected',
+      tEmailReq: 'Email is required', tReqLogged: 'Request logged. Confirmation sent.', tReportSent: 'Report sent. Thank you.',
+      effective: 'Effective'
+    },
+    es: {
+      launcher: 'Privacidad y Derechos de Datos',
+      headerSub: 'Administre cookies, sus datos y acceso',
+      gpcTitle: 'Control de Privacidad Global detectado',
+      gpcBody: 'Lo hemos excluido automáticamente de la venta y el intercambio de datos, según lo exige su estado.',
+      rightsTitle: 'Sus derechos de privacidad',
+      reqAccess: 'Acceder a mis datos', reqDelete: 'Eliminar mis datos', reqCorrect: 'Corregir mis datos', reqOptOut: 'Excluir de venta/intercambio',
+      fullName: 'Nombre completo', emailOnFile: 'Correo electrónico registrado', state: 'Estado (ej. TX)',
+      agentLabel: 'Presento esta solicitud como agente autorizado', submitReq: 'Enviar solicitud verificada',
+      cookieTitle: 'Preferencias de cookies',
+      necessary: 'Estrictamente necesarias', necessaryDesc: 'Requeridas para el sitio. Siempre activas.',
+      functional: 'Funcionales', analytics: 'Analíticas', advertising: 'Publicidad',
+      rejectAll: 'Rechazar todo', saveChoices: 'Guardar opciones',
+      a11yTitle: 'Accesibilidad',
+      a11yNote: 'Esta es una herramienta de comentarios y preferencias, no un sustituto de un sitio accesible.',
+      a11yStatement: 'Declaración de accesibilidad', reportBarrier: 'Reportar una barrera de accesibilidad',
+      pageUrl: 'URL de la página', describeBarrier: 'Describa la barrera', yourEmail: 'Su correo (opcional)', sendReport: 'Enviar reporte',
+      displayPrefs: 'Preferencias de visualización (solo este navegador)',
+      largerText: 'Texto más grande', highContrast: 'Alto contraste', monochrome: 'Monocromo',
+      reduceMotion: 'Reducir movimiento', oversizeCursor: 'Cursor grande', screenReader: 'Optimizado para lector de pantalla',
+      aiTitle: 'Divulgación de Uso de IA',
+      aiNote: 'En cumplimiento con las directrices de la FTC y la ley AB 302 de California, este sitio divulga cuándo y cómo se utiliza la inteligencia artificial para interactuar con usted.',
+      tPrefsSaved: 'Preferencias guardadas', tRejected: 'Todas las cookies opcionales rechazadas',
+      tEmailReq: 'El correo electrónico es obligatorio', tReqLogged: 'Solicitud registrada. Confirmación enviada.', tReportSent: 'Reporte enviado. Gracias.',
+      effective: 'Vigente'
+    }
+  };
+
+  function render(cfg, keepOpen) {
     if (cfg.install_status && cfg.install_status !== 'active') { return; }
+    var lang = localStorage.getItem('dros_lang') === 'es' ? 'es' : 'en';
+    var t = I18N[lang];
     var accent = cfg.primary_color || '#0d7d74';
     var isDark = (cfg.widget_theme || 'dark') !== 'light';
     // Theme tokens
@@ -103,6 +160,9 @@ Deno.serve(async (req) => {
       + '.phead h2{margin:0;font-size:14px;font-weight:700;color:' + panelText + '}'
       + '.phead .sub{margin:1px 0 0;font-size:11px;color:' + panelSubText + '}'
       + '.x{position:absolute;top:12px;right:12px;width:26px;height:26px;border:1px solid ' + divider + ';border-radius:7px;background:' + itemBg + ';cursor:pointer;color:' + panelSubText + ';font-size:15px;line-height:1}'
+      + '.langpick{position:absolute;top:12px;right:44px;display:flex;gap:2px;background:' + itemBg + ';border:1px solid ' + divider + ';border-radius:7px;padding:2px}'
+      + '.langpick button{border:none;background:none;cursor:pointer;font-size:10px;font-weight:700;padding:3px 6px;border-radius:5px;color:' + panelSubText + ';font-family:inherit}'
+      + '.langpick button.on{background:' + accent + ';color:#fff}'
       + '.body{overflow-y:auto;padding:12px 16px}'
       + '.vid{margin:2px 0 12px;aspect-ratio:16/9;border-radius:9px;overflow:hidden;border:1px solid ' + divider + ';background:#000}'
       + '.vid iframe{width:100%;height:100%;border:0}'
@@ -155,58 +215,60 @@ Deno.serve(async (req) => {
 
     var html = ''
       + '<style>' + css + '</style>'
-      + '<button class="launcher" id="L"><span class="dot"></span>Privacy &amp; Data Rights</button>'
+      + '<button class="launcher" id="L"><span class="dot"></span>' + esc(t.launcher) + '</button>'
       + '<div class="panel hidden" id="P">'
       + '<div class="phead"><div class="crest">' + (cfg.logo_url ? '<img src="' + esc(cfg.logo_url) + '">' : 'D') + '</div>'
-      + '<div><h2>' + esc(cfg.product_name) + '</h2><div class="sub">Manage cookies, your data, and access</div></div>'
+      + '<div><h2>' + esc(cfg.product_name) + '</h2><div class="sub">' + esc(t.headerSub) + '</div></div>'
+      + '<div class="langpick"><button data-lang="en" class="' + (lang === 'en' ? 'on' : '') + '">EN</button><button data-lang="es" class="' + (lang === 'es' ? 'on' : '') + '">ES</button></div>'
       + '<button class="x" id="X">&times;</button></div>'
       + '<div class="body">'
       + (yt ? '<div class="vid"><iframe src="' + yt + '" title="Intro" allowfullscreen></iframe></div>' : '')
-      + ((cfg.honor_gpc && GPC) ? '<div class="gpc"><div><b>Global Privacy Control detected</b><p>We\\'ve automatically opted you out of sale &amp; sharing, as required in your state.</p></div></div>' : '')
-      + (showRights ? '<div class="drawer open" data-d><button class="dh" data-t>Your privacy rights<span>&#9662;</span></button><div class="db">'
+      + ((cfg.honor_gpc && GPC) ? '<div class="gpc"><div><b>' + esc(t.gpcTitle) + '</b><p>' + esc(t.gpcBody) + '</p></div></div>' : '')
+      + (showRights ? '<div class="drawer open" data-d><button class="dh" data-t>' + esc(t.rightsTitle) + '<span>&#9662;</span></button><div class="db">'
         + '<div class="rights">'
-        + '<button class="rb" data-req="access">Access my data</button>'
-        + '<button class="rb" data-req="delete">Delete my data</button>'
-        + '<button class="rb" data-req="correct">Correct my data</button>'
-        + '<button class="rb" data-req="opt_out">Opt out of sale/sharing</button>'
+        + '<button class="rb" data-req="access">' + esc(t.reqAccess) + '</button>'
+        + '<button class="rb" data-req="delete">' + esc(t.reqDelete) + '</button>'
+        + '<button class="rb" data-req="correct">' + esc(t.reqCorrect) + '</button>'
+        + '<button class="rb" data-req="opt_out">' + esc(t.reqOptOut) + '</button>'
         + '</div>'
-        + '<div class="intake" id="IN"><input class="fld" id="rn" placeholder="Full name"><input class="fld" id="re" type="email" placeholder="Email on file"><input class="fld" id="rs" placeholder="State (e.g. TX)">'
-        + '<label class="chk"><input type="checkbox" id="ra"> I am submitting as an authorized agent</label>'
-        + '<button class="btn p" id="RS" style="width:100%">Submit verified request</button></div>'
+        + '<div class="intake" id="IN"><input class="fld" id="rn" placeholder="' + esc(t.fullName) + '"><input class="fld" id="re" type="email" placeholder="' + esc(t.emailOnFile) + '"><input class="fld" id="rs" placeholder="' + esc(t.state) + '">'
+        + '<label class="chk"><input type="checkbox" id="ra"> ' + esc(t.agentLabel) + '</label>'
+        + '<button class="btn p" id="RS" style="width:100%">' + esc(t.submitReq) + '</button></div>'
         + '</div></div>' : '')
-      + (showCookies ? '<div class="drawer" data-d><button class="dh" data-t>Cookie preferences<span>&#9662;</span></button><div class="db">'
-        + '<div class="row"><div><div class="lbl">Strictly necessary</div><div class="desc">Required for the site. Always on.</div></div><label class="sw lock"><input type="checkbox" checked disabled><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="row"><div><div class="lbl">Functional</div></div><label class="sw"><input type="checkbox" id="cf"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="row"><div><div class="lbl">Analytics</div></div><label class="sw"><input type="checkbox" id="ca"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="row"><div><div class="lbl">Advertising</div></div><label class="sw"><input type="checkbox" id="cad"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="btnrow"><button class="btn g" id="CR">Reject all</button><button class="btn p" id="CS">Save choices</button></div>'
+      + (showCookies ? '<div class="drawer" data-d><button class="dh" data-t>' + esc(t.cookieTitle) + '<span>&#9662;</span></button><div class="db">'
+        + '<div class="row"><div><div class="lbl">' + esc(t.necessary) + '</div><div class="desc">' + esc(t.necessaryDesc) + '</div></div><label class="sw lock"><input type="checkbox" checked disabled><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="row"><div><div class="lbl">' + esc(t.functional) + '</div></div><label class="sw"><input type="checkbox" id="cf"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="row"><div><div class="lbl">' + esc(t.analytics) + '</div></div><label class="sw"><input type="checkbox" id="ca"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="row"><div><div class="lbl">' + esc(t.advertising) + '</div></div><label class="sw"><input type="checkbox" id="cad"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="btnrow"><button class="btn g" id="CR">' + esc(t.rejectAll) + '</button><button class="btn p" id="CS">' + esc(t.saveChoices) + '</button></div>'
         + '</div></div>' : '')
-      + (showA11y ? '<div class="drawer" data-d><button class="dh" data-t>Accessibility<span>&#9662;</span></button><div class="db">'
-        + '<div class="note">This is a feedback &amp; preferences tool, not a substitute for an accessible site.</div>'
-        + (cfg.accessibility_statement_url ? '<a class="link" href="' + esc(cfg.accessibility_statement_url) + '" target="_blank" rel="noopener">Accessibility statement &#8599;</a>' : '')
-        + '<button class="link" id="BR">Report an accessibility barrier &#8250;</button>'
-        + '<div class="intake" id="BF"><input class="fld" id="bu" placeholder="Page URL"><textarea class="fld" id="bd" rows="2" placeholder="Describe the barrier"></textarea><input class="fld" id="be" type="email" placeholder="Your email (optional)"><button class="btn p" id="BS" style="width:100%">Send report</button></div>'
-        + '<div class="cap">Display preferences (this browser only)</div>'
+      + (showA11y ? '<div class="drawer" data-d><button class="dh" data-t>' + esc(t.a11yTitle) + '<span>&#9662;</span></button><div class="db">'
+        + '<div class="note">' + esc(t.a11yNote) + '</div>'
+        + (cfg.accessibility_statement_url ? '<a class="link" href="' + esc(cfg.accessibility_statement_url) + '" target="_blank" rel="noopener">' + esc(t.a11yStatement) + ' &#8599;</a>' : '')
+        + '<button class="link" id="BR">' + esc(t.reportBarrier) + ' &#8250;</button>'
+        + '<div class="intake" id="BF"><input class="fld" id="bu" placeholder="' + esc(t.pageUrl) + '"><textarea class="fld" id="bd" rows="2" placeholder="' + esc(t.describeBarrier) + '"></textarea><input class="fld" id="be" type="email" placeholder="' + esc(t.yourEmail) + '"><button class="btn p" id="BS" style="width:100%">' + esc(t.sendReport) + '</button></div>'
+        + '<div class="cap">' + esc(t.displayPrefs) + '</div>'
         + '<div class="a11ygrid">'
-        + '<div class="a11ycell"><div class="lbl">Larger text</div><label class="sw"><input type="checkbox" id="pf"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="a11ycell"><div class="lbl">High contrast</div><label class="sw"><input type="checkbox" id="phc"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="a11ycell"><div class="lbl">Monochrome</div><label class="sw"><input type="checkbox" id="pmo"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="a11ycell"><div class="lbl">Reduce motion</div><label class="sw"><input type="checkbox" id="pm"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="a11ycell"><div class="lbl">Oversize cursor</div><label class="sw"><input type="checkbox" id="poc"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="a11ycell"><div class="lbl">Screen reader optimized</div><label class="sw"><input type="checkbox" id="psr"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">' + esc(t.largerText) + '</div><label class="sw"><input type="checkbox" id="pf"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">' + esc(t.highContrast) + '</div><label class="sw"><input type="checkbox" id="phc"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">' + esc(t.monochrome) + '</div><label class="sw"><input type="checkbox" id="pmo"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">' + esc(t.reduceMotion) + '</div><label class="sw"><input type="checkbox" id="pm"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">' + esc(t.oversizeCursor) + '</div><label class="sw"><input type="checkbox" id="poc"><span class="tr"></span><span class="kn"></span></label></div>'
+        + '<div class="a11ycell"><div class="lbl">' + esc(t.screenReader) + '</div><label class="sw"><input type="checkbox" id="psr"><span class="tr"></span><span class="kn"></span></label></div>'
         + '</div>'
         + '</div></div>' : '')
-      + (showAI ? '<div class="drawer" data-d><button class="dh" data-t>AI Use Disclosure<span>&#9662;</span></button><div class="db">'
-        + '<div class="note">In compliance with FTC guidelines and California AB 302, this site discloses when and how artificial intelligence is used to interact with you.</div>'
+      + (showAI ? '<div class="drawer" data-d><button class="dh" data-t>' + esc(t.aiTitle) + '<span>&#9662;</span></button><div class="db">'
+        + '<div class="note">' + esc(t.aiNote) + '</div>'
         + '</div></div>' : '')
       + '</div>'
       + (function() {
           var stmts = cfg.statements || {};
+          var stitle = function(s) { return (lang === 'es' && s.title_es) ? s.title_es : s.title; };
           var links = [];
-          if (stmts.privacy_policy) links.push('<button class="stmtlink" data-stmt="privacy_policy">' + esc(stmts.privacy_policy.title || 'Privacy Policy') + '</button>');
-          if (stmts.cookie_policy) links.push('<button class="stmtlink" data-stmt="cookie_policy">' + esc(stmts.cookie_policy.title || 'Cookie Policy') + '</button>');
-          if (stmts.accessibility_statement) links.push('<button class="stmtlink" data-stmt="accessibility_statement">' + esc(stmts.accessibility_statement.title || 'Accessibility Statement') + '</button>');
-          if (stmts.ai_use_statement) links.push('<button class="stmtlink" data-stmt="ai_use_statement">' + esc(stmts.ai_use_statement.title || 'AI Use Statement') + '</button>');
+          if (stmts.privacy_policy) links.push('<button class="stmtlink" data-stmt="privacy_policy">' + esc(stitle(stmts.privacy_policy) || 'Privacy Policy') + '</button>');
+          if (stmts.cookie_policy) links.push('<button class="stmtlink" data-stmt="cookie_policy">' + esc(stitle(stmts.cookie_policy) || 'Cookie Policy') + '</button>');
+          if (stmts.accessibility_statement) links.push('<button class="stmtlink" data-stmt="accessibility_statement">' + esc(stitle(stmts.accessibility_statement) || 'Accessibility Statement') + '</button>');
+          if (stmts.ai_use_statement) links.push('<button class="stmtlink" data-stmt="ai_use_statement">' + esc(stitle(stmts.ai_use_statement) || 'AI Use Statement') + '</button>');
           return links.length ? '<div class="stmtlinks">' + links.join('<span style="color:' + panelSubText + ';font-size:10px">·</span>') + '</div>' : '';
         })()
       + '<div class="foot">Powered by <a href="https://bizooma.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Bizooma, LLC</a></div>'
@@ -220,8 +282,20 @@ Deno.serve(async (req) => {
 
     var L = $('L'), P = $('P'), T = $('T'), tt;
     function toast(m) { T.textContent = m; T.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { T.classList.remove('show'); }, 2200); }
+    if (keepOpen) { P.classList.remove('hidden'); L.classList.add('hidden'); }
     L.onclick = function () { P.classList.remove('hidden'); L.classList.add('hidden'); };
     $('X').onclick = function () { P.classList.add('hidden'); L.classList.remove('hidden'); };
+
+    // Language picker — persist choice and re-render the panel in the new language (keeping it open).
+    q('[data-lang]').forEach(function (b) {
+      b.onclick = function () {
+        var next = b.getAttribute('data-lang');
+        if (next === lang) return;
+        localStorage.setItem('dros_lang', next);
+        host.remove();
+        render(cfg, true);
+      };
+    });
 
     q('[data-t]').forEach(function (h) { h.onclick = function () { h.closest('[data-d]').classList.toggle('open'); }; });
 
@@ -231,8 +305,8 @@ Deno.serve(async (req) => {
     }
 
     if (showCookies) {
-      $('CS').onclick = function () { post({ type: 'consent', action: 'save_choices', necessary: true, functional: $('cf').checked, analytics: $('ca').checked, advertising: $('cad').checked }); toast('Preferences saved'); };
-      $('CR').onclick = function () { post({ type: 'consent', action: 'reject_all', necessary: true, functional: false, analytics: false, advertising: false }); toast('All optional cookies rejected'); };
+      $('CS').onclick = function () { post({ type: 'consent', action: 'save_choices', necessary: true, functional: $('cf').checked, analytics: $('ca').checked, advertising: $('cad').checked }); toast(t.tPrefsSaved); };
+      $('CR').onclick = function () { post({ type: 'consent', action: 'reject_all', necessary: true, functional: false, analytics: false, advertising: false }); toast(t.tRejected); };
     }
 
     if (showRights) {
@@ -240,16 +314,16 @@ Deno.serve(async (req) => {
       q('[data-req]').forEach(function (b) { b.onclick = function () { q('[data-req]').forEach(function (x) { x.classList.remove('sel'); }); b.classList.add('sel'); reqType = b.getAttribute('data-req'); $('IN').classList.add('show'); }; });
       $('RS').onclick = function () {
         if (!reqType) return;
-        if (!$('re').value) { toast('Email is required'); return; }
+        if (!$('re').value) { toast(t.tEmailReq); return; }
         post({ type: 'rights_request', request_type: reqType, requester_name: $('rn').value, requester_email: $('re').value, requester_state: $('rs').value, is_authorized_agent: $('ra').checked, agent_details: '' });
         $('IN').classList.remove('show'); q('[data-req]').forEach(function (x) { x.classList.remove('sel'); }); reqType = null;
-        toast('Request logged. Confirmation sent.');
+        toast(t.tReqLogged);
       };
     }
 
     if (showA11y) {
       $('BR').onclick = function () { $('BF').classList.toggle('show'); };
-      $('BS').onclick = function () { post({ type: 'accessibility_report', page_url: $('bu').value || location.href, description: $('bd').value, reporter_email: $('be').value }); $('BF').classList.remove('show'); toast('Report sent. Thank you.'); };
+      $('BS').onclick = function () { post({ type: 'accessibility_report', page_url: $('bu').value || location.href, description: $('bd').value, reporter_email: $('be').value }); $('BF').classList.remove('show'); toast(t.tReportSent); };
 
       // Global stylesheet injected into the host page (outside shadow DOM) for visual a11y overrides.
       var a11yStyle = document.getElementById('dros-a11y-style');
@@ -296,9 +370,10 @@ Deno.serve(async (req) => {
           var key = btn.getAttribute('data-stmt');
           var s = (cfg.statements || {})[key];
           if (!s) return;
-          MT.textContent = s.title || key;
-          MM.textContent = (s.effective_date ? 'Effective: ' + s.effective_date : '') + (s.version ? '  ·  v' + s.version : '');
-          MB.innerHTML = s.body || '';
+          var useEs = (lang === 'es');
+          MT.textContent = (useEs && s.title_es ? s.title_es : s.title) || key;
+          MM.textContent = (s.effective_date ? t.effective + ': ' + s.effective_date : '') + (s.version ? '  ·  v' + s.version : '');
+          MB.innerHTML = (useEs && s.body_es ? s.body_es : s.body) || '';
           MO.classList.remove('hidden');
         };
       });

@@ -22,11 +22,19 @@
     },
     "title": {
       "type": "string",
-      "description": "Display title for this statement"
+      "description": "Display title for this statement (English)"
     },
     "body": {
       "type": "string",
-      "description": "Full HTML/rich-text body of the statement"
+      "description": "Full HTML/rich-text body of the statement (English)"
+    },
+    "title_es": {
+      "type": "string",
+      "description": "Spanish display title for this statement (optional)"
+    },
+    "body_es": {
+      "type": "string",
+      "description": "Spanish HTML/rich-text body of the statement (optional)"
     },
     "version": {
       "type": "string",

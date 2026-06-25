@@ -47,10 +47,10 @@ Deno.serve(async (req) => {
     privacy_policy_url: site.privacy_policy_url || '',
     policy_version: site.policy_version || '1.0',
     statements: {
-      privacy_policy: privacyStmt ? { title: privacyStmt.title, body: privacyStmt.body, version: privacyStmt.version, effective_date: privacyStmt.effective_date } : null,
-      cookie_policy: cookieStmt ? { title: cookieStmt.title, body: cookieStmt.body, version: cookieStmt.version, effective_date: cookieStmt.effective_date } : null,
-      accessibility_statement: a11yStmt ? { title: a11yStmt.title, body: a11yStmt.body, version: a11yStmt.version, effective_date: a11yStmt.effective_date } : null,
-      ai_use_statement: aiStmt ? { title: aiStmt.title, body: aiStmt.body, version: aiStmt.version, effective_date: aiStmt.effective_date } : null,
+      privacy_policy: privacyStmt ? { title: privacyStmt.title, body: privacyStmt.body, title_es: privacyStmt.title_es || '', body_es: privacyStmt.body_es || '', version: privacyStmt.version, effective_date: privacyStmt.effective_date } : null,
+      cookie_policy: cookieStmt ? { title: cookieStmt.title, body: cookieStmt.body, title_es: cookieStmt.title_es || '', body_es: cookieStmt.body_es || '', version: cookieStmt.version, effective_date: cookieStmt.effective_date } : null,
+      accessibility_statement: a11yStmt ? { title: a11yStmt.title, body: a11yStmt.body, title_es: a11yStmt.title_es || '', body_es: a11yStmt.body_es || '', version: a11yStmt.version, effective_date: a11yStmt.effective_date } : null,
+      ai_use_statement: aiStmt ? { title: aiStmt.title, body: aiStmt.body, title_es: aiStmt.title_es || '', body_es: aiStmt.body_es || '', version: aiStmt.version, effective_date: aiStmt.effective_date } : null,
     },
   };
 

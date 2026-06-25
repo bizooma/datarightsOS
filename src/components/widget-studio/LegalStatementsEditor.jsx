@@ -93,6 +93,9 @@ export default function LegalStatementsEditor({ site }) {
 function StatementForm({ site, statementType, existing, onSaved }) {
   const [title, setTitle] = useState(existing?.title || statementType.defaultTitle);
   const [body, setBody] = useState(existing?.body || '');
+  const [titleEs, setTitleEs] = useState(existing?.title_es || '');
+  const [bodyEs, setBodyEs] = useState(existing?.body_es || '');
+  const [lang, setLang] = useState('en');
   const [version, setVersion] = useState(existing?.version || '1.0');
   const [effectiveDate, setEffectiveDate] = useState(existing?.effective_date || new Date().toISOString().split('T')[0]);
 
@@ -101,6 +104,8 @@ function StatementForm({ site, statementType, existing, onSaved }) {
     if (existing) {
       setTitle(existing.title || statementType.defaultTitle);
       setBody(existing.body || '');
+      setTitleEs(existing.title_es || '');
+      setBodyEs(existing.body_es || '');
       setVersion(existing.version || '1.0');
       setEffectiveDate(existing.effective_date || new Date().toISOString().split('T')[0]);
     }
@@ -114,6 +119,8 @@ function StatementForm({ site, statementType, existing, onSaved }) {
         statement_type: statementType.key,
         title,
         body,
+        title_es: titleEs,
+        body_es: bodyEs,
         version,
         effective_date: effectiveDate,
         is_active: true,
@@ -164,13 +171,40 @@ function StatementForm({ site, statementType, existing, onSaved }) {
           </div>
         </div>
 
+        <div className="flex items-center gap-1 p-0.5 rounded-md bg-muted w-fit">
+          <button
+            type="button"
+            onClick={() => setLang('en')}
+            className={`px-3 py-1 text-xs font-medium rounded ${lang === 'en' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
+          >
+            English
+          </button>
+          <button
+            type="button"
+            onClick={() => setLang('es')}
+            className={`px-3 py-1 text-xs font-medium rounded ${lang === 'es' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
+          >
+            Español
+          </button>
+        </div>
+
+        {lang === 'es' && (
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">Spanish Title (optional)</Label>
+            <Input value={titleEs} onChange={e => setTitleEs(e.target.value)} className="h-9 text-sm" placeholder="Falls back to English if empty" />
+          </div>
+        )}
+
         <div>
-          <Label className="text-xs text-muted-foreground mb-1.5 block">Statement Body</Label>
+          <Label className="text-xs text-muted-foreground mb-1.5 block">
+            Statement Body {lang === 'es' ? '(Spanish — optional)' : '(English)'}
+          </Label>
           <div className="rounded-md border border-input overflow-hidden">
             <ReactQuill
+              key={lang}
               theme="snow"
-              value={body}
-              onChange={setBody}
+              value={lang === 'es' ? bodyEs : body}
+              onChange={lang === 'es' ? setBodyEs : setBody}
               style={{ minHeight: 280 }}
               modules={{
                 toolbar: [
@@ -184,7 +218,9 @@ function StatementForm({ site, statementType, existing, onSaved }) {
             />
           </div>
           <p className="text-[10px] text-muted-foreground mt-1">
-            This content is served inside the widget modal. Visitors will see it when they click the statement link.
+            {lang === 'es'
+              ? 'Spanish visitors will see this version. If left empty, the English statement is shown instead.'
+              : 'This content is served inside the widget modal. Visitors will see it when they click the statement link.'}
           </p>
         </div>
 
