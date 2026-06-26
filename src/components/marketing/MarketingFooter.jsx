@@ -39,7 +39,7 @@ export default function MarketingFooter() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-slate-600 text-xs">© {new Date().getFullYear()} Bizooma. All rights reserved.</p>
+          <p className="text-slate-600 text-xs">© 2026 <a href="https://bizooma.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Bizooma, LLC</a>. All Rights Reserved.</p>
           <p className="text-slate-600 text-xs">Built for US state privacy law compliance.</p>
         </div>
       </div>
