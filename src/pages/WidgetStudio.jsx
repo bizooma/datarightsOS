@@ -187,8 +187,13 @@ export default function WidgetStudio() {
                   }`}
                 >
                   <p className="truncate">{s.domain}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {s.install_status === 'active' ? '● Active' : '○ Pending'}
+                  <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                    <span
+                      className={`inline-block w-2 h-2 rounded-full ${
+                        s.install_status === 'active' ? 'bg-green-500' : 'bg-red-500'
+                      }`}
+                    />
+                    {s.install_status === 'active' ? 'Active' : 'Pending'}
                   </p>
                 </button>
                 <button
