@@ -11,6 +11,7 @@ import QuickStatusPanel from '@/components/request/QuickStatusPanel';
 import NotesPanel from '@/components/request/NotesPanel';
 import AssignPanel from '@/components/request/AssignPanel';
 import AuditTimeline from '@/components/request/AuditTimeline';
+import DeadlineCountdown from '@/components/request/DeadlineCountdown';
 import { ArrowLeft, Clock, User, Mail, MapPin, Shield, FileText, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -148,6 +149,9 @@ export default function RequestDetail() {
 
         {/* Right column */}
         <div className="space-y-6">
+          {/* 45-Day Countdown */}
+          <DeadlineCountdown deadline={request.statutory_deadline} />
+
           {/* Key Dates */}
           <Card>
             <CardHeader className="pb-3">

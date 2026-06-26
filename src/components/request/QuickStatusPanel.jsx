@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Loader2, Circle, Clock, CheckCircle2 } from 'lucide-react';
 
 // Quick-set buttons mapped to existing request_status values.
 const QUICK_STATUSES = [
-  { key: 'new', label: 'Pending', icon: Clock },
-  { key: 'in_progress', label: 'Verified', icon: ShieldCheck },
-  { key: 'fulfilled', label: 'Completed', icon: CheckCircle2 },
+  { key: 'new', label: 'Not Started', icon: Circle },
+  { key: 'in_progress', label: 'In Progress', icon: Clock },
+  { key: 'fulfilled', label: 'Complete', icon: CheckCircle2 },
 ];
 
 export default function QuickStatusPanel({ request, onChangeStatus }) {
@@ -29,7 +29,7 @@ export default function QuickStatusPanel({ request, onChangeStatus }) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold">Quick Status</CardTitle>
+        <CardTitle className="text-sm font-semibold">Status</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex gap-2 flex-wrap">
