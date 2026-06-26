@@ -9,7 +9,7 @@ export default function HeroSection() {
     >
       <div className="absolute inset-0 bg-[#14202b]/70" />
       <div className="relative max-w-4xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 bg-[#0d7d74]/8 border border-[#0d7d74]/20 text-[#0d7d74] text-xs font-semibold px-3 py-1.5 rounded-full mb-8">
+        <div className="inline-flex items-center gap-2 bg-[#0d7d74]/8 border border-[#0d7d74]/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-[#0d7d74]" />
           Built for US state privacy law compliance
         </div>
