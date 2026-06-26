@@ -118,6 +118,36 @@ Please log in to review and process this request promptly.`,
       });
     }
 
+    // --- 5. Outbound webhook (fault-isolated, non-blocking) ---
+    // A webhook failure must NEVER affect the saved request or this function's
+    // success. Wrapped in its own try/catch; the sender itself never throws into us.
+    try {
+      const webhookPayload = {
+        event: 'request.created',
+        request_id: requestId,
+        request_type: requestData?.request_type,
+        status: 'not_started',
+        requester: {
+          name: requestData?.requester_name || '',
+          email: requestData?.requester_email || '',
+          state: requestData?.requester_state || '',
+        },
+        authorized_agent: !!requestData?.is_authorized_agent,
+        submitted_at: receivedDate.toISOString(),
+        deadline_at: deadline.toISOString(),
+        site_id: requestData?.site || '',
+        organization_id: requestData?.organization || '',
+      };
+      if (requestData?.organization) {
+        await base44.asServiceRole.functions.invoke('sendOutboundWebhook', {
+          organization_id: requestData.organization,
+          payload: webhookPayload,
+        });
+      }
+    } catch (whErr) {
+      console.log(`[onRequestCreated] outbound webhook failed (non-blocking): ${whErr.message}`);
+    }
+
     return Response.json({ success: true, deadline: deadline.toISOString() });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

@@ -11,19 +11,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Check, Building2, Users, CreditCard, Trash2, Lock, Upload, UserCircle } from 'lucide-react';
+import { Check, Building2, Users, CreditCard, Trash2, Lock, Upload, UserCircle, Webhook } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 import BillingTab from '@/components/settings/BillingTab';
 import ProfileTab from '@/components/settings/ProfileTab';
-import { canAddMember } from '@/lib/planLimits';
+import IntegrationsTab from '@/components/settings/IntegrationsTab';
+import { canAddMember, canUseOutboundWebhook } from '@/lib/planLimits';
 
 export default function Settings() {
   const { orgId, user, isOwnerOrAdmin } = useCurrentUser();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const activeTab = ['profile', 'branding', 'team', 'plan'].includes(tabParam) ? tabParam : 'profile';
+  const activeTab = ['profile', 'branding', 'team', 'integrations', 'plan'].includes(tabParam) ? tabParam : 'profile';
 
   const { data: org, isLoading } = useQuery({
     queryKey: ['organization', orgId],
@@ -69,6 +70,12 @@ export default function Settings() {
             <Users className="w-3.5 h-3.5" />
             Team
           </TabsTrigger>
+          {org && isOwnerOrAdmin && canUseOutboundWebhook(org.plan) && (
+            <TabsTrigger value="integrations" className="text-sm gap-1.5">
+              <Webhook className="w-3.5 h-3.5" />
+              Integrations
+            </TabsTrigger>
+          )}
           <TabsTrigger value="plan" className="text-sm gap-1.5">
             <CreditCard className="w-3.5 h-3.5" />
             Plan
@@ -89,6 +96,14 @@ export default function Settings() {
 
         <TabsContent value="team">
           <TeamTab members={teamMembers} currentUser={user} orgId={orgId} isOwnerOrAdmin={isOwnerOrAdmin} refetch={refetchTeam} plan={org?.plan} />
+        </TabsContent>
+
+        <TabsContent value="integrations">
+          {org && (
+            isOwnerOrAdmin
+              ? <IntegrationsTab org={org} />
+              : <LockedTab label="Integrations" description="Only owners and admins can manage integrations." />
+          )}
         </TabsContent>
 
         <TabsContent value="plan">
