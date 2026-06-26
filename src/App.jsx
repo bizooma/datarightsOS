@@ -21,6 +21,7 @@ import WidgetStudio from '@/pages/WidgetStudio';
 import AuditTrail from '@/pages/AuditTrail';
 import AccessibilityReports from '@/pages/AccessibilityReports';
 import Settings from '@/pages/Settings';
+import KnowledgeBase from '@/pages/KnowledgeBase';
 import Organizations from '@/pages/Organizations';
 import PrivacyCenter from '@/pages/PrivacyCenter';
 import Home from '@/pages/Home';
@@ -59,6 +60,7 @@ const AuthenticatedApp = () => {
           <Route path="/audit-trail" element={<AuditTrail />} />
           <Route path="/accessibility" element={<AccessibilityReports />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/knowledge-base" element={<KnowledgeBase />} />
           <Route path="/organizations" element={<Organizations />} />
           <Route path="/admin/users" element={<AdminUsers />} />
         </Route>

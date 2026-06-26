@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
+  BookOpen,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -25,6 +26,7 @@ const navItems = [
   { path: '/widget-studio', label: 'Widget Studio', icon: FileText },
   { path: '/audit-trail', label: 'Audit Trail', icon: Shield },
   { path: '/accessibility', label: 'Accessibility', icon: Accessibility },
+  { path: '/knowledge-base', label: 'Knowledge Base', icon: BookOpen },
   { path: '/settings', label: 'Settings', icon: SettingsIcon },
 ];
 
