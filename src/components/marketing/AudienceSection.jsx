@@ -1,20 +1,18 @@
-import { Building2, Users, Globe } from 'lucide-react';
-
 const audiences = [
   {
-    icon: Building2,
+    image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/5156a4c1f_generated_image.png',
     title: 'Law firms',
     description:
       'Advise clients on state privacy law and hand them a fully functional compliance tool. Add your branding, hand off the dashboard, bill the management fee.',
   },
   {
-    icon: Users,
+    image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/8f564f100_generated_image.png',
     title: 'Digital agencies',
     description:
       'Add a privacy compliance offering to your web projects. White-label the widget with client branding. Manage dozens of sites from a single agency seat.',
   },
   {
-    icon: Globe,
+    image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/e1df6f9b7_generated_image.png',
     title: 'Resellers',
     description:
       'The Agency plan supports multi-tenant organizations. Set your own pricing, use your own product name, and give each client their own isolated dashboard.',
@@ -36,12 +34,14 @@ export default function AudienceSection() {
 
         <div className="grid md:grid-cols-3 gap-6">
           {audiences.map((a) => (
-            <div key={a.title} className="bg-white/5 backdrop-blur-md rounded-xl border border-white/10 p-6 shadow-lg shadow-black/20 hover:bg-white/[0.07] transition-colors">
-              <div className="w-9 h-9 rounded-lg bg-[#0d7d74]/20 border border-[#0d7d74]/30 flex items-center justify-center mb-4">
-                <a.icon className="w-4.5 h-4.5 text-[#16b3a6]" />
+            <div key={a.title} className="bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-lg shadow-black/20 hover:bg-white/[0.07] transition-colors overflow-hidden">
+              <div className="h-36 w-full overflow-hidden">
+                <img src={a.image} alt={a.title} className="w-full h-full object-cover" />
               </div>
-              <h3 className="font-semibold text-white mb-2">{a.title}</h3>
-              <p className="text-sm text-slate-300 leading-relaxed">{a.description}</p>
+              <div className="p-6">
+                <h3 className="font-semibold text-white mb-2">{a.title}</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">{a.description}</p>
+              </div>
             </div>
           ))}
         </div>
