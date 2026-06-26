@@ -309,7 +309,6 @@ Deno.serve(async (req) => {
         + '<div class="a11ycell"><div class="lbl">' + esc(t.monochrome) + '</div><label class="sw"><input type="checkbox" id="pmo"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="a11ycell"><div class="lbl">' + esc(t.reduceMotion) + '</div><label class="sw"><input type="checkbox" id="pm"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="a11ycell"><div class="lbl">' + esc(t.oversizeCursor) + '</div><label class="sw"><input type="checkbox" id="poc"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="a11ycell"><div class="lbl">' + esc(t.screenReader) + '</div><label class="sw"><input type="checkbox" id="psr"><span class="tr"></span><span class="kn"></span></label></div>'
         + '</div>'
         + '</div></div></div>' : '')
       + (showAI ? '<div class="section hidden" data-section="ai"><button class="backbtn" data-back>&#8249; ' + esc(t.backHome) + '</button><div class="drawer open" data-d><button class="dh" data-t>' + esc(t.aiTitle) + '<span>&#9662;</span></button><div class="db">'
@@ -428,8 +427,7 @@ Deno.serve(async (req) => {
         { id: 'phc', key: 'dros_hc', cls: 'dros-contrast' },
         { id: 'pmo', key: 'dros_mono', cls: 'dros-mono' },
         { id: 'pm', key: 'dros_pm', cls: 'dros-reduce-motion' },
-        { id: 'poc', key: 'dros_oc', cls: 'dros-bigcursor' },
-        { id: 'psr', key: 'dros_sr', cls: 'dros-screenreader' }
+        { id: 'poc', key: 'dros_oc', cls: 'dros-bigcursor' }
       ];
       prefs.forEach(function (p) {
         var on = localStorage.getItem(p.key) === '1';
