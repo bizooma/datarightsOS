@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import OnboardingChecklist from '@/components/onboarding/OnboardingChecklist';
+import FulfillmentGuidePanel from '@/components/request-inbox/FulfillmentGuidePanel';
 
 export default function RequestInbox() {
   const { user, orgId, isSuperAdmin } = useCurrentUser();
@@ -119,6 +120,13 @@ export default function RequestInbox() {
       />
 
       {!isSuperAdmin && <OnboardingChecklist sites={sites} />}
+
+      {!isLoading && (
+        <FulfillmentGuidePanel
+          key={requests.length === 0 ? 'empty' : 'has-requests'}
+          defaultOpen={requests.length === 0}
+        />
+      )}
 
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4">
