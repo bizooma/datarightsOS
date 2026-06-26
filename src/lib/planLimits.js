@@ -89,13 +89,34 @@ export function canAddMember(plan, currentCount) {
 }
 
 // Audit-trail / request retention in days. null = unlimited (never auto-purge).
+//
+// COMPLIANCE-CRITICAL: null retentionDays = unlimited retention; any future cleanup
+// MUST call hasUnlimitedRetention() first and skip purge when true. Never pass null
+// into date math. This is a compliance product — accidental deletion of audit
+// records is the worst possible bug.
 export function getRetentionDays(plan) {
   return getPlanLimits(plan).retentionDays;
 }
 
 // True when records on this plan are kept forever (no automatic purge).
+//
+// COMPLIANCE-CRITICAL: null retentionDays = unlimited retention; any future cleanup
+// MUST call hasUnlimitedRetention() first and skip purge when true. Never pass null
+// into date math. This is a compliance product — accidental deletion of audit
+// records is the worst possible bug.
 export function hasUnlimitedRetention(plan) {
   return getPlanLimits(plan).retentionDays == null;
+}
+
+// Defense-in-depth guard for any FUTURE purge logic. Returns the cutoff Date past
+// which records on this plan MAY be deleted, or null when records must NEVER be
+// deleted (unlimited retention). Callers MUST treat a null return as "skip purge".
+// null retentionDays can never reach date math here — it short-circuits to null.
+export function getPurgeCutoffDate(plan, now = new Date()) {
+  if (hasUnlimitedRetention(plan)) return null; // unlimited — never delete
+  const days = getRetentionDays(plan);
+  if (days == null || !Number.isFinite(days)) return null; // belt-and-suspenders: null/NaN never deletes
+  return new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
 }
 
 // Self-serve CSV export of the account's own records.

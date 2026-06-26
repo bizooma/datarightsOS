@@ -21,7 +21,7 @@ export default function TrialExpiredWall() {
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Plans start at</p>
           <p className="text-2xl font-bold text-foreground">$99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
           <ul className="text-sm text-muted-foreground space-y-1 mt-2">
-            <li>✓ Core — $99/mo: cookie consent widget, data-rights intake, 90-day audit trail</li>
+            <li>✓ Core — $99/mo: cookie consent widget, data-rights intake, 1-year audit trail</li>
             <li>✓ Proof — $299/mo: up to 10 sites, unlimited audit retention, CSV export, white-label</li>
           </ul>
         </div>
