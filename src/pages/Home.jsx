@@ -5,6 +5,7 @@ import FeaturesSection from '@/components/marketing/FeaturesSection';
 import AudienceSection from '@/components/marketing/AudienceSection';
 import DifferentiatorSection from '@/components/marketing/DifferentiatorSection';
 import PricingSection from '@/components/marketing/PricingSection';
+import BizoomaSection from '@/components/marketing/BizoomaSection';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import MarketingNav from '@/components/marketing/MarketingNav';
 
@@ -29,6 +30,7 @@ export default function Home() {
         loading="lazy"
         referrerPolicy="strict-origin-when-cross-origin"
       />
+      <BizoomaSection />
       <MarketingFooter />
     </div>
   );
