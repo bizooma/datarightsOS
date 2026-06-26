@@ -25,6 +25,13 @@ Deno.serve(async (req) => {
 
   if (!SITE) { console.warn('[DataRightsOS] missing data-tessera-site'); return; }
 
+  // Don't render the live widget inside the Data Rights OS dashboard itself —
+  // the Widget Studio already shows its own preview. Only suppress it on the app's own host.
+  var h = location.hostname;
+  if (h === 'datarightsos.com' || h === 'www.datarightsos.com' || /\\.base44\\.app$/.test(h)) {
+    return;
+  }
+
   var GPC = (navigator.globalPrivacyControl === true);
 
   var vid = localStorage.getItem('dros_vid');
