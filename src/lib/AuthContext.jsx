@@ -110,9 +110,10 @@ export const AuthProvider = ({ children }) => {
       window.localStorage.removeItem('token');
     } catch (e) { /* ignore */ }
     // The real session lives in an HTTP-only cookie that only the server-side logout
-    // endpoint can clear, so we must use the SDK's logout. Pass our own-origin homepage
-    // so it returns here after clearing the cookie.
-    base44.auth.logout(window.location.origin + '/');
+    // endpoint can clear, so we must use the SDK's logout. We return to our own-origin
+    // homepage with `clear_access_token=true`, which the app reads on boot to wipe any
+    // lingering localStorage token — preventing the silent re-login loop.
+    base44.auth.logout(window.location.origin + '/?clear_access_token=true');
   };
 
   const navigateToLogin = () => {
