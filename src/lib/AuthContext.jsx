@@ -111,9 +111,10 @@ export const AuthProvider = ({ children }) => {
     } catch (e) { /* ignore */ }
     // Do NOT use the SDK's logout() — on a custom domain it redirects to
     // app.base44.app/api/apps/auth/logout which returns "App not found".
-    // Instead, hard-redirect to our own login page with `clear_access_token=true`,
-    // which the app reads on boot to wipe any lingering token and stay logged out.
-    window.location.href = window.location.origin + '/login?clear_access_token=true';
+    // We've already cleared the stored tokens above, so just hard-redirect to our
+    // own login page. (No clear_access_token flag — it persists in storage and would
+    // wipe the token on every later load, breaking subsequent logins.)
+    window.location.href = window.location.origin + '/login';
   };
 
   const navigateToLogin = () => {

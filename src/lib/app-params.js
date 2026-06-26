@@ -35,7 +35,16 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 }
 
 const getAppParams = () => {
-	if (getAppParamValue("clear_access_token") === 'true') {
+	// Only honor clear_access_token when it's present in the actual URL (a fresh logout
+	// redirect) — never from a previously-persisted localStorage value, which would
+	// wipe the token on every load and break login.
+	const urlHasClearFlag = !isNode &&
+		new URLSearchParams(window.location.search).get('clear_access_token') === 'true';
+	// Always remove any stale persisted flag from earlier sessions.
+	if (!isNode) {
+		storage.removeItem('base44_clear_access_token');
+	}
+	if (urlHasClearFlag) {
 		storage.removeItem('base44_access_token');
 		storage.removeItem('token');
 	}
