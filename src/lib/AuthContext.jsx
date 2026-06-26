@@ -104,16 +104,16 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
-    // Proactively clear the locally-stored tokens so nothing is read back on reload.
+    // Clear the locally-stored tokens immediately.
     try {
       window.localStorage.removeItem('base44_access_token');
       window.localStorage.removeItem('token');
     } catch (e) { /* ignore */ }
-    // The real session lives in an HTTP-only cookie that only the server-side logout
-    // endpoint can clear, so we must use the SDK's logout. We return to our own-origin
-    // homepage with `clear_access_token=true`, which the app reads on boot to wipe any
-    // lingering localStorage token — preventing the silent re-login loop.
-    base44.auth.logout(window.location.origin + '/?clear_access_token=true');
+    // Do NOT use the SDK's logout() — on a custom domain it redirects to
+    // app.base44.app/api/apps/auth/logout which returns "App not found".
+    // Instead, hard-redirect to our own login page with `clear_access_token=true`,
+    // which the app reads on boot to wipe any lingering token and stay logged out.
+    window.location.href = window.location.origin + '/login?clear_access_token=true';
   };
 
   const navigateToLogin = () => {
