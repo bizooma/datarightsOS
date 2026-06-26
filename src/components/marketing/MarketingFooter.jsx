@@ -13,10 +13,15 @@ export default function MarketingFooter() {
               </div>
               <span className="text-white font-semibold text-sm">Data Rights OS</span>
             </div>
-            <p className="text-slate-500 text-xs max-w-xs leading-relaxed">
-              Privacy compliance infrastructure for law firms, agencies, and the sites they protect.
-              A Bizooma product.
-            </p>
+            <div className="text-slate-500 text-xs max-w-xs leading-relaxed space-y-3">
+              <p>
+                <span className="text-slate-300 font-semibold block mb-1">Compliance Is Becoming a Moving Target</span>
+                Privacy rights, accessibility statements, cookie disclosures, AI notices, and consumer request links are no longer "nice to have." Data RightS OS gives your website a simple way to display important statements and help visitors find the rights information they're looking for.
+              </p>
+              <p>
+                Data RightS OS helps businesses organize and display privacy, accessibility, AI, and data-rights statements. It does not replace legal advice or guarantee compliance.
+              </p>
+            </div>
           </div>
 
           <nav className="flex flex-wrap gap-x-7 gap-y-2">
