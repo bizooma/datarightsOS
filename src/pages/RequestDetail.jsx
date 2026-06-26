@@ -6,6 +6,7 @@ import { useRequestActions } from '@/hooks/useRequestActions';
 import { daysUntilDeadline, deadlineBgColor, formatRequestType, formatStatus } from '@/lib/tenantUtils';
 import StatusBadge from '@/components/shared/StatusBadge';
 import VerificationPanel from '@/components/request/VerificationPanel';
+import FulfillmentChecklist from '@/components/request/FulfillmentChecklist';
 import StatusWorkflowPanel from '@/components/request/StatusWorkflowPanel';
 import QuickStatusPanel from '@/components/request/QuickStatusPanel';
 import NotesPanel from '@/components/request/NotesPanel';
@@ -35,6 +36,12 @@ export default function RequestDetail() {
     queryFn: () => base44.entities.AuditEvent.filter({ related_request: id }, 'created_date'),
     enabled: !!id,
   });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => base44.entities.User.list(),
+  });
+  const userMap = Object.fromEntries(users.map(u => [u.id, u]));
 
   const { data: site } = useQuery({
     queryKey: ['site', request?.site],
@@ -126,6 +133,13 @@ export default function RequestDetail() {
             request={request}
             onMarkVerified={actions.markVerified}
             onRejectRequest={actions.rejectRequest}
+          />
+
+          {/* Fulfillment Checklist */}
+          <FulfillmentChecklist
+            request={request}
+            actions={actions}
+            userMap={userMap}
           />
 
           {/* Quick Status */}

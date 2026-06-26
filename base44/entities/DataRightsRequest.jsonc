@@ -52,6 +52,15 @@
       "default": "unverified",
       "description": "Identity verification status"
     },
+    "verified_by": {
+      "type": "string",
+      "description": "Email of the user who verified the requester's identity"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the requester's identity was verified"
+    },
     "request_status": {
       "type": "string",
       "enum": [
@@ -63,6 +72,49 @@
       ],
       "default": "new",
       "description": "Current request processing status"
+    },
+    "fulfillment_checklist": {
+      "type": "array",
+      "description": "Ordered, per-request interactive fulfillment steps",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "applicable": {
+            "type": "boolean",
+            "default": true
+          },
+          "done": {
+            "type": "boolean",
+            "default": false
+          },
+          "done_by": {
+            "type": "string"
+          },
+          "done_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "completed_by": {
+      "type": "string",
+      "description": "Email of the user who marked the request complete"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the request was marked complete"
     },
     "received_date": {
       "type": "string",

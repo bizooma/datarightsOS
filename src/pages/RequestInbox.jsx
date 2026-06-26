@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import OnboardingChecklist from '@/components/onboarding/OnboardingChecklist';
 import FulfillmentGuidePanel from '@/components/request-inbox/FulfillmentGuidePanel';
+import { statusHint } from '@/lib/fulfillmentChecklist';
 
 export default function RequestInbox() {
   const { user, orgId, isSuperAdmin } = useCurrentUser();
@@ -224,8 +225,13 @@ export default function RequestInbox() {
                       </Link>
                     </td>
                     <td className="px-4 py-3">
-                      <Link to={`/request/${req.id}`}>
+                      <Link to={`/request/${req.id}`} className="inline-flex items-center gap-1.5">
                         <StatusBadge status={req.request_status} />
+                        {statusHint(req.request_status, req.fulfillment_checklist) && (
+                          <span className="text-[11px] text-muted-foreground font-medium">
+                            · {statusHint(req.request_status, req.fulfillment_checklist)}
+                          </span>
+                        )}
                       </Link>
                     </td>
                     <td className="px-4 py-3">

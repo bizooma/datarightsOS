@@ -71,6 +71,27 @@ Deno.serve(async (req) => {
       const now = new Date();
       const deadline = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000);
 
+      const actLabels = {
+        delete: 'Delete or de-identify their personal data everywhere it lives',
+        access: 'Compile their data (categories, sources, purposes, recipients) in a portable format',
+        correct: 'Correct the inaccurate information',
+        opt_out: 'Flag do-not-sell/share, disable data sharing in ad/analytics tools, honor GPC',
+      };
+      const checklistDefs = [
+        { key: 'acknowledge', label: 'Acknowledge receipt (within 10 business days)', required: true },
+        { key: 'verify_identity', label: "Verify the requester's identity", required: true },
+        { key: 'locate_data', label: "Locate the requester's data across your systems", required: true },
+        { key: 'act', label: actLabels[request_type] || 'Fulfill the request', required: true },
+        { key: 'check_exemptions', label: "Check what you're legally required to keep (exemptions)", required: false },
+        { key: 'notify_third_parties', label: 'Notify processors/third parties to delete or stop', required: false },
+        { key: 'respond', label: 'Respond to the requester before the deadline', required: true },
+        { key: 'log_complete', label: 'Confirm the audit trail is complete', required: true },
+      ];
+      const fulfillment_checklist = checklistDefs.map(d => ({
+        key: d.key, label: d.label, required: d.required,
+        applicable: true, done: false, done_by: null, done_at: null,
+      }));
+
       const request = await base44.asServiceRole.entities.DataRightsRequest.create({
         organization: site.organization,
         site: site.id,
@@ -84,6 +105,7 @@ Deno.serve(async (req) => {
         request_status: 'new',
         received_date: now.toISOString(),
         statutory_deadline: deadline.toISOString(),
+        fulfillment_checklist,
       });
 
       await base44.asServiceRole.entities.AuditEvent.create({
