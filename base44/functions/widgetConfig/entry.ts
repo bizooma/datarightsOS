@@ -27,6 +27,11 @@ Deno.serve(async (req) => {
   ]);
   const org = orgs[0] || {};
 
+  // Only the Agency (white-label) plan can remove the "Powered by DataRightsOS" badge.
+  // Core and Proof always show it, regardless of the site's hide_branding flag.
+  const canHideBadge = org.plan === 'agency';
+  const showBadge = !(canHideBadge && site.hide_branding === true);
+
   const getStatement = (type) => statements.find(s => s.statement_type === type);
   const privacyStmt = getStatement('privacy_policy');
   const cookieStmt = getStatement('cookie_policy');
@@ -42,6 +47,7 @@ Deno.serve(async (req) => {
     install_status: site.install_status || 'active',
     widget_theme: site.widget_theme || 'dark',
     honor_gpc: site.honor_gpc !== false,
+    show_badge: showBadge,
     intro_video_url: site.intro_video_url || '',
     accessibility_statement_url: site.accessibility_statement_url || '',
     privacy_policy_url: site.privacy_policy_url || '',

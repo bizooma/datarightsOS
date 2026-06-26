@@ -40,6 +40,11 @@
       "type": "string",
       "description": "Site-specific primary brand color for the widget. Falls back to organization color if empty."
     },
+    "hide_branding": {
+      "type": "boolean",
+      "default": false,
+      "description": "Remove the 'Powered by DataRightsOS' widget badge. Only honored on the Agency (white-label) plan."
+    },
     "enabled_drawers": {
       "type": "array",
       "items": {

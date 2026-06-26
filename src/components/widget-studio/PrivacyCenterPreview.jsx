@@ -16,6 +16,8 @@ export default function PrivacyCenterPreview({ site }) {
   const productName = site.brand_product_name || org?.white_label_product_name || 'Privacy & Data Rights Center';
   const drawers = site.enabled_drawers || ['cookies', 'privacy_rights'];
   const isDark = (site.widget_theme || 'dark') !== 'light';
+  // Only Agency can hide the badge; otherwise it's always shown.
+  const showBadge = !(org?.plan === 'agency' && site.hide_branding === true);
 
   // Theme tokens mirroring widgetJs
   const panelBg = isDark ? '#14202b' : '#ffffff';
@@ -159,12 +161,14 @@ export default function PrivacyCenterPreview({ site }) {
           </div>
 
           {/* Footer */}
-          <div style={{
-            borderTop: `1px solid ${divider}`, padding: '7px 13px',
-            fontSize: 9.5, color: panelSubText, background: footerBg,
-          }}>
-            Powered by <span style={{ textDecoration: 'underline' }}>Bizooma, LLC</span>
-          </div>
+          {showBadge && (
+            <div style={{
+              borderTop: `1px solid ${divider}`, padding: '7px 13px',
+              fontSize: 9.5, color: panelSubText, background: footerBg,
+            }}>
+              Powered by <span style={{ textDecoration: 'underline' }}>DataRightsOS</span>
+            </div>
+          )}
         </div>
 
         {/* Launcher button */}

@@ -1,10 +1,20 @@
 // Plan limits and features for Data Rights OS
+//
+// retentionDays: how long audit-trail & request records are kept before any
+//   automatic purge may remove them. null = unlimited (never auto-purge).
+// canExportOwn: account can export its OWN request/audit records to CSV on demand.
+// canBulkScheduledExport: account can run bulk & scheduled CSV exports.
+// canHideBadge: account can remove the "Powered by DataRightsOS" widget badge.
 export const PLAN_LIMITS = {
   trial: {
     sites: 1,
     teamMembers: 2,
     label: 'Free Trial',
     price: 'Free',
+    retentionDays: 365,
+    canExportOwn: true,
+    canBulkScheduledExport: false,
+    canHideBadge: false,
     features: [
       '1 site',
       '2 team members',
@@ -17,12 +27,16 @@ export const PLAN_LIMITS = {
     teamMembers: 2,
     label: 'Core',
     price: '$99/mo',
+    retentionDays: 365,
+    canExportOwn: true,
+    canBulkScheduledExport: false,
+    canHideBadge: false,
     features: [
       '1 site / 1 domain',
       '2 team members',
       'Cookie consent widget with GPC',
       'Data-rights request intake',
-      'Audit trail (90-day retention)',
+      'Audit trail (1-year retention)',
     ],
   },
   proof: {
@@ -30,6 +44,10 @@ export const PLAN_LIMITS = {
     teamMembers: 10,
     label: 'Proof',
     price: '$299/mo',
+    retentionDays: null,
+    canExportOwn: true,
+    canBulkScheduledExport: true,
+    canHideBadge: false,
     features: [
       'Up to 10 sites',
       '10 team members',
@@ -43,6 +61,10 @@ export const PLAN_LIMITS = {
     teamMembers: Infinity,
     label: 'Agency',
     price: '$399/mo',
+    retentionDays: null,
+    canExportOwn: true,
+    canBulkScheduledExport: true,
+    canHideBadge: true,
     features: [
       'Unlimited sites',
       'Unlimited team members',
@@ -64,6 +86,31 @@ export function canAddSite(plan, currentCount) {
 
 export function canAddMember(plan, currentCount) {
   return currentCount < getPlanLimits(plan).teamMembers;
+}
+
+// Audit-trail / request retention in days. null = unlimited (never auto-purge).
+export function getRetentionDays(plan) {
+  return getPlanLimits(plan).retentionDays;
+}
+
+// True when records on this plan are kept forever (no automatic purge).
+export function hasUnlimitedRetention(plan) {
+  return getPlanLimits(plan).retentionDays == null;
+}
+
+// Self-serve CSV export of the account's own records.
+export function canExportOwn(plan) {
+  return !!getPlanLimits(plan).canExportOwn;
+}
+
+// Bulk & scheduled CSV exports (Proof / Agency).
+export function canBulkScheduledExport(plan) {
+  return !!getPlanLimits(plan).canBulkScheduledExport;
+}
+
+// Only the Agency (white-label) plan can remove the "Powered by DataRightsOS" badge.
+export function canHideBadge(plan) {
+  return !!getPlanLimits(plan).canHideBadge;
 }
 
 const TRIAL_DAYS = 7;

@@ -326,7 +326,7 @@ Deno.serve(async (req) => {
           if (stmts.ai_use_statement) links.push('<button class="stmtlink" data-stmt="ai_use_statement">' + esc(stitle(stmts.ai_use_statement) || 'AI Use Statement') + '</button>');
           return links.length ? '<div class="stmtlinks">' + links.join('<span style="color:' + panelSubText + ';font-size:10px">·</span>') + '</div>' : '';
         })()
-      + '<div class="foot">Powered by <a href="https://bizooma.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Bizooma, LLC</a></div>'
+      + (cfg.show_badge === false ? '' : '<div class="foot">Powered by <a href="https://datarightsos.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">DataRightsOS</a></div>')
       + '</div>'
       + '<div class="modal-overlay hidden" id="MO"><div class="modal"><div class="modal-head"><div><h3 id="MT"></h3><div class="modal-meta" id="MM"></div></div><button class="x" id="MX">&times;</button></div><div class="modal-body" id="MB"></div></div></div>'
       + '<div class="toast" id="T"></div>';

@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import { generateKey } from '@/lib/tenantUtils';
-import { canAddSite } from '@/lib/planLimits';
+import { canAddSite, canHideBadge } from '@/lib/planLimits';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import { FileText, Plus, Globe, Check, Trash2 } from 'lucide-react';
@@ -217,7 +217,7 @@ export default function WidgetStudio() {
                   <TabsTrigger value="legal" className="text-xs">Legal Statements</TabsTrigger>
                 </TabsList>
                 <TabsContent value="config">
-                  <SiteConfigForm key={selectedSite.id} site={selectedSite} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
+                  <SiteConfigForm key={selectedSite.id} site={selectedSite} plan={org?.plan} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
                   <div className="border-t border-border pt-6 mt-6 space-y-6">
                     <EmbedSnippet site={selectedSite} />
                     <PrivacyCenterPreview site={liveFormData || selectedSite} />
@@ -255,8 +255,9 @@ export default function WidgetStudio() {
   );
 }
 
-function SiteConfigForm({ site, onUpdate, onFormChange }) {
+function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
   const [form, setForm] = useState(site);
+  const allowHideBadge = canHideBadge(plan);
 
   const handleChange = (field, value) => {
     setForm(prev => {
@@ -350,6 +351,21 @@ function SiteConfigForm({ site, onUpdate, onFormChange }) {
                 className="h-9 text-sm font-mono flex-1"
               />
             </div>
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-border">
+            <div>
+              <p className="text-sm font-medium">Hide "Powered by DataRightsOS" badge</p>
+              <p className="text-[11px] text-muted-foreground">
+                {allowHideBadge
+                  ? 'Full white-label — removes the DataRightsOS badge from the widget footer.'
+                  : 'Available on the Agency (white-label) plan. The badge stays visible on this plan.'}
+              </p>
+            </div>
+            <Switch
+              checked={allowHideBadge && !!form.hide_branding}
+              disabled={!allowHideBadge}
+              onCheckedChange={v => handleChange('hide_branding', v)}
+            />
           </div>
         </CardContent>
       </Card>
