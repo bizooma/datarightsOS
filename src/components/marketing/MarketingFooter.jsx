@@ -32,9 +32,6 @@ export default function MarketingFooter() {
             <Link to="/register" className="text-slate-400 hover:text-white text-sm transition-colors">
               Start free trial
             </Link>
-            <Link to="/privacy-center" className="text-slate-400 hover:text-white text-sm transition-colors">
-              Privacy Policy
-            </Link>
           </nav>
         </div>
 
