@@ -96,7 +96,7 @@ export default function PricingSection() {
           <h2 className="text-2xl md:text-3xl font-bold text-[#14202b] mb-3">
             Simple, transparent pricing.
           </h2>
-          <p className="text-slate-500 max-w-md mx-auto">
+          <p className="text-slate-500 max-w-2xl mx-auto whitespace-nowrap">
             No per-request fees. No surprise overages. Cancel any time.
           </p>
         </div>
