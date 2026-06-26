@@ -148,7 +148,7 @@ export default function PricingSection() {
 
               {plan.contact ? (
                 <a
-                  href="mailto:sales@bizooma.com?subject=Agency%20plan%20inquiry"
+                  href="mailto:joe@bizooma.com?subject=Agency%20plan%20inquiry"
                   className="w-full text-center text-sm font-semibold py-2.5 rounded-lg transition-colors border border-slate-200 text-[#14202b] hover:bg-slate-50"
                 >
                   {plan.cta}
