@@ -35,7 +35,6 @@ const plans = [
       'Everything in Core',
       'Unlimited audit trail retention',
       'CSV export for regulatory responses',
-      'White-label widget (client branding)',
       '10 team members',
       'Priority support',
     ],
