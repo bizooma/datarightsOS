@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard
+Disallow: /analytics
+Disallow: /request
+Disallow: /consent-log
+Disallow: /widget-studio
+Disallow: /audit-trail
+Disallow: /accessibility
+Disallow: /settings
+Disallow: /organizations
+Disallow: /admin
+
+Sitemap: https://datarightsos.com/sitemap.xml
