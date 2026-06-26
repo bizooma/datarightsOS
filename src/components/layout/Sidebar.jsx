@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useCurrentUser } from '@/lib/useCurrentUser';
+import { useAuth } from '@/lib/AuthContext';
 
 const navItems = [
   { path: '/dashboard', label: 'Request Inbox', icon: Inbox },
@@ -38,6 +39,7 @@ const superAdminItems = [
 export default function Sidebar() {
   const location = useLocation();
   const { user, isSuperAdmin } = useCurrentUser();
+  const { logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
   // Resolve effective orgId — supports super-admin impersonation via sessionStorage
@@ -138,7 +140,7 @@ export default function Sidebar() {
         )}
         <div className="flex items-center justify-between">
           <button
-            onClick={() => base44.auth.logout(window.location.origin + '/login')}
+            onClick={logout}
             className="flex items-center gap-2 text-slate-500 hover:text-white text-xs transition-colors"
             title="Log out"
           >
