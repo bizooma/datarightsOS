@@ -29,15 +29,22 @@ const COMPLETION_TYPE_LINES = {
   opt_out: "We've opted you out of the sale and sharing of your personal information.",
 };
 
-const DEFAULT_ACK_SUBJECT = 'We received your privacy request — {business_name}';
+const DEFAULT_ACK_SUBJECT = 'Confirm your privacy request — {business_name}';
 const DEFAULT_ACK_BODY = `Hi {requester_name},
 
-We received your request and we're processing it. For your records:
+We received your request. To protect your data, we need you to confirm this request really came from you.
+
+Please confirm by clicking this single-use link (it expires in 30 days):
+{verification_link}
+
+Until you confirm, we won't act on the request.
+
+For your records:
 - Request type: {request_type_label}
 - Reference ID: {request_id}
 - Date received: {submitted_date}
 
-We'll complete your request and respond by {deadline_date}. If we need more time, we'll let you know with the reason.
+Once confirmed, we'll complete your request and respond by {deadline_date}. If we need more time, we'll let you know with the reason.
 
 Questions? Reply to this email or contact us at {contact_email}.
 
@@ -117,6 +124,14 @@ Deno.serve(async (req) => {
     const completionDate = fmtDate(request.completed_at || request.fulfilled_date || new Date().toISOString());
     const typeLabel = REQUEST_TYPE_LABELS[request.request_type] || request.request_type || 'Privacy request';
 
+    // Public verification link (single-use). Built from this function's own request
+    // origin so it always points at the live deployment.
+    const appId = Deno.env.get('BASE44_APP_ID');
+    const origin = new URL(req.url).origin;
+    const verificationLink = request.verification_token
+      ? `${origin}/api/apps/${appId}/functions/verifyRequest?request_id=${request_id}&token=${request.verification_token}`
+      : '';
+
     const values = {
       requester_name: request.requester_name || 'there',
       request_type_label: typeLabel,
@@ -126,6 +141,7 @@ Deno.serve(async (req) => {
       completion_date: completionDate,
       business_name: businessName || 'Privacy Team',
       contact_email: contactEmail,
+      verification_link: verificationLink,
       type_specific_line: COMPLETION_TYPE_LINES[request.request_type] || '',
     };
 

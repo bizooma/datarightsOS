@@ -47,10 +47,25 @@
         "unverified",
         "verifying",
         "verified",
-        "rejected"
+        "rejected",
+        "expired"
       ],
       "default": "unverified",
       "description": "Identity verification status"
+    },
+    "verification_token": {
+      "type": "string",
+      "description": "Single-use token embedded in the email verification link. Cleared once consumed."
+    },
+    "verification_token_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email verification link expires. After this, the token is no longer accepted."
+    },
+    "email_verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the requester self-verified by clicking the email verification link."
     },
     "verified_by": {
       "type": "string",

@@ -70,6 +70,10 @@ Deno.serve(async (req) => {
 
       const now = new Date();
       const deadline = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000);
+      // Single-use email-verification token. The requester must click the link
+      // in their acknowledgment email (within 30 days) to confirm identity.
+      const verificationToken = crypto.randomUUID().replace(/-/g, '') + Math.random().toString(36).slice(2, 10);
+      const tokenExpiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
       const actLabels = {
         delete: 'Delete or de-identify their personal data everywhere it lives',
@@ -102,6 +106,8 @@ Deno.serve(async (req) => {
         is_authorized_agent: !!is_authorized_agent,
         agent_details: is_authorized_agent ? agent_details : undefined,
         verification_status: 'unverified',
+        verification_token: verificationToken,
+        verification_token_expires_at: tokenExpiresAt.toISOString(),
         request_status: 'new',
         received_date: now.toISOString(),
         statutory_deadline: deadline.toISOString(),
