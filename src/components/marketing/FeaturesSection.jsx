@@ -1,9 +1,9 @@
-import { Cookie, Inbox, Shield, Bot, Accessibility, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const features = [
   {
-    icon: Cookie,
+    image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/855bcf927_generated_image.png',
     color: '#0d7d74',
     title: 'Cookie consent with GPC',
     description:
@@ -12,7 +12,7 @@ const features = [
     link: '/cookie-consent',
   },
   {
-    icon: Inbox,
+    image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/7acaa8e70_generated_image.png',
     color: '#0d7d74',
     title: 'Data-rights request intake',
     description:
@@ -21,7 +21,7 @@ const features = [
     link: '/data-privacy',
   },
   {
-    icon: Shield,
+    image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/77f1c255f_generated_image.png',
     color: '#b58a2e',
     title: 'Immutable audit trail',
     description:
@@ -29,7 +29,7 @@ const features = [
     details: ['Timestamped event log per request', 'Consent receipt archive', 'CSV and report export', 'Organization-level isolation'],
   },
   {
-    icon: Bot,
+    image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/61378b5e4_generated_image.png',
     color: '#0d7d74',
     title: 'AI use disclosure',
     description:
@@ -38,7 +38,7 @@ const features = [
     link: '/ai-disclosure',
   },
   {
-    icon: Accessibility,
+    image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/e283c4e9a_generated_image.png',
     color: '#b58a2e',
     title: 'Web accessibility',
     description:
@@ -64,11 +64,8 @@ export default function FeaturesSection() {
         <div className="grid md:grid-cols-2 gap-8">
           {features.map((f) => (
             <div key={f.title} className="flex flex-col">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center mb-5"
-                style={{ backgroundColor: `${f.color}15`, border: `1px solid ${f.color}30` }}
-              >
-                <f.icon className="w-5 h-5" style={{ color: f.color }} />
+              <div className="w-full h-40 rounded-xl overflow-hidden mb-5 border border-slate-100">
+                <img src={f.image} alt={f.title} className="w-full h-full object-cover" />
               </div>
               <h3 className="font-semibold text-[#14202b] mb-2">{f.title}</h3>
               <p className="text-sm text-slate-600 leading-relaxed mb-5">{f.description}</p>
