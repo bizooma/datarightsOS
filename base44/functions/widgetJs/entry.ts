@@ -52,6 +52,14 @@ Deno.serve(async (req) => {
     en: {
       launcher: 'Privacy & Data Rights',
       headerSub: 'Manage cookies, your data, and access',
+      statusCompliant: 'Compliant',
+      searchPlaceholder: 'How can we help with your privacy?',
+      backHome: 'Back',
+      cardRights: 'Privacy Rights', cardRightsSub: 'Submit a request',
+      cardCookies: 'Cookies', cardCookiesSub: 'Manage settings',
+      cardA11y: 'Accessibility', cardA11ySub: 'View & report',
+      cardAI: 'AI Disclosure', cardAISub: 'How we use AI',
+      noResults: 'No matches found',
       gpcTitle: 'Global Privacy Control detected',
       gpcBody: "We've automatically opted you out of sale & sharing, as required in your state.",
       rightsTitle: 'Your privacy rights',
@@ -78,6 +86,14 @@ Deno.serve(async (req) => {
     es: {
       launcher: 'Privacidad y Derechos de Datos',
       headerSub: 'Administre cookies, sus datos y acceso',
+      statusCompliant: 'En cumplimiento',
+      searchPlaceholder: '¿Cómo podemos ayudarle con su privacidad?',
+      backHome: 'Volver',
+      cardRights: 'Derechos de Privacidad', cardRightsSub: 'Enviar una solicitud',
+      cardCookies: 'Cookies', cardCookiesSub: 'Administrar ajustes',
+      cardA11y: 'Accesibilidad', cardA11ySub: 'Ver y reportar',
+      cardAI: 'Divulgación de IA', cardAISub: 'Cómo usamos la IA',
+      noResults: 'Sin resultados',
       gpcTitle: 'Control de Privacidad Global detectado',
       gpcBody: 'Lo hemos excluido automáticamente de la venta y el intercambio de datos, según lo exige su estado.',
       rightsTitle: 'Sus derechos de privacidad',
@@ -159,6 +175,18 @@ Deno.serve(async (req) => {
       + '.crest img{width:100%;height:100%;object-fit:contain;padding:2px}'
       + '.phead h2{margin:0;font-size:14px;font-weight:700;color:' + panelText + '}'
       + '.phead .sub{margin:1px 0 0;font-size:11px;color:' + panelSubText + '}'
+      + '.pill{display:inline-flex;align-items:center;gap:4px;margin-top:4px;background:' + accent + '1f;color:' + accent + ';border-radius:999px;padding:2px 8px;font-size:10px;font-weight:700}'
+      + '.pill .pdot{width:6px;height:6px;border-radius:50%;background:' + accent + '}'
+      + '.cmdsearch{display:flex;align-items:center;gap:8px;margin:0 0 12px;background:' + itemBg + ';border:1px solid ' + divider + ';border-radius:10px;padding:10px 12px}'
+      + '.cmdsearch input{flex:1;border:none;background:none;outline:none;font-size:12.5px;color:' + panelText + ';font-family:inherit}'
+      + '.cmdsearch input::placeholder{color:' + panelSubText + '}'
+      + '.cardgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:4px}'
+      + '.ccard{border:1px solid ' + divider + ';background:' + itemBg + ';border-radius:11px;padding:13px 12px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:8px}'
+      + '.ccard:hover{border-color:' + accent + ';background:' + accent + '14}'
+      + '.ccard .cicon{width:30px;height:30px;border-radius:8px;background:' + accent + '1f;display:flex;align-items:center;justify-content:center;font-size:15px}'
+      + '.ccard .ctitle{font-size:12.5px;font-weight:700;color:' + panelText + ';line-height:1.2}'
+      + '.ccard .csub{font-size:10.5px;color:' + panelSubText + ';margin-top:2px}'
+      + '.backbtn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-size:11.5px;font-weight:650;color:' + accent + ';padding:0;margin-bottom:10px;font-family:inherit}'
       + '.x{position:absolute;top:12px;right:12px;width:26px;height:26px;border:1px solid ' + divider + ';border-radius:7px;background:' + itemBg + ';cursor:pointer;color:' + panelSubText + ';font-size:15px;line-height:1}'
       + '.langpick{position:absolute;top:12px;right:44px;display:flex;gap:2px;background:' + itemBg + ';border:1px solid ' + divider + ';border-radius:7px;padding:2px}'
       + '.langpick button{border:none;background:none;cursor:pointer;font-size:10px;font-weight:700;padding:3px 6px;border-radius:5px;color:' + panelSubText + ';font-family:inherit}'
@@ -168,6 +196,7 @@ Deno.serve(async (req) => {
       + '.vid iframe{width:100%;height:100%;border:0}'
       + '.gpc{display:flex;gap:8px;padding:10px;border-radius:9px;background:' + accent + '22;border:1px solid ' + accent + '44;margin-bottom:12px}'
       + '.gpc b{font-size:12px;color:' + accent + '}.gpc p{margin:2px 0 0;font-size:11px;color:' + panelSubText + ';line-height:1.4}'
+      + '.section{margin-bottom:4px}'
       + '.drawer{border:1px solid ' + divider + ';border-radius:9px;margin-bottom:9px;overflow:hidden}'
       + '.dh{display:flex;align-items:center;justify-content:space-between;width:100%;background:' + itemBg + ';border:none;cursor:pointer;padding:12px;font-size:13px;font-weight:650;color:' + panelText + ';text-align:left}'
       + '.dh:hover{background:' + itemHover + '}'
@@ -218,13 +247,22 @@ Deno.serve(async (req) => {
       + '<button class="launcher" id="L"><span class="dot"></span>' + esc(t.launcher) + '</button>'
       + '<div class="panel hidden" id="P">'
       + '<div class="phead"><div class="crest">' + (cfg.logo_url ? '<img src="' + esc(cfg.logo_url) + '">' : 'D') + '</div>'
-      + '<div><h2>' + esc(cfg.product_name) + '</h2><div class="sub">' + esc(t.headerSub) + '</div></div>'
+      + '<div><h2>' + esc(cfg.product_name) + '</h2><div class="pill"><span class="pdot"></span>' + esc(t.statusCompliant) + '</div></div>'
       + '<div class="langpick"><button data-lang="en" class="' + (lang === 'en' ? 'on' : '') + '">EN</button><button data-lang="es" class="' + (lang === 'es' ? 'on' : '') + '">ES</button></div>'
       + '<button class="x" id="X">&times;</button></div>'
       + '<div class="body">'
       + (yt ? '<div class="vid"><iframe src="' + yt + '" title="Intro" allowfullscreen></iframe></div>' : '')
       + ((cfg.honor_gpc && GPC) ? '<div class="gpc"><div><b>' + esc(t.gpcTitle) + '</b><p>' + esc(t.gpcBody) + '</p></div></div>' : '')
-      + (showRights ? '<div class="drawer open" data-d><button class="dh" data-t>' + esc(t.rightsTitle) + '<span>&#9662;</span></button><div class="db">'
+      + '<div id="HOME">'
+      + '<div class="cmdsearch"><span style="font-size:13px;color:' + panelSubText + '">&#128269;</span><input id="CMDQ" placeholder="' + esc(t.searchPlaceholder) + '"></div>'
+      + '<div class="cardgrid">'
+      + (showRights ? '<button class="ccard" data-card="rights" data-kw="' + esc(t.rightsTitle) + '"><div class="cicon">&#128274;</div><div><div class="ctitle">' + esc(t.cardRights) + '</div><div class="csub">' + esc(t.cardRightsSub) + '</div></div></button>' : '')
+      + (showCookies ? '<button class="ccard" data-card="cookies" data-kw="' + esc(t.cookieTitle) + '"><div class="cicon">&#127850;</div><div><div class="ctitle">' + esc(t.cardCookies) + '</div><div class="csub">' + esc(t.cardCookiesSub) + '</div></div></button>' : '')
+      + (showA11y ? '<button class="ccard" data-card="a11y" data-kw="' + esc(t.a11yTitle) + '"><div class="cicon">&#9855;</div><div><div class="ctitle">' + esc(t.cardA11y) + '</div><div class="csub">' + esc(t.cardA11ySub) + '</div></div></button>' : '')
+      + (showAI ? '<button class="ccard" data-card="ai" data-kw="' + esc(t.aiTitle) + '"><div class="cicon">&#10024;</div><div><div class="ctitle">' + esc(t.cardAI) + '</div><div class="csub">' + esc(t.cardAISub) + '</div></div></button>' : '')
+      + '</div></div>'
+      + '<div id="SECTIONS">'
+      + (showRights ? '<div class="section hidden" data-section="rights"><button class="backbtn" data-back>&#8249; ' + esc(t.backHome) + '</button><div class="drawer open" data-d><button class="dh" data-t>' + esc(t.rightsTitle) + '<span>&#9662;</span></button><div class="db">'
         + '<div class="rights">'
         + '<button class="rb" data-req="access">' + esc(t.reqAccess) + '</button>'
         + '<button class="rb" data-req="delete">' + esc(t.reqDelete) + '</button>'
@@ -234,15 +272,15 @@ Deno.serve(async (req) => {
         + '<div class="intake" id="IN"><input class="fld" id="rn" placeholder="' + esc(t.fullName) + '"><input class="fld" id="re" type="email" placeholder="' + esc(t.emailOnFile) + '"><input class="fld" id="rs" placeholder="' + esc(t.state) + '">'
         + '<label class="chk"><input type="checkbox" id="ra"> ' + esc(t.agentLabel) + '</label>'
         + '<button class="btn p" id="RS" style="width:100%">' + esc(t.submitReq) + '</button></div>'
-        + '</div></div>' : '')
-      + (showCookies ? '<div class="drawer" data-d><button class="dh" data-t>' + esc(t.cookieTitle) + '<span>&#9662;</span></button><div class="db">'
+        + '</div></div></div>' : '')
+      + (showCookies ? '<div class="section hidden" data-section="cookies"><button class="backbtn" data-back>&#8249; ' + esc(t.backHome) + '</button><div class="drawer open" data-d><button class="dh" data-t>' + esc(t.cookieTitle) + '<span>&#9662;</span></button><div class="db">'
         + '<div class="row"><div><div class="lbl">' + esc(t.necessary) + '</div><div class="desc">' + esc(t.necessaryDesc) + '</div></div><label class="sw lock"><input type="checkbox" checked disabled><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="row"><div><div class="lbl">' + esc(t.functional) + '</div></div><label class="sw"><input type="checkbox" id="cf"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="row"><div><div class="lbl">' + esc(t.analytics) + '</div></div><label class="sw"><input type="checkbox" id="ca"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="row"><div><div class="lbl">' + esc(t.advertising) + '</div></div><label class="sw"><input type="checkbox" id="cad"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="btnrow"><button class="btn g" id="CR">' + esc(t.rejectAll) + '</button><button class="btn p" id="CS">' + esc(t.saveChoices) + '</button></div>'
-        + '</div></div>' : '')
-      + (showA11y ? '<div class="drawer" data-d><button class="dh" data-t>' + esc(t.a11yTitle) + '<span>&#9662;</span></button><div class="db">'
+        + '</div></div></div>' : '')
+      + (showA11y ? '<div class="section hidden" data-section="a11y"><button class="backbtn" data-back>&#8249; ' + esc(t.backHome) + '</button><div class="drawer open" data-d><button class="dh" data-t>' + esc(t.a11yTitle) + '<span>&#9662;</span></button><div class="db">'
         + '<div class="note">' + esc(t.a11yNote) + '</div>'
         + (cfg.accessibility_statement_url ? '<a class="link" href="' + esc(cfg.accessibility_statement_url) + '" target="_blank" rel="noopener">' + esc(t.a11yStatement) + ' &#8599;</a>' : '')
         + '<button class="link" id="BR">' + esc(t.reportBarrier) + ' &#8250;</button>'
@@ -256,10 +294,11 @@ Deno.serve(async (req) => {
         + '<div class="a11ycell"><div class="lbl">' + esc(t.oversizeCursor) + '</div><label class="sw"><input type="checkbox" id="poc"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="a11ycell"><div class="lbl">' + esc(t.screenReader) + '</div><label class="sw"><input type="checkbox" id="psr"><span class="tr"></span><span class="kn"></span></label></div>'
         + '</div>'
-        + '</div></div>' : '')
-      + (showAI ? '<div class="drawer" data-d><button class="dh" data-t>' + esc(t.aiTitle) + '<span>&#9662;</span></button><div class="db">'
+        + '</div></div></div>' : '')
+      + (showAI ? '<div class="section hidden" data-section="ai"><button class="backbtn" data-back>&#8249; ' + esc(t.backHome) + '</button><div class="drawer open" data-d><button class="dh" data-t>' + esc(t.aiTitle) + '<span>&#9662;</span></button><div class="db">'
         + '<div class="note">' + esc(t.aiNote) + '</div>'
-        + '</div></div>' : '')
+        + '</div></div></div>' : '')
+      + '</div>'
       + '</div>'
       + (function() {
           var stmts = cfg.statements || {};
@@ -298,6 +337,31 @@ Deno.serve(async (req) => {
     });
 
     q('[data-t]').forEach(function (h) { h.onclick = function () { h.closest('[data-d]').classList.toggle('open'); }; });
+
+    // Command Center navigation: cards open sections, back returns home.
+    var HOME = $('HOME'), SECTIONS = $('SECTIONS');
+    function showHome() {
+      HOME.classList.remove('hidden');
+      q('[data-section]').forEach(function (s) { s.classList.add('hidden'); });
+    }
+    function showSection(name) {
+      HOME.classList.add('hidden');
+      q('[data-section]').forEach(function (s) { s.classList.toggle('hidden', s.getAttribute('data-section') !== name); });
+    }
+    q('[data-card]').forEach(function (c) { c.onclick = function () { showSection(c.getAttribute('data-card')); }; });
+    q('[data-back]').forEach(function (b) { b.onclick = showHome; });
+
+    // Search filters the action cards on the home view.
+    var CMDQ = $('CMDQ');
+    if (CMDQ) {
+      CMDQ.oninput = function () {
+        var term = CMDQ.value.toLowerCase().trim();
+        q('[data-card]').forEach(function (c) {
+          var kw = (c.getAttribute('data-kw') || '').toLowerCase();
+          c.style.display = (!term || kw.indexOf(term) > -1) ? '' : 'none';
+        });
+      };
+    }
 
     if (cfg.honor_gpc && GPC && !localStorage.getItem('dros_gpc_' + SITE)) {
       post({ type: 'consent', action: 'gpc_optout', necessary: true, functional: false, analytics: false, advertising: false });
