@@ -141,16 +141,35 @@ Deno.serve(async (req) => {
     const subject = renderTemplate(subjectTpl, values);
     const body = renderTemplate(bodyTpl, values);
 
-    // Send under the subscriber's identity. from_name = business name; the contact
-    // email is surfaced in-body as the reply destination (built-in SendEmail has no
-    // reply-to header param).
+    // Send via Resend from the platform's verified domain, branded as the subscriber:
+    //   from_name = subscriber business name, from_email = verified shared sender,
+    //   reply_to = subscriber's privacy_contact_email (replies go to the subscriber).
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    const fromEmail = Deno.env.get('RESEND_FROM_EMAIL');
+    if (!resendApiKey || !fromEmail) {
+      return Response.json({ success: false, error: 'Email delivery is not configured (missing RESEND_API_KEY or RESEND_FROM_EMAIL).' });
+    }
+
+    const fromName = (businessName || 'Privacy Team').replace(/[<>"]/g, '');
     try {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        from_name: businessName || undefined,
-        to: request.requester_email,
-        subject,
-        body,
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: `${fromName} <${fromEmail}>`,
+          to: [request.requester_email],
+          reply_to: contactEmail,
+          subject,
+          text: body,
+        }),
       });
+      if (!resendRes.ok) {
+        const errBody = await resendRes.text();
+        throw new Error(`Resend ${resendRes.status}: ${errBody}`);
+      }
     } catch (sendErr) {
       console.log(`[sendRequesterEmail] send failed (${kind}, ${request_id}): ${sendErr.message}`);
       await base44.asServiceRole.entities.DataRightsRequest.update(request_id, {
