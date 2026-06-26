@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Search, Cookie, ShieldCheck, Accessibility, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Search, CheckCircle2 } from 'lucide-react';
 
 export default function PrivacyCenterPreview({ site }) {
   const { data: org } = useQuery({
@@ -31,10 +31,10 @@ export default function PrivacyCenterPreview({ site }) {
   const launcherBorder = isDark ? 'none' : '1px solid #d1d9e0';
 
   const cardConfig = {
-    cookies: { label: 'Cookies', sub: 'Manage settings', Icon: Cookie },
-    privacy_rights: { label: 'Privacy Rights', sub: 'Submit a request', Icon: ShieldCheck },
-    accessibility: { label: 'Accessibility', sub: 'View statement', Icon: Accessibility },
-    ai_disclosure: { label: 'AI Disclosure', sub: 'How we use AI', Icon: Sparkles },
+    cookies: { label: 'Cookies', sub: 'Manage settings', img: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=400&q=70' },
+    privacy_rights: { label: 'Privacy Rights', sub: 'Submit a request', img: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=400&q=70' },
+    accessibility: { label: 'Accessibility', sub: 'View statement', img: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=400&q=70' },
+    ai_disclosure: { label: 'AI Disclosure', sub: 'How we use AI', img: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=400&q=70' },
   };
 
   return (
@@ -115,26 +115,33 @@ export default function PrivacyCenterPreview({ site }) {
               {drawers.map((d) => {
                 const c = cardConfig[d];
                 if (!c) return null;
-                const { Icon } = c;
                 return (
                   <div key={d} style={{
                     background: cardBg,
                     border: `1px solid ${divider}`,
                     borderRadius: 11,
-                    padding: '12px 11px',
-                    display: 'flex', flexDirection: 'column', gap: 7,
+                    overflow: 'hidden',
+                    display: 'flex', flexDirection: 'column',
                     cursor: 'default',
                   }}>
+                    {/* Photographic header band with title overlay */}
                     <div style={{
-                      width: 28, height: 28, borderRadius: 8,
-                      background: `${accent}1f`, display: 'flex',
-                      alignItems: 'center', justifyContent: 'center',
+                      position: 'relative', height: 54,
+                      backgroundImage: `url(${c.img})`,
+                      backgroundSize: 'cover', backgroundPosition: 'center',
                     }}>
-                      <Icon style={{ width: 15, height: 15, color: accent }} />
+                      <div style={{
+                        position: 'absolute', inset: 0,
+                        background: 'linear-gradient(180deg, rgba(20,32,43,0.15) 0%, rgba(20,32,43,0.78) 100%)',
+                      }} />
+                      <div style={{
+                        position: 'absolute', left: 8, right: 8, bottom: 6, zIndex: 1,
+                        fontWeight: 700, fontSize: 11, color: '#fff', lineHeight: 1.2,
+                        textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+                      }}>{c.label}</div>
                     </div>
-                    <div>
-                      <div style={{ fontWeight: 650, fontSize: 11.5, color: panelText, lineHeight: 1.2 }}>{c.label}</div>
-                      <div style={{ fontSize: 9.5, color: panelSubText, marginTop: 2 }}>{c.sub}</div>
+                    <div style={{ padding: '7px 10px 9px' }}>
+                      <div style={{ fontSize: 9.5, color: panelSubText }}>{c.sub}</div>
                     </div>
                   </div>
                 );

@@ -181,11 +181,13 @@ Deno.serve(async (req) => {
       + '.cmdsearch input{flex:1;border:none;background:none;outline:none;font-size:12.5px;color:' + panelText + ';font-family:inherit}'
       + '.cmdsearch input::placeholder{color:' + panelSubText + '}'
       + '.cardgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:4px}'
-      + '.ccard{border:1px solid ' + divider + ';background:' + itemBg + ';border-radius:11px;padding:13px 12px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:8px}'
-      + '.ccard:hover{border-color:' + accent + ';background:' + accent + '14}'
-      + '.ccard .cicon{width:30px;height:30px;border-radius:8px;background:' + accent + '1f;display:flex;align-items:center;justify-content:center;font-size:15px}'
-      + '.ccard .ctitle{font-size:12.5px;font-weight:700;color:' + panelText + ';line-height:1.2}'
-      + '.ccard .csub{font-size:10.5px;color:' + panelSubText + ';margin-top:2px}'
+      + '.ccard{border:1px solid ' + divider + ';background:' + itemBg + ';border-radius:11px;overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column;padding:0;transition:border-color .15s,box-shadow .15s,transform .15s}'
+      + '.ccard:hover{border-color:' + accent + ';box-shadow:0 8px 22px -10px rgba(20,32,43,.5);transform:translateY(-1px)}'
+      + '.ccard .chead{position:relative;height:64px;background-size:cover;background-position:center}'
+      + '.ccard .chead::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,32,43,.15) 0%,rgba(20,32,43,.78) 100%)}'
+      + '.ccard .ctitle{position:absolute;left:10px;right:10px;bottom:8px;z-index:1;font-size:12.5px;font-weight:700;color:#fff;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,.5)}'
+      + '.ccard .cbody{padding:8px 11px 11px}'
+      + '.ccard .csub{font-size:10.5px;color:' + panelSubText + '}'
       + '.backbtn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-size:11.5px;font-weight:650;color:' + accent + ';padding:0;margin-bottom:10px;font-family:inherit}'
       + '.x{position:absolute;top:12px;right:12px;width:26px;height:26px;border:1px solid ' + divider + ';border-radius:7px;background:' + itemBg + ';cursor:pointer;color:' + panelSubText + ';font-size:15px;line-height:1}'
       + '.langpick{position:absolute;top:12px;right:44px;display:flex;gap:2px;background:' + itemBg + ';border:1px solid ' + divider + ';border-radius:7px;padding:2px}'
@@ -242,6 +244,14 @@ Deno.serve(async (req) => {
     }
     var yt = ytEmbed(cfg.intro_video_url);
 
+    // Professional photographic header images for the action cards.
+    var IMG = {
+      rights: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=400&q=70',
+      cookies: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=400&q=70',
+      a11y: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=400&q=70',
+      ai: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=400&q=70'
+    };
+
     var html = ''
       + '<style>' + css + '</style>'
       + '<button class="launcher" id="L"><span class="dot"></span>' + esc(t.launcher) + '</button>'
@@ -256,10 +266,10 @@ Deno.serve(async (req) => {
       + '<div id="HOME">'
       + '<div class="cmdsearch"><span style="font-size:13px;color:' + panelSubText + '">&#128269;</span><input id="CMDQ" placeholder="' + esc(t.searchPlaceholder) + '"></div>'
       + '<div class="cardgrid">'
-      + (showRights ? '<button class="ccard" data-card="rights" data-kw="' + esc(t.rightsTitle) + '"><div class="cicon">&#128274;</div><div><div class="ctitle">' + esc(t.cardRights) + '</div><div class="csub">' + esc(t.cardRightsSub) + '</div></div></button>' : '')
-      + (showCookies ? '<button class="ccard" data-card="cookies" data-kw="' + esc(t.cookieTitle) + '"><div class="cicon">&#127850;</div><div><div class="ctitle">' + esc(t.cardCookies) + '</div><div class="csub">' + esc(t.cardCookiesSub) + '</div></div></button>' : '')
-      + (showA11y ? '<button class="ccard" data-card="a11y" data-kw="' + esc(t.a11yTitle) + '"><div class="cicon">&#9855;</div><div><div class="ctitle">' + esc(t.cardA11y) + '</div><div class="csub">' + esc(t.cardA11ySub) + '</div></div></button>' : '')
-      + (showAI ? '<button class="ccard" data-card="ai" data-kw="' + esc(t.aiTitle) + '"><div class="cicon">&#10024;</div><div><div class="ctitle">' + esc(t.cardAI) + '</div><div class="csub">' + esc(t.cardAISub) + '</div></div></button>' : '')
+      + (showRights ? '<button class="ccard" data-card="rights" data-kw="' + esc(t.rightsTitle) + '"><div class="chead" style="background-image:url(' + IMG.rights + ')"><div class="ctitle">' + esc(t.cardRights) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardRightsSub) + '</div></div></button>' : '')
+      + (showCookies ? '<button class="ccard" data-card="cookies" data-kw="' + esc(t.cookieTitle) + '"><div class="chead" style="background-image:url(' + IMG.cookies + ')"><div class="ctitle">' + esc(t.cardCookies) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardCookiesSub) + '</div></div></button>' : '')
+      + (showA11y ? '<button class="ccard" data-card="a11y" data-kw="' + esc(t.a11yTitle) + '"><div class="chead" style="background-image:url(' + IMG.a11y + ')"><div class="ctitle">' + esc(t.cardA11y) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardA11ySub) + '</div></div></button>' : '')
+      + (showAI ? '<button class="ccard" data-card="ai" data-kw="' + esc(t.aiTitle) + '"><div class="chead" style="background-image:url(' + IMG.ai + ')"><div class="ctitle">' + esc(t.cardAI) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardAISub) + '</div></div></button>' : '')
       + '</div></div>'
       + '<div id="SECTIONS">'
       + (showRights ? '<div class="section hidden" data-section="rights"><button class="backbtn" data-back>&#8249; ' + esc(t.backHome) + '</button><div class="drawer open" data-d><button class="dh" data-t>' + esc(t.rightsTitle) + '<span>&#9662;</span></button><div class="db">'
