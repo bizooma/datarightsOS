@@ -25,7 +25,7 @@ export default function AudienceSection() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            Built for the people who manage privacy, not just the people who need it.
+            Built for the people who manage privacy,<br />not just the people who need it.
           </h2>
           <p className="text-slate-400 max-w-xl mx-auto">
             White-label and reseller friendly from day one.
