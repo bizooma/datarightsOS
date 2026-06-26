@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     en: {
       launcher: 'Privacy & Data Rights',
       headerSub: 'Manage cookies, your data, and access',
-      statusCompliant: 'Compliant',
+      statusCompliant: 'Active',
       searchPlaceholder: 'How can we help with your privacy?',
       backHome: 'Back',
       cardRights: 'Privacy Rights', cardRightsSub: 'Submit a request',
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     es: {
       launcher: 'Privacidad y Derechos de Datos',
       headerSub: 'Administre cookies, sus datos y acceso',
-      statusCompliant: 'En cumplimiento',
+      statusCompliant: 'Activo',
       searchPlaceholder: '¿Cómo podemos ayudarle con su privacidad?',
       backHome: 'Volver',
       cardRights: 'Derechos de Privacidad', cardRightsSub: 'Enviar una solicitud',
