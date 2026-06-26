@@ -18,11 +18,20 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/";
+      const result = await base44.auth.loginViaEmailPassword(email, password);
+      // Make absolutely sure the token is persisted before we reload. On some
+      // custom-domain setups the SDK's internal setToken can run before storage
+      // is ready; writing it explicitly guarantees it's there on the next load.
+      const token = result?.access_token;
+      if (token) {
+        base44.auth.setToken(token);
+        window.localStorage.setItem("base44_access_token", token);
+        window.localStorage.setItem("token", token);
+      }
+      // Hard redirect to the dashboard so the app re-initializes with the stored token.
+      window.location.href = "/dashboard";
     } catch (err) {
       setError(err.message || "Invalid email or password");
-    } finally {
       setLoading(false);
     }
   };
