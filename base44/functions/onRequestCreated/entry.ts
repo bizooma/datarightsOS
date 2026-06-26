@@ -35,37 +35,16 @@ Deno.serve(async (req) => {
     const typeLabel = REQUEST_TYPE_LABELS[requestData?.request_type] || requestData?.request_type || 'Privacy';
     const deadlineStr = deadline.toISOString().slice(0, 10);
 
-    // --- 2. Confirmation email to requester ---
-    if (requestData?.requester_email) {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: requestData.requester_email,
-        subject: `Your ${typeLabel} Request Has Been Received (Ref: ${requestId.slice(0, 8).toUpperCase()})`,
-        body: `Hello ${requestData.requester_name || 'there'},
-
-We have received your ${typeLabel} request and it has been logged in our system.
-
-Reference ID: ${requestId.slice(0, 8).toUpperCase()}
-Request Type: ${typeLabel}
-Date Received: ${receivedDate.toISOString().slice(0, 10)}
-Response Deadline: ${deadlineStr}
-
-We are required by law to respond to your request within 45 days. If we need additional time or information, we will contact you.
-
-If you have any questions, please reply to this email with your reference ID.
-
-Thank you,
-The Privacy Team`,
+    // --- 2. Acknowledgment email to requester (sent under the subscriber's identity) ---
+    // Centralized in sendRequesterEmail: handles identity, templates, duplicate guard,
+    // timestamp, audit, and failure recording. Never blocks request processing.
+    try {
+      await base44.asServiceRole.functions.invoke('sendRequesterEmail', {
+        request_id: requestId,
+        kind: 'acknowledgment',
       });
-
-      if (requestData?.organization) {
-        await base44.asServiceRole.entities.AuditEvent.create({
-          organization: requestData.organization,
-          related_request: requestId,
-          event_type: 'notification_sent',
-          actor: 'system',
-          description: `Confirmation email sent to requester ${requestData.requester_email} (Ref: ${requestId.slice(0, 8).toUpperCase()}).`,
-        });
-      }
+    } catch (ackErr) {
+      console.log(`[onRequestCreated] acknowledgment email failed (non-blocking): ${ackErr.message}`);
     }
 
     // --- 3. Notify assigned user or all org admins ---

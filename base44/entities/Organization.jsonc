@@ -11,6 +11,30 @@
       "maxLength": 1000,
       "description": "Optional description of the organization"
     },
+    "business_name": {
+      "type": "string",
+      "description": "Public-facing business name used as the from-name on requester emails. Falls back to organization name."
+    },
+    "privacy_contact_email": {
+      "type": "string",
+      "description": "Reply-to address for requester emails and the contact shown to requesters. Requester notifications are not sent if this is empty."
+    },
+    "ack_email_subject": {
+      "type": "string",
+      "description": "Editable subject line for the acknowledgment email sent to requesters."
+    },
+    "ack_email_body": {
+      "type": "string",
+      "description": "Editable body for the acknowledgment email sent to requesters."
+    },
+    "completion_email_subject": {
+      "type": "string",
+      "description": "Editable subject line for the completion email sent to requesters."
+    },
+    "completion_email_body": {
+      "type": "string",
+      "description": "Editable body for the completion email sent to requesters."
+    },
     "plan": {
       "type": "string",
       "enum": [

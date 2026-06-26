@@ -116,6 +116,24 @@
       "format": "date-time",
       "description": "Timestamp when the request was marked complete"
     },
+    "acknowledgment_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp the acknowledgment email was successfully sent to the requester. Guards against duplicate sends."
+    },
+    "completion_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp the completion email was successfully sent to the requester. Guards against duplicate sends."
+    },
+    "ack_email_error": {
+      "type": "string",
+      "description": "Last acknowledgment email send failure reason, surfaced for retry. Cleared on success."
+    },
+    "completion_email_error": {
+      "type": "string",
+      "description": "Last completion email send failure reason, surfaced for retry. Cleared on success."
+    },
     "received_date": {
       "type": "string",
       "format": "date-time",

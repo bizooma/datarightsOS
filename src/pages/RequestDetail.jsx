@@ -13,6 +13,7 @@ import NotesPanel from '@/components/request/NotesPanel';
 import AssignPanel from '@/components/request/AssignPanel';
 import AuditTimeline from '@/components/request/AuditTimeline';
 import DeadlineCountdown from '@/components/request/DeadlineCountdown';
+import RequesterEmailStatus from '@/components/request/RequesterEmailStatus';
 import { ArrowLeft, Clock, User, Mail, MapPin, Shield, FileText, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -50,6 +51,15 @@ export default function RequestDetail() {
       return all[0] || null;
     },
     enabled: !!request?.site,
+  });
+
+  const { data: org } = useQuery({
+    queryKey: ['organization', request?.organization],
+    queryFn: async () => {
+      const all = await base44.entities.Organization.filter({ id: request.organization });
+      return all[0] || null;
+    },
+    enabled: !!request?.organization,
   });
 
   const actions = useRequestActions({
@@ -182,6 +192,9 @@ export default function RequestDetail() {
               <DateRow label="Fulfilled" value={request.fulfilled_date} />
             </CardContent>
           </Card>
+
+          {/* Requester Emails */}
+          <RequesterEmailStatus request={request} org={org} />
 
           {/* Assign */}
           <AssignPanel

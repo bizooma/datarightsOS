@@ -11,12 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Check, Building2, Users, CreditCard, Trash2, Lock, Upload, UserCircle, Webhook } from 'lucide-react';
+import { Check, Building2, Users, CreditCard, Trash2, Lock, Upload, UserCircle, Webhook, Mail } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 import BillingTab from '@/components/settings/BillingTab';
 import ProfileTab from '@/components/settings/ProfileTab';
 import IntegrationsTab from '@/components/settings/IntegrationsTab';
+import RequesterEmailsTab from '@/components/settings/RequesterEmailsTab';
 import { canAddMember, canUseOutboundWebhook } from '@/lib/planLimits';
 
 export default function Settings() {
@@ -24,7 +25,7 @@ export default function Settings() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const activeTab = ['profile', 'branding', 'team', 'integrations', 'plan'].includes(tabParam) ? tabParam : 'profile';
+  const activeTab = ['profile', 'branding', 'requester-emails', 'team', 'integrations', 'plan'].includes(tabParam) ? tabParam : 'profile';
 
   const { data: org, isLoading } = useQuery({
     queryKey: ['organization', orgId],
@@ -66,6 +67,10 @@ export default function Settings() {
             <Building2 className="w-3.5 h-3.5" />
             Branding
           </TabsTrigger>
+          <TabsTrigger value="requester-emails" className="text-sm gap-1.5">
+            <Mail className="w-3.5 h-3.5" />
+            Requester Emails
+          </TabsTrigger>
           <TabsTrigger value="team" className="text-sm gap-1.5">
             <Users className="w-3.5 h-3.5" />
             Team
@@ -91,6 +96,14 @@ export default function Settings() {
             isOwnerOrAdmin
               ? <BrandingTab org={org} />
               : <ReadOnlyBranding org={org} />
+          )}
+        </TabsContent>
+
+        <TabsContent value="requester-emails">
+          {org && (
+            isOwnerOrAdmin
+              ? <RequesterEmailsTab org={org} />
+              : <LockedTab label="Requester Emails" description="Only owners and admins can manage requester email settings." />
           )}
         </TabsContent>
 

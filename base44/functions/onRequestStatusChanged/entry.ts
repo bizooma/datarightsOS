@@ -38,6 +38,18 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: 'no_org' });
     }
 
+    // --- Completion email to requester (under the subscriber's identity) ---
+    // Centralized in sendRequesterEmail: identity, templates, duplicate guard via
+    // completion_sent_at, timestamp, audit, and failure recording. Never blocks.
+    try {
+      await base44.asServiceRole.functions.invoke('sendRequesterEmail', {
+        request_id: current.id || event.entity_id,
+        kind: 'completion',
+      });
+    } catch (compErr) {
+      console.log(`[onRequestStatusChanged] completion email failed (non-blocking): ${compErr.message}`);
+    }
+
     const submittedAt = current.received_date || current.created_date || new Date().toISOString();
     const deadlineAt =
       current.statutory_deadline ||
