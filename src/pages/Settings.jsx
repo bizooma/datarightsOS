@@ -20,6 +20,9 @@ import { canAddMember } from '@/lib/planLimits';
 export default function Settings() {
   const { orgId, user, isOwnerOrAdmin } = useCurrentUser();
 
+  const tabParam = new URLSearchParams(window.location.search).get('tab');
+  const initialTab = ['profile', 'branding', 'team', 'plan'].includes(tabParam) ? tabParam : 'profile';
+
   const { data: org, isLoading } = useQuery({
     queryKey: ['organization', orgId],
     queryFn: async () => {
@@ -50,7 +53,7 @@ export default function Settings() {
     <div>
       <PageHeader title="Settings" description="Manage your organization settings" />
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs defaultValue={initialTab} className="space-y-6">
         <TabsList className="bg-white border border-border">
           <TabsTrigger value="profile" className="text-sm gap-1.5">
             <UserCircle className="w-3.5 h-3.5" />

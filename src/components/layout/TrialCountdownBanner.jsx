@@ -17,7 +17,7 @@ export default function TrialCountdownBanner({ org }) {
             : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left in your free trial.`}
         </span>
       </div>
-      <Link to="/settings" className="font-semibold underline shrink-0 text-white hover:text-white/80 transition-colors">
+      <Link to="/settings?tab=plan" className="font-semibold underline shrink-0 text-white hover:text-white/80 transition-colors">
         Upgrade
       </Link>
     </div>
