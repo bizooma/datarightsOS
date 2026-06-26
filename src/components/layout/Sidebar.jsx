@@ -138,7 +138,7 @@ export default function Sidebar() {
         )}
         <div className="flex items-center justify-between">
           <button
-            onClick={() => base44.auth.logout('/')}
+            onClick={() => base44.auth.logout(window.location.origin + '/login')}
             className="flex items-center gap-2 text-slate-500 hover:text-white text-xs transition-colors"
             title="Log out"
           >
