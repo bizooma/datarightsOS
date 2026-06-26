@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
@@ -20,8 +21,9 @@ import { canAddMember } from '@/lib/planLimits';
 export default function Settings() {
   const { orgId, user, isOwnerOrAdmin } = useCurrentUser();
 
-  const tabParam = new URLSearchParams(window.location.search).get('tab');
-  const initialTab = ['profile', 'branding', 'team', 'plan'].includes(tabParam) ? tabParam : 'profile';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const activeTab = ['profile', 'branding', 'team', 'plan'].includes(tabParam) ? tabParam : 'profile';
 
   const { data: org, isLoading } = useQuery({
     queryKey: ['organization', orgId],
@@ -53,7 +55,7 @@ export default function Settings() {
     <div>
       <PageHeader title="Settings" description="Manage your organization settings" />
 
-      <Tabs defaultValue={initialTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={(v) => setSearchParams(v === 'profile' ? {} : { tab: v })} className="space-y-6">
         <TabsList className="bg-white border border-border">
           <TabsTrigger value="profile" className="text-sm gap-1.5">
             <UserCircle className="w-3.5 h-3.5" />
