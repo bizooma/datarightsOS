@@ -126,6 +126,24 @@ export default function IntegrationsTab({ org }) {
     setTesting(false);
   }
 
+  // Plan gate — after all hooks so hook order stays stable. The Settings tab is
+  // already hidden for ineligible plans; this is a defensive fallback.
+  if (!canUseOutboundWebhook(org.plan)) {
+    return (
+      <Card>
+        <CardContent className="flex items-center gap-3 py-10 justify-center text-center">
+          <div>
+            <Lock className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm font-medium">Integrations</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+              Outbound webhooks are available on paid plans. Upgrade to connect Zapier and other tools.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const lastStatus = org.webhook_last_status;
 
   return (

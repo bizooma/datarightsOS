@@ -134,6 +134,13 @@ export function canHideBadge(plan) {
   return !!getPlanLimits(plan).canHideBadge;
 }
 
+// Outbound webhook (Zapier / any endpoint). Available on all PAID plans for now.
+// Route all webhook UI and sending through this helper so access can be tightened
+// later (e.g. Proof+ only) without touching component or function code.
+export function canUseOutboundWebhook(plan) {
+  return ['core', 'proof', 'agency'].includes(plan);
+}
+
 const TRIAL_DAYS = 7;
 
 export function isTrialExpired(org) {
