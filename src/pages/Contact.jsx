@@ -1,5 +1,6 @@
 import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
+import BizoomaSection from '@/components/marketing/BizoomaSection';
 import { Mail, LifeBuoy, Briefcase } from 'lucide-react';
 
 export default function Contact() {
@@ -45,6 +46,7 @@ export default function Contact() {
           </a>
         </div>
       </main>
+      <BizoomaSection />
       <MarketingFooter />
     </div>
   );

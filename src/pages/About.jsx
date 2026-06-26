@@ -1,5 +1,6 @@
 import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
+import BizoomaSection from '@/components/marketing/BizoomaSection';
 import { Shield } from 'lucide-react';
 
 export default function About() {
@@ -39,6 +40,7 @@ export default function About() {
           </p>
         </div>
       </main>
+      <BizoomaSection />
       <MarketingFooter />
     </div>
   );
