@@ -104,11 +104,15 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
-    // Clear the local session token, then hard-redirect to our own site's homepage.
-    // We avoid the SDK's built-in redirect because it routes through Base44's host
-    // and can return "App not found" on the live domain.
-    try { base44.auth.setToken(null); } catch (e) { /* ignore */ }
-    window.location.href = window.location.origin + '/';
+    // Proactively clear the locally-stored tokens so nothing is read back on reload.
+    try {
+      window.localStorage.removeItem('base44_access_token');
+      window.localStorage.removeItem('token');
+    } catch (e) { /* ignore */ }
+    // The real session lives in an HTTP-only cookie that only the server-side logout
+    // endpoint can clear, so we must use the SDK's logout. Pass our own-origin homepage
+    // so it returns here after clearing the cookie.
+    base44.auth.logout(window.location.origin + '/');
   };
 
   const navigateToLogin = () => {
