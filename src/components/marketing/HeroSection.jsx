@@ -19,9 +19,9 @@ export default function HeroSection() {
         </h1>
 
         <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed mb-10">
-          Drop one script tag onto any website. Data Rights OS handles cookie consent with GPC,
-          consumer data-rights request intake, deadline tracking, and generates a court-ready audit
-          trail — all under the US state privacy laws that apply to your clients.
+          Add it to any website with one line of code, auto generated in your dashboard. Every cookie
+          choice and privacy request gets honored, tracked to its legal deadline, and recorded in an
+          audit trail that holds up in court.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
