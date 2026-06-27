@@ -3,8 +3,7 @@ import { Copy, Check, ExternalLink } from 'lucide-react';
 
 export default function EmbedSnippet({ site }) {
   const [copied, setCopied] = useState(false);
-  const APP_ID = '6a3735f4f27dcb14405892ae';
-  const snippet = `<script src="https://api.base44.app/api/apps/${APP_ID}/functions/widgetJs" data-tessera-site="${site.site_key}"></script>`;
+  const snippet = `<script src="https://datarightsos.com/functions/widgetJs" data-tessera-site="${site.site_key}"></script>`;
 
   function copy() {
     navigator.clipboard.writeText(snippet);
