@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
@@ -7,7 +7,9 @@ import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import GeoDeviceInsights from '@/components/consent-log/GeoDeviceInsights';
 import ColumnHeader from '@/components/consent-log/ColumnHeader';
-import { Cookie, Download, Search, Filter } from 'lucide-react';
+import EnforcementStatus, { getEnforcementState } from '@/components/consent-log/EnforcementStatus';
+import EnforcementDetail from '@/components/consent-log/EnforcementDetail';
+import { Cookie, Download, Search, Filter, ChevronDown, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -33,6 +35,7 @@ export default function ConsentLog() {
   const [actionFilter, setActionFilter] = useState('all');
   const [siteFilter, setSiteFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [expanded, setExpanded] = useState(null);
 
   const { data: sites = [] } = useQuery({
     queryKey: ['sites', orgId],
@@ -87,6 +90,13 @@ export default function ConsentLog() {
       analytics: r.analytics,
       advertising: r.advertising,
       gpc_detected: r.gpc_detected,
+      status: getEnforcementState(r).honored ? 'Honored' : 'Recorded only / partial',
+      enforcement_applied: r.enforcement_applied === true,
+      enforced_categories: (r.enforced_categories || []).join(' | '),
+      signals_sent: (r.signals_sent || []).join(' | '),
+      unmanaged_detected: (r.unmanaged_detected || []).join(' | '),
+      verification_passed: r.verification_passed,
+      decision_persisted: r.decision_persisted === true,
       policy_version: r.policy_version,
       created_date: r.created_date,
     }));
@@ -179,6 +189,11 @@ export default function ConsentLog() {
                 captured="The visitor had GPC enabled in their browser/extension — passive, automatic, no action."
               />
               <ColumnHeader
+                label="Status"
+                what={'"Honored" means the widget actively enforced the choice (blocked tags, cleared cookies, sent consent-mode signals) AND self-verification passed AND no unmanaged trackers were found. "Recorded only / partial" means the choice was logged but enforcement failed, verification failed, or unmanaged trackers were detected.'}
+                captured="Computed from the enforcement evidence the widget reports with each consent event. Expand a row to see signals sent and any unmanaged trackers."
+              />
+              <ColumnHeader
                 label="Date"
                 what="Timestamp of the consent action."
                 captured="Stamped automatically when the action was recorded."
@@ -189,22 +204,26 @@ export default function ConsentLog() {
             {isLoading ? (
               Array(5).fill(0).map((_, i) => (
                 <tr key={i}>
-                  {Array(6).fill(0).map((_, j) => (
+                  {Array(7).fill(0).map((_, j) => (
                     <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
                   ))}
                 </tr>
               ))
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6}>
+                <td colSpan={7}>
                   <EmptyState icon={Cookie} title="No consent records" description="Consent records will appear here as visitors interact with your widget." />
                 </td>
               </tr>
             ) : (
               filtered.map(r => (
-                <tr key={r.id} className="hover:bg-muted/40 transition-colors">
+                <Fragment key={r.id}>
+                <tr className="hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => setExpanded(expanded === r.id ? null : r.id)}>
                   <td className="px-4 py-3">
-                    <span className="text-[12px] font-mono text-muted-foreground">{r.consent_receipt_id || '—'}</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      {expanded === r.id ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
+                      <span className="text-[12px] font-mono text-muted-foreground">{r.consent_receipt_id || '—'}</span>
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">{siteMap[r.site]?.domain || '—'}</td>
                   <td className="px-4 py-3">
@@ -227,10 +246,15 @@ export default function ConsentLog() {
                       <span className="text-[11px] text-muted-foreground">—</span>
                     )}
                   </td>
+                  <td className="px-4 py-3">
+                    <EnforcementStatus record={r} />
+                  </td>
                   <td className="px-4 py-3 text-[12px] text-muted-foreground">
                     {r.created_date ? format(new Date(r.created_date), 'MMM d, yyyy h:mm a') : '—'}
                   </td>
                 </tr>
+                {expanded === r.id && <EnforcementDetail record={r} colSpan={7} />}
+                </Fragment>
               ))
             )}
           </tbody>

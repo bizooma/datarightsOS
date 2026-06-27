@@ -45,6 +45,210 @@ Deno.serve(async (req) => {
     });
   }
 
+  /* ============================================================
+     ENFORCEMENT ENGINE
+     Turns a consent decision into actual browser behavior:
+     - blocks/activates tags wired via <script type="text/plain" data-dros-category="...">
+     - clears cookies belonging to denied categories
+     - sends Google Consent Mode signals
+     - honors GPC as a do-not-sell/share opt-out
+     - scans for unmanaged trackers it could NOT control
+     - self-verifies the result
+     The widget runs this on first paint AND on every saved decision, and
+     re-applies the stored decision on return visits before any gated tag loads.
+     ============================================================ */
+  var CATS = ['functional', 'analytics', 'advertising'];
+
+  // Known cookie name fragments per category, for cleanup of already-set cookies.
+  var COOKIE_SIGNATURES = {
+    analytics: ['_ga', '_gid', '_gat', '__utm', '_hj', 'amplitude', 'mp_', 'ajs_', '_clck', '_clsk'],
+    advertising: ['_fbp', '_fbc', 'fr', '_gcl', 'IDE', 'test_cookie', 'MUID', '_ttp', '_pin_unauth', 'personalization_id'],
+    functional: ['intercom-', '_hp2_', 'yt-remote', 'wistia']
+  };
+  // Script src fragments that identify unmanaged (not-wired-through-widget) trackers.
+  var UNMANAGED_SIGNATURES = [
+    { name: 'Google Analytics / gtag', re: /googletagmanager\\.com|google-analytics\\.com/i, cat: 'analytics' },
+    { name: 'Google Tag Manager', re: /googletagmanager\\.com\\/gtm/i, cat: 'analytics' },
+    { name: 'Meta / Facebook Pixel', re: /connect\\.facebook\\.net/i, cat: 'advertising' },
+    { name: 'TikTok Pixel', re: /analytics\\.tiktok\\.com/i, cat: 'advertising' },
+    { name: 'LinkedIn Insight', re: /snap\\.licdn\\.com/i, cat: 'advertising' },
+    { name: 'Hotjar', re: /static\\.hotjar\\.com/i, cat: 'analytics' },
+    { name: 'Hubspot', re: /js\\.hs-scripts\\.com|js\\.hsforms\\.net/i, cat: 'analytics' },
+    { name: 'Segment', re: /cdn\\.segment\\.com/i, cat: 'analytics' },
+    { name: 'Twitter / X Pixel', re: /static\\.ads-twitter\\.com/i, cat: 'advertising' }
+  ];
+
+  function readGrants() {
+    try { var raw = localStorage.getItem('dros_consent_' + SITE); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+  function writeGrants(g) {
+    try { localStorage.setItem('dros_consent_' + SITE, JSON.stringify(g)); } catch (e) {}
+    // Mirror to a cookie so server/edge and non-localStorage contexts can read it too.
+    try { document.cookie = 'dros_consent=' + encodeURIComponent(JSON.stringify(g)) + ';path=/;max-age=' + (180 * 86400) + ';SameSite=Lax'; } catch (e) {}
+  }
+
+  function deleteCookie(name) {
+    var host = location.hostname;
+    var domains = ['', host, '.' + host];
+    var parts = host.split('.');
+    if (parts.length > 2) domains.push('.' + parts.slice(-2).join('.'));
+    domains.forEach(function (d) {
+      var base = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+      document.cookie = base + (d ? ';domain=' + d : '');
+    });
+  }
+
+  function clearCategoryCookies(deniedCats) {
+    var cleared = [];
+    var present = document.cookie ? document.cookie.split(';').map(function (c) { return c.split('=')[0].trim(); }) : [];
+    deniedCats.forEach(function (cat) {
+      (COOKIE_SIGNATURES[cat] || []).forEach(function (sig) {
+        present.forEach(function (cn) {
+          if (cn.indexOf(sig) === 0 || cn.indexOf(sig) > -1) { deleteCookie(cn); cleared.push(cn); }
+        });
+      });
+    });
+    return cleared;
+  }
+
+  // Consent-gated loading: tags authored as
+  //   <script type="text/plain" data-dros-category="analytics" data-src="..."> or inline
+  // are inert until granted, then activated here.
+  function activateGatedTags(grants) {
+    var gated = document.querySelectorAll('script[type="text/plain"][data-dros-category]');
+    gated.forEach(function (s) {
+      var cat = s.getAttribute('data-dros-category');
+      if (cat === 'necessary' || grants[cat] === true) {
+        if (s.getAttribute('data-dros-activated')) return;
+        var n = document.createElement('script');
+        for (var i = 0; i < s.attributes.length; i++) {
+          var a = s.attributes[i];
+          if (a.name === 'type' || a.name === 'data-dros-category' || a.name === 'data-src') continue;
+          n.setAttribute(a.name, a.value);
+        }
+        var src = s.getAttribute('data-src') || s.getAttribute('src');
+        if (src) n.src = src; else n.text = s.textContent || '';
+        s.setAttribute('data-dros-activated', '1');
+        s.parentNode.insertBefore(n, s.nextSibling);
+      }
+    });
+  }
+
+  // Google Consent Mode v2 signals.
+  function sendConsentMode(grants) {
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { window.dataLayer.push(arguments); }
+    window.gtag = window.gtag || gtag;
+    gtag('consent', 'update', {
+      analytics_storage: grants.analytics ? 'granted' : 'denied',
+      ad_storage: grants.advertising ? 'granted' : 'denied',
+      ad_user_data: grants.advertising ? 'granted' : 'denied',
+      ad_personalization: grants.advertising ? 'granted' : 'denied',
+      functionality_storage: grants.functional ? 'granted' : 'denied',
+      personalization_storage: grants.functional ? 'granted' : 'denied'
+    });
+  }
+
+  function scanUnmanaged(deniedCats) {
+    var found = [];
+    var scripts = document.querySelectorAll('script[src]');
+    scripts.forEach(function (s) {
+      // Tags wired through the widget are gated (type=text/plain) and excluded from this scan.
+      var src = s.getAttribute('src') || '';
+      UNMANAGED_SIGNATURES.forEach(function (sig) {
+        if (sig.re.test(src) && deniedCats.indexOf(sig.cat) > -1 && found.indexOf(sig.name) === -1) {
+          found.push(sig.name);
+        }
+      });
+    });
+    return found;
+  }
+
+  // Self-verify: after enforcement, confirm denied-category cookies are gone and
+  // gated tags in denied categories did not execute.
+  function verify(deniedCats) {
+    var present = document.cookie ? document.cookie.split(';').map(function (c) { return c.split('=')[0].trim(); }) : [];
+    var leaked = false;
+    deniedCats.forEach(function (cat) {
+      (COOKIE_SIGNATURES[cat] || []).forEach(function (sig) {
+        present.forEach(function (cn) { if (cn.indexOf(sig) > -1) leaked = true; });
+      });
+    });
+    var ranGated = false;
+    document.querySelectorAll('script[type="text/plain"][data-dros-category]').forEach(function (s) {
+      var cat = s.getAttribute('data-dros-category');
+      if (deniedCats.indexOf(cat) > -1 && s.getAttribute('data-dros-activated')) ranGated = true;
+    });
+    return !leaked && !ranGated;
+  }
+
+  // Apply a full decision. Returns an enforcement-evidence object for the receipt.
+  function applyDecision(grants, opts) {
+    opts = opts || {};
+    var deniedCats = CATS.filter(function (c) { return grants[c] !== true; });
+    var signals = [];
+
+    activateGatedTags(grants);
+    var cleared = clearCategoryCookies(deniedCats);
+    sendConsentMode(grants);
+    signals.push(deniedCats.length ? 'consent_mode:denied' : 'consent_mode:granted');
+
+    if (GPC && grants.advertising !== true) {
+      try { document.cookie = 'dros_do_not_sell=1;path=/;max-age=' + (180 * 86400) + ';SameSite=Lax'; } catch (e) {}
+      try { localStorage.setItem('dros_do_not_sell', '1'); } catch (e) {}
+      signals.push('gpc:honored');
+      signals.push('do_not_sell:set');
+    }
+
+    var unmanaged = scanUnmanaged(deniedCats);
+    var verified = verify(deniedCats);
+
+    writeGrants({ functional: !!grants.functional, analytics: !!grants.analytics, advertising: !!grants.advertising, ts: Date.now() });
+
+    return {
+      enforcement_applied: true,
+      enforced_categories: deniedCats,
+      signals_sent: signals,
+      unmanaged_detected: unmanaged,
+      verification_passed: verified,
+      decision_persisted: opts.persisted === true,
+      cookies_cleared: cleared
+    };
+  }
+
+  // --- BOOT: default-deny + re-apply prior decision before gated tags load ---
+  // Establish a deny-by-default Consent Mode baseline as early as possible.
+  (function () {
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { window.dataLayer.push(arguments); }
+    window.gtag = window.gtag || gtag;
+    gtag('consent', 'default', {
+      analytics_storage: 'denied', ad_storage: 'denied',
+      ad_user_data: 'denied', ad_personalization: 'denied',
+      functionality_storage: 'denied', personalization_storage: 'denied'
+    });
+  })();
+
+  var priorGrants = readGrants();
+  if (GPC) {
+    // GPC drives enforcement: force advertising denied (opt-out of sale/sharing).
+    priorGrants = priorGrants || { functional: false, analytics: false, advertising: false };
+    priorGrants.advertising = false;
+  }
+  if (priorGrants) {
+    var bootEnf = applyDecision(priorGrants, { persisted: true });
+    // Record that the prior decision persisted and was re-applied on this visit.
+    post({
+      type: 'consent',
+      action: GPC ? 'gpc_optout' : 'save_choices',
+      necessary: true,
+      functional: !!priorGrants.functional,
+      analytics: !!priorGrants.analytics,
+      advertising: !!priorGrants.advertising,
+      enforcement: bootEnf
+    });
+  }
+
   var DEFAULT = { product_name: 'Privacy & Data Rights Center', logo_url: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/b5c7df386_vault.png', primary_color: '#0d7d74',
     enabled_drawers: ['privacy_rights', 'cookies', 'accessibility'], honor_gpc: true,
     intro_video_url: '', accessibility_statement_url: '', privacy_policy_url: '', policy_version: '1.0' };
@@ -380,14 +584,37 @@ Deno.serve(async (req) => {
       };
     }
 
+    // Reflect any stored decision in the cookie toggles so the panel matches reality.
+    (function () {
+      var g = readGrants();
+      if (!g) return;
+      if ($('cf')) $('cf').checked = g.functional === true;
+      if ($('ca')) $('ca').checked = g.analytics === true;
+      if ($('cad')) $('cad').checked = GPC ? false : g.advertising === true;
+    })();
+
     if (cfg.honor_gpc && GPC && !localStorage.getItem('dros_gpc_' + SITE)) {
-      post({ type: 'consent', action: 'gpc_optout', necessary: true, functional: false, analytics: false, advertising: false });
+      // First GPC visit with no prior decision recorded by boot: enforce + record explicitly.
+      if (!readGrants()) {
+        var gpcEnf = applyDecision({ functional: false, analytics: false, advertising: false }, { persisted: false });
+        post({ type: 'consent', action: 'gpc_optout', necessary: true, functional: false, analytics: false, advertising: false, enforcement: gpcEnf });
+      }
       localStorage.setItem('dros_gpc_' + SITE, '1');
     }
 
     if (showCookies) {
-      $('CS').onclick = function () { post({ type: 'consent', action: 'save_choices', necessary: true, functional: $('cf').checked, analytics: $('ca').checked, advertising: $('cad').checked }); toast(t.tPrefsSaved); };
-      $('CR').onclick = function () { post({ type: 'consent', action: 'reject_all', necessary: true, functional: false, analytics: false, advertising: false }); toast(t.tRejected); };
+      $('CS').onclick = function () {
+        var grants = { functional: $('cf').checked, analytics: $('ca').checked, advertising: GPC ? false : $('cad').checked };
+        var enf = applyDecision(grants, { persisted: false });
+        post({ type: 'consent', action: 'save_choices', necessary: true, functional: grants.functional, analytics: grants.analytics, advertising: grants.advertising, enforcement: enf });
+        toast(t.tPrefsSaved);
+      };
+      $('CR').onclick = function () {
+        var enf = applyDecision({ functional: false, analytics: false, advertising: false }, { persisted: false });
+        if ($('cf')) $('cf').checked = false; if ($('ca')) $('ca').checked = false; if ($('cad')) $('cad').checked = false;
+        post({ type: 'consent', action: 'reject_all', necessary: true, functional: false, analytics: false, advertising: false, enforcement: enf });
+        toast(t.tRejected);
+      };
     }
 
     if (showRights) {

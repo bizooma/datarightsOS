@@ -70,6 +70,11 @@ Deno.serve(async (req) => {
   const gpcDetected = body.gpc_detected === true;
 
   if (type === 'consent') {
+    // Enforcement evidence reported by the widget. These prove the decision was
+    // actually honored client-side, not merely recorded.
+    const enf = body.enforcement || {};
+    const asStringList = (v) => Array.isArray(v) ? v.map(x => sanitize(String(x), 120)).filter(Boolean).slice(0, 50) : [];
+
     await base44.asServiceRole.entities.ConsentRecord.create({
       site: site.id,
       visitor_id: visitorId,
@@ -83,6 +88,12 @@ Deno.serve(async (req) => {
       region_state: regionState,
       policy_version: site.policy_version || '1.0',
       consent_receipt_id: generateReceiptId(),
+      enforcement_applied: enf.enforcement_applied === true,
+      enforced_categories: asStringList(enf.enforced_categories),
+      signals_sent: asStringList(enf.signals_sent),
+      unmanaged_detected: asStringList(enf.unmanaged_detected),
+      verification_passed: typeof enf.verification_passed === 'boolean' ? enf.verification_passed : undefined,
+      decision_persisted: enf.decision_persisted === true,
     });
 
   } else if (type === 'rights_request') {

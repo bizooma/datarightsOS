@@ -61,6 +61,41 @@
     "consent_receipt_id": {
       "type": "string",
       "description": "Unique consent receipt identifier (auto-generated)"
+    },
+    "enforcement_applied": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the widget actively enforced the decision client-side (blocked tags, cleared cookies, sent consent-mode signals), not just recorded it."
+    },
+    "enforced_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Categories actually blocked/denied during enforcement, e.g. ['functional','analytics','advertising']."
+    },
+    "signals_sent": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Enforcement signals emitted, e.g. ['consent_mode:denied','gpc:honored','do_not_sell:set']."
+    },
+    "unmanaged_detected": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Non-necessary trackers/cookies present but NOT wired through the widget \u2014 detected but not blocked."
+    },
+    "verification_passed": {
+      "type": "boolean",
+      "description": "Self-verification outcome: cookies in denied categories were confirmed absent/cleared and gated tags did not execute."
+    },
+    "decision_persisted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this record reflects a prior decision re-applied from storage on a return visit (no re-prompt)."
     }
   },
   "required": [
