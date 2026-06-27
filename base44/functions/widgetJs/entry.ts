@@ -542,7 +542,9 @@ Deno.serve(async (req) => {
 
     var L = $('L'), P = $('P'), T = $('T'), tt;
     function toast(m) { T.textContent = m; T.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { T.classList.remove('show'); }, 2200); }
-    if (keepOpen) { P.classList.remove('hidden'); L.classList.add('hidden'); }
+    // On mobile, never auto-open the panel — show only the launcher so it doesn't cover the page.
+    var isMobile = (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches) || window.innerWidth <= 640;
+    if (keepOpen && !isMobile) { P.classList.remove('hidden'); L.classList.add('hidden'); }
     L.onclick = function () { P.classList.remove('hidden'); L.classList.add('hidden'); };
     $('X').onclick = function () { P.classList.add('hidden'); L.classList.remove('hidden'); };
 
