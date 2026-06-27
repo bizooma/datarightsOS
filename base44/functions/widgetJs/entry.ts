@@ -25,10 +25,11 @@ Deno.serve(async (req) => {
 
   if (!SITE) { console.warn('[DataRightsOS] missing data-tessera-site'); return; }
 
-  // Don't render the live widget inside the Data Rights OS dashboard itself —
-  // the Widget Studio already shows its own preview. Only suppress it on the app's own host.
+  // Don't render the live widget inside the Data Rights OS dashboard app itself
+  // (the base44 preview/app host) — the Widget Studio already shows its own preview.
+  // The public marketing site (datarightsos.com) SHOULD show the live widget.
   var h = location.hostname;
-  if (h === 'datarightsos.com' || h === 'www.datarightsos.com' || /\\.base44\\.app$/.test(h)) {
+  if (/\\.base44\\.app$/.test(h)) {
     return;
   }
 
