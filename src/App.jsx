@@ -22,6 +22,7 @@ import AuditTrail from '@/pages/AuditTrail';
 import AccessibilityReports from '@/pages/AccessibilityReports';
 import Settings from '@/pages/Settings';
 import KnowledgeBase from '@/pages/KnowledgeBase';
+import Support from '@/pages/Support';
 import Organizations from '@/pages/Organizations';
 import PrivacyCenter from '@/pages/PrivacyCenter';
 import Home from '@/pages/Home';
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
           <Route path="/accessibility" element={<AccessibilityReports />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/knowledge-base" element={<KnowledgeBase />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/organizations" element={<Organizations />} />
           <Route path="/admin/users" element={<AdminUsers />} />
         </Route>

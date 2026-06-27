@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Users,
   BookOpen,
+  LifeBuoy,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -28,6 +29,7 @@ const navItems = [
   { path: '/audit-trail', label: 'Audit Trail', icon: Shield },
   { path: '/accessibility', label: 'Accessibility', icon: Accessibility },
   { path: '/knowledge-base', label: 'Knowledge Base', icon: BookOpen },
+  { path: '/support', label: 'Support', icon: LifeBuoy },
   { path: '/settings', label: 'Settings', icon: SettingsIcon },
 ];
 
