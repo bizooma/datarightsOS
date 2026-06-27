@@ -1,16 +1,17 @@
 import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import BizoomaSection from '@/components/marketing/BizoomaSection';
-import { Shield } from 'lucide-react';
 
 export default function About() {
   return (
     <div className="min-h-screen bg-background">
       <MarketingNav />
       <main className="max-w-3xl mx-auto px-6 py-16">
-        <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-6">
-          <Shield className="w-6 h-6 text-white" />
-        </div>
+        <img
+          src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/1891e3f22_vault.png"
+          alt="Vault"
+          className="w-12 h-12 rounded-xl object-cover mb-6"
+        />
         <h1 className="text-3xl font-bold text-foreground mb-6">About Data Rights OS</h1>
         <div className="space-y-4 text-muted-foreground leading-relaxed">
           <p>
