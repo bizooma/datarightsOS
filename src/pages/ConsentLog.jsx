@@ -86,7 +86,6 @@ export default function ConsentLog() {
       analytics: r.analytics,
       advertising: r.advertising,
       gpc_detected: r.gpc_detected,
-      region_state: r.region_state,
       policy_version: r.policy_version,
       created_date: r.created_date,
     }));
@@ -158,7 +157,6 @@ export default function ConsentLog() {
               <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">Action</th>
               <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">Categories</th>
               <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">GPC</th>
-              <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">State</th>
               <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">Date</th>
             </tr>
           </thead>
@@ -166,14 +164,14 @@ export default function ConsentLog() {
             {isLoading ? (
               Array(5).fill(0).map((_, i) => (
                 <tr key={i}>
-                  {Array(7).fill(0).map((_, j) => (
+                  {Array(6).fill(0).map((_, j) => (
                     <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
                   ))}
                 </tr>
               ))
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={7}>
+                <td colSpan={6}>
                   <EmptyState icon={Cookie} title="No consent records" description="Consent records will appear here as visitors interact with your widget." />
                 </td>
               </tr>
@@ -204,7 +202,6 @@ export default function ConsentLog() {
                       <span className="text-[11px] text-muted-foreground">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{r.region_state || '—'}</td>
                   <td className="px-4 py-3 text-[12px] text-muted-foreground">
                     {r.created_date ? format(new Date(r.created_date), 'MMM d, yyyy h:mm a') : '—'}
                   </td>
