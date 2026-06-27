@@ -15,8 +15,7 @@ export default function HeroSection() {
         </div>
 
         <h1 className="text-4xl md:text-5xl lg:text-[56px] font-bold text-white leading-[1.1] tracking-tight mb-6">
-          Consent, data rights,<br />
-          and proof — in one widget.
+          Compliance You Can Actually Prove
         </h1>
 
         <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed mb-10">
