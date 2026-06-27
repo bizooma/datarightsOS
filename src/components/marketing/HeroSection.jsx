@@ -41,32 +41,6 @@ export default function HeroSection() {
             See how it works
           </a>
         </div>
-
-        {/* Widget mockup */}
-        <div className="mt-16 max-w-sm mx-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden text-left">
-            <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-md bg-[#14202b] flex items-center justify-center">
-                <span className="text-white text-[10px] font-bold">D</span>
-              </div>
-              <div>
-                <p className="text-[12px] font-bold text-[#14202b]">Privacy & Data Rights Center</p>
-                <p className="text-[10px] text-slate-500">Manage cookies, your data, and access</p>
-              </div>
-            </div>
-            <div className="p-3 space-y-2">
-              {['Your privacy rights', 'Cookie preferences', 'Accessibility', 'AI Use Disclosure'].map((label, i) => (
-                <div key={i} className="border border-slate-100 rounded-lg px-3 py-2.5 flex items-center justify-between">
-                  <span className="text-[12px] font-semibold text-[#14202b]">{label}</span>
-                  <span className="text-slate-400 text-xs">›</span>
-                </div>
-              ))}
-            </div>
-            <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-100">
-              <p className="text-[10px] text-slate-400">Powered by Bizooma</p>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
