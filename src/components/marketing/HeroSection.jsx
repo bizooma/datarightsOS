@@ -18,7 +18,7 @@ export default function HeroSection() {
           Compliance You Can Actually Prove
         </h1>
 
-        <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed mb-10">
+        <p className="text-lg text-white max-w-2xl mx-auto leading-relaxed mb-10">
           Add it to any website with one line of code, auto generated in your dashboard. Every cookie
           choice and privacy request gets honored, tracked to its legal deadline, and recorded in an
           audit trail that holds up in court.
