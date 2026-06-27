@@ -101,7 +101,7 @@ export default function Sidebar() {
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+      <nav className="py-3 px-2 space-y-0.5 overflow-y-auto">
         {allItems.map(item => {
           const isActive =
             item.path === '/dashboard'
@@ -127,8 +127,8 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* User & Collapse */}
-      <div className="border-t border-white/10 p-3 space-y-2 shrink-0">
+      {/* User & Collapse — placed right under nav (not pinned to bottom) so the widget launcher can't overlay it */}
+      <div className="border-t border-white/10 p-3 space-y-2 shrink-0 mt-2">
         {!collapsed && user && (
           <div className="px-1 mb-2">
             <p className="text-white text-xs font-medium truncate">{user.full_name}</p>
