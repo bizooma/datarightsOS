@@ -58,27 +58,29 @@ export default function DifferentiatorSection() {
           </div>
         </div>
 
-        {/* Right: audit log mockup */}
-        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 font-mono text-xs space-y-3">
-          <p className="font-sans text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-4">Audit trail — live preview</p>
-          {[
-            { time: '2026-06-21 09:14:02', actor: 'widget', event: 'request_received', type: 'deletion', color: '#0d7d74' },
-            { time: '2026-06-21 09:14:02', actor: 'system', event: 'deadline_set', type: '45 days — 2026-08-05', color: '#b58a2e' },
-            { time: '2026-06-21 11:30:44', actor: 'jane@firm.com', event: 'identity_verified', type: '', color: '#0d7d74' },
-            { time: '2026-06-21 14:02:17', actor: 'jane@firm.com', event: 'status_changed', type: 'in_progress', color: '#14202b' },
-            { time: '2026-06-22 10:05:59', actor: 'jane@firm.com', event: 'request_fulfilled', type: '', color: '#0d7d74' },
-          ].map((row, i) => (
-            <div key={i} className="flex items-start gap-3 pb-3 border-b border-slate-200 last:border-0 last:pb-0">
-              <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: row.color }} />
-              <div className="min-w-0">
-                <p className="text-[10px] text-slate-400">{row.time}</p>
-                <p className="text-[11px] font-semibold text-[#14202b]">
-                  {row.event}{row.type ? <span className="text-slate-500 font-normal"> — {row.type}</span> : ''}
-                </p>
-                <p className="text-[10px] text-slate-400">{row.actor}</p>
-              </div>
-            </div>
-          ))}
+        {/* Right: Sephora enforcement case study */}
+        <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden">
+          <img
+            src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/0fad3965e_Sephora-767x633.jpg"
+            alt="Sephora storefront"
+            className="w-full h-56 object-cover"
+          />
+          <div className="p-6">
+            <h3 className="text-lg font-bold text-[#14202b] mb-3 leading-snug">
+              Sephora pays $1.2 million to settle a California suit.
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              SACRAMENTO — Sephora Inc., one of the world's largest cosmetics retailers, has settled
+              a lawsuit claiming that the company sold customer information without proper notice in
+              violation of California's landmark consumer privacy law, state Atty. Gen. Rob Bonta said
+              Wednesday.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Sephora failed to tell customers that it was selling their personal information, failed
+              to allow customers to opt out of that sale, and didn't fix the problem within 30 days as
+              required by the law even after it was notified of the violation, state officials said.
+            </p>
+          </div>
         </div>
       </div>
     </section>
