@@ -31,6 +31,18 @@ Deno.serve(async (req) => {
       console.log('Updated org', orgId, JSON.stringify(data));
     }
 
+    // When an org moves onto a paid plan, instantly re-activate every site it
+    // owns so the widget starts rendering again (reverses trial deactivation).
+    async function reactivateSites(orgId) {
+      if (!orgId) return;
+      const sites = await base44.asServiceRole.entities.Site.filter({ organization: orgId });
+      const pendingSites = (sites || []).filter((s) => s.install_status !== 'active');
+      for (const site of pendingSites) {
+        await base44.asServiceRole.entities.Site.update(site.id, { install_status: 'active' });
+      }
+      console.log('Reactivated', pendingSites.length, 'site(s) for org', orgId);
+    }
+
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const orgId = session.metadata?.organization_id;
@@ -41,6 +53,7 @@ Deno.serve(async (req) => {
         stripe_customer_id: session.customer,
         stripe_subscription_id: session.subscription,
       });
+      await reactivateSites(orgId);
     } else if (event.type === 'customer.subscription.updated') {
       const sub = event.data.object;
       const orgId = sub.metadata?.organization_id;
@@ -50,6 +63,7 @@ Deno.serve(async (req) => {
       const data = { billing_status: status };
       if (plan) data.plan = plan;
       await updateOrg(orgId, data);
+      if (plan && status === 'active') await reactivateSites(orgId);
     } else if (event.type === 'customer.subscription.deleted') {
       const sub = event.data.object;
       const orgId = sub.metadata?.organization_id;
