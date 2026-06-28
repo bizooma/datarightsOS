@@ -51,6 +51,11 @@
       "format": "date-time",
       "description": "Timestamp when the trial started (set on org creation)"
     },
+    "trial_reminder_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the 2-days-left trial reminder email was sent. Guards against duplicate sends."
+    },
     "white_label_product_name": {
       "type": "string",
       "default": "Privacy & Data Rights Center",
