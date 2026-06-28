@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const plans = [
@@ -101,6 +101,21 @@ export default function PricingSection() {
           <p className="text-slate-500 max-w-2xl mx-auto whitespace-nowrap">
             No per-request fees. No surprise overages. Cancel any time.
           </p>
+        </div>
+
+        {/* Free trial entry point — leads to registration, no card required */}
+        <div className="mb-10 rounded-2xl border border-[#0d7d74]/20 bg-[#0d7d74]/5 p-6 text-center">
+          <p className="text-sm font-semibold text-[#0d7d74] mb-1">Try it free for 7 days</p>
+          <p className="text-xs text-slate-500 mb-4 max-w-md mx-auto">
+            Create your account and explore every feature. No credit card required — upgrade any time before your trial ends.
+          </p>
+          <Link
+            to="/register"
+            className="inline-flex items-center justify-center gap-2 text-sm font-semibold py-2.5 px-6 rounded-lg bg-[#0d7d74] text-white hover:bg-[#0a6b63] transition-colors"
+          >
+            Start free trial
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 items-start">

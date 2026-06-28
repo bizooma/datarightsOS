@@ -44,6 +44,22 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
+      // Provision a free trial organization for the brand-new user so they
+      // land in the dashboard on a 7-day trial with the clock started.
+      try {
+        const me = await base44.auth.me();
+        if (me && !me.organization) {
+          const org = await base44.entities.Organization.create({
+            name: (me.full_name || email.split("@")[0]) + "'s Organization",
+            plan: "trial",
+            trial_started_at: new Date().toISOString(),
+          });
+          await base44.auth.updateMe({ organization: org.id, role: "owner" });
+        }
+      } catch (provisionErr) {
+        // Non-fatal: the user can still complete org setup later.
+        console.error("Trial org provisioning failed", provisionErr);
+      }
       window.location.href = "/";
     } catch (err) {
       setError(err.message || "Invalid verification code");
