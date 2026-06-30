@@ -12,13 +12,17 @@ Deno.serve(async (req) => {
     const now = Date.now();
     const trialOrgs = await base44.asServiceRole.entities.Organization.filter({ plan: 'trial' });
 
-    // Orgs with ~2 days left (between 1 and 2 days remaining) and not already reminded.
+    // Orgs with 2 or fewer days left, still in trial, and not already reminded.
+    // The trial_reminder_sent_at guard ensures each org is emailed only once, so
+    // we fire as soon as the threshold is reached rather than within a narrow
+    // window the daily run could otherwise skip over.
     const dueForReminder = (trialOrgs || []).filter((o) => {
       if (!o.trial_started_at || o.trial_reminder_sent_at) return false;
       const started = new Date(o.trial_started_at).getTime();
       if (Number.isNaN(started)) return false;
       const daysLeft = TRIAL_DAYS - (now - started) / (1000 * 60 * 60 * 24);
-      return daysLeft > REMIND_AT_DAYS_LEFT - 1 && daysLeft <= REMIND_AT_DAYS_LEFT;
+      // Already expired trials are handled by checkSubscriptionStatus, skip them here.
+      return daysLeft > 0 && daysLeft <= REMIND_AT_DAYS_LEFT;
     });
 
     let sent = 0;

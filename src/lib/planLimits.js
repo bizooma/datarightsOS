@@ -156,5 +156,7 @@ export function trialDaysRemaining(org) {
   const started = org.trial_started_at ? new Date(org.trial_started_at) : null;
   if (!started) return TRIAL_DAYS;
   const elapsed = (Date.now() - started.getTime()) / (1000 * 60 * 60 * 24);
-  return Math.max(0, Math.ceil(TRIAL_DAYS - elapsed));
+  // Whole days left, decrementing once per 24h. floor of the remaining time so
+  // the count drops steadily each day instead of lingering on the same number.
+  return Math.max(0, Math.floor(TRIAL_DAYS - elapsed));
 }
