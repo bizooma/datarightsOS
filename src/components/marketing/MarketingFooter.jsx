@@ -7,11 +7,8 @@ export default function MarketingFooter() {
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-7 h-7 rounded-md overflow-hidden flex items-center justify-center">
-                <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/d6c9d39a9_vault.png" alt="Data Rights OS" className="w-full h-full object-cover" />
-              </div>
-              <span className="text-white font-semibold text-sm">Data Rights OS</span>
+            <div className="mb-3">
+              <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9c1b23b5f_logo-horizontal-reversed.svg" alt="Data Rights OS" className="h-8 object-contain" />
             </div>
             <div className="text-slate-500 text-xs max-w-xs leading-relaxed space-y-3">
               <p>
