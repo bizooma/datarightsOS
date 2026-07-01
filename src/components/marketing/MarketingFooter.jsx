@@ -8,7 +8,7 @@ export default function MarketingFooter() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
             <div className="mb-3">
-              <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9c1b23b5f_logo-horizontal-reversed.svg" alt="Data Rights OS" className="h-8 object-contain" />
+              <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9c1b23b5f_logo-horizontal-reversed.svg" alt="Data Rights OS" className="h-12 object-contain" />
             </div>
             <div className="text-slate-500 text-xs max-w-xs leading-relaxed space-y-3">
               <p>
