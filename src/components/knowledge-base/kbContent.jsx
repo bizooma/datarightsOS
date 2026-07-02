@@ -66,6 +66,8 @@ export const dashboardSections = [
     why: 'ADA and WCAG-related litigation against websites continues to rise. Offering a clear way for users to report barriers — and tracking your response — demonstrates good-faith remediation efforts.',
     points: [
       { label: 'Barrier reports', text: 'Visitors describe the page and the accessibility issue they encountered.' },
+      { label: 'Report detail view', text: 'Click any report to open its full detail page, where you can jump straight to the reported page or email the reporter.' },
+      { label: 'Assign to a team member', text: 'From a report\'s detail page, hand the issue off to a specific team member to investigate — so ownership is always clear.' },
       { label: 'Status tracking', text: 'Move reports from new to reviewing to resolved so nothing is forgotten.' },
       { label: 'Accountability', text: 'A documented remediation process is a strong signal of good-faith compliance effort.' },
     ],
