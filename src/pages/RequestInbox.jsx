@@ -17,7 +17,7 @@ import FulfillmentGuidePanel from '@/components/request-inbox/FulfillmentGuidePa
 import { statusHint } from '@/lib/fulfillmentChecklist';
 
 export default function RequestInbox() {
-  const { user, orgId, isSuperAdmin } = useCurrentUser();
+  const { user, orgId } = useCurrentUser();
   const [statusFilter, setStatusFilter] = useState('all');
   const [siteFilter, setSiteFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -25,21 +25,19 @@ export default function RequestInbox() {
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ['data-rights-requests', orgId],
     queryFn: () => {
-      if (isSuperAdmin) return base44.entities.DataRightsRequest.list('-statutory_deadline');
       if (!orgId) return [];
       return base44.entities.DataRightsRequest.filter(orgFilter(orgId), '-statutory_deadline');
     },
-    enabled: !!orgId || isSuperAdmin,
+    enabled: !!orgId,
   });
 
   const { data: sites = [] } = useQuery({
     queryKey: ['sites', orgId],
     queryFn: () => {
-      if (isSuperAdmin) return base44.entities.Site.list();
       if (!orgId) return [];
       return base44.entities.Site.filter(orgFilter(orgId));
     },
-    enabled: !!orgId || isSuperAdmin,
+    enabled: !!orgId,
   });
 
   const { data: users = [] } = useQuery({
@@ -120,7 +118,7 @@ export default function RequestInbox() {
         }
       />
 
-      {!isSuperAdmin && <OnboardingChecklist sites={sites} />}
+      <OnboardingChecklist sites={sites} />
 
       {!isLoading && (
         <FulfillmentGuidePanel

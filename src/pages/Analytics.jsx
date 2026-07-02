@@ -38,16 +38,15 @@ function buildMonthlySummary(requests) {
 }
 
 export default function Analytics() {
-  const { orgId, isSuperAdmin } = useCurrentUser();
+  const { orgId } = useCurrentUser();
 
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ['analytics-requests', orgId],
     queryFn: () => {
-      if (isSuperAdmin) return base44.entities.DataRightsRequest.list('-received_date');
       if (!orgId) return [];
       return base44.entities.DataRightsRequest.filter(orgFilter(orgId), '-received_date');
     },
-    enabled: !!orgId || isSuperAdmin,
+    enabled: !!orgId,
   });
 
   const monthly = buildMonthlySummary(requests);

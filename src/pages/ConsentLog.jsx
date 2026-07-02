@@ -31,7 +31,7 @@ const actionColors = {
 };
 
 export default function ConsentLog() {
-  const { orgId, isSuperAdmin } = useCurrentUser();
+  const { orgId } = useCurrentUser();
   const [actionFilter, setActionFilter] = useState('all');
   const [siteFilter, setSiteFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -40,11 +40,10 @@ export default function ConsentLog() {
   const { data: sites = [] } = useQuery({
     queryKey: ['sites', orgId],
     queryFn: () => {
-      if (isSuperAdmin) return base44.entities.Site.list();
       if (!orgId) return [];
       return base44.entities.Site.filter({ organization: orgId });
     },
-    enabled: !!orgId || isSuperAdmin,
+    enabled: !!orgId,
   });
 
   const orgSiteIds = sites.map(s => s.id);
@@ -52,15 +51,14 @@ export default function ConsentLog() {
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['consent-records', orgId, orgSiteIds],
     queryFn: async () => {
-      if (orgSiteIds.length === 0 && !isSuperAdmin) return [];
-      if (isSuperAdmin) return base44.entities.ConsentRecord.list('-created_date', 500);
+      if (orgSiteIds.length === 0) return [];
       // Fetch by each site belonging to org
       const results = await Promise.all(
         orgSiteIds.map(siteId => base44.entities.ConsentRecord.filter({ site: siteId }, '-created_date', 200))
       );
       return results.flat().sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
     },
-    enabled: orgSiteIds.length > 0 || isSuperAdmin,
+    enabled: orgSiteIds.length > 0,
   });
 
   const siteMap = Object.fromEntries(sites.map(s => [s.id, s]));

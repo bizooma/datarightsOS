@@ -9,16 +9,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 
 export default function AccessibilityReports() {
-  const { orgId, isSuperAdmin } = useCurrentUser();
+  const { orgId } = useCurrentUser();
 
   const { data: sites = [] } = useQuery({
     queryKey: ['sites', orgId],
     queryFn: () => {
-      if (isSuperAdmin) return base44.entities.Site.list();
       if (!orgId) return [];
       return base44.entities.Site.filter({ organization: orgId });
     },
-    enabled: !!orgId || isSuperAdmin,
+    enabled: !!orgId,
   });
 
   const orgSiteIds = sites.map(s => s.id);
@@ -26,14 +25,13 @@ export default function AccessibilityReports() {
   const { data: reports = [], isLoading } = useQuery({
     queryKey: ['accessibility-reports', orgSiteIds],
     queryFn: async () => {
-      if (orgSiteIds.length === 0 && !isSuperAdmin) return [];
-      if (isSuperAdmin) return base44.entities.AccessibilityReport.list('-created_date', 200);
+      if (orgSiteIds.length === 0) return [];
       const results = await Promise.all(
         orgSiteIds.map(siteId => base44.entities.AccessibilityReport.filter({ site: siteId }, '-created_date', 100))
       );
       return results.flat().sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
     },
-    enabled: orgSiteIds.length > 0 || isSuperAdmin,
+    enabled: orgSiteIds.length > 0,
   });
 
   const siteMap = Object.fromEntries(sites.map(s => [s.id, s]));

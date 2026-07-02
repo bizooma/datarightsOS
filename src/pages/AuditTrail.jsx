@@ -12,17 +12,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 
 export default function AuditTrail() {
-  const { orgId, isSuperAdmin } = useCurrentUser();
+  const { orgId } = useCurrentUser();
   const [search, setSearch] = useState('');
 
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['audit-events-all', orgId],
     queryFn: () => {
-      if (isSuperAdmin) return base44.entities.AuditEvent.list('-created_date', 500);
       if (!orgId) return [];
       return base44.entities.AuditEvent.filter(orgFilter(orgId), '-created_date', 500);
     },
-    enabled: !!orgId || isSuperAdmin,
+    enabled: !!orgId,
   });
 
   const filtered = events.filter(e => {
