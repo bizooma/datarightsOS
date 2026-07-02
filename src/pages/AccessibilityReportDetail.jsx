@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, ExternalLink, Mail, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { useState } from 'react';
+import { useCurrentUser } from '@/lib/useCurrentUser';
 
 const STATUS_OPTIONS = [
   { value: 'new', label: 'New' },
@@ -32,7 +33,9 @@ export default function AccessibilityReportDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { orgId } = useCurrentUser();
   const [saving, setSaving] = useState(false);
+  const [assigning, setAssigning] = useState(false);
 
   const { data: report, isLoading } = useQuery({
     queryKey: ['accessibility-report', id],
@@ -45,6 +48,24 @@ export default function AccessibilityReportDetail() {
     queryFn: () => base44.entities.Site.get(report.site),
     enabled: !!report?.site,
   });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['org-users', orgId],
+    queryFn: () => base44.entities.User.filter({ organization: orgId }),
+    enabled: !!orgId,
+  });
+
+  async function handleAssign(userId) {
+    if (!report || userId === (report.assigned_to || '')) return;
+    setAssigning(true);
+    try {
+      await base44.entities.AccessibilityReport.update(report.id, { assigned_to: userId });
+      queryClient.invalidateQueries({ queryKey: ['accessibility-report', id] });
+      queryClient.invalidateQueries({ queryKey: ['accessibility-reports'] });
+    } finally {
+      setAssigning(false);
+    }
+  }
 
   async function handleStatusChange(newStatus) {
     if (!report || newStatus === report.status) return;
@@ -109,6 +130,21 @@ export default function AccessibilityReportDetail() {
               <SelectContent>
                 {STATUS_OPTIONS.map(o => (
                   <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="bg-white rounded-lg border border-border p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-1">Assigned to</h3>
+            <p className="text-xs text-muted-foreground mb-3">Hand this off to a team member to investigate.</p>
+            <Select value={report.assigned_to || ''} onValueChange={handleAssign} disabled={assigning}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Unassigned" />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map(u => (
+                  <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

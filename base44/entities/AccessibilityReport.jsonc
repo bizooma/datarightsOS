@@ -27,6 +27,10 @@
       ],
       "default": "new",
       "description": "Current status of the report"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Reference to the User assigned to investigate this report"
     }
   },
   "required": [
