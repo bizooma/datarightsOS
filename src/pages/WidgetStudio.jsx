@@ -6,7 +6,7 @@ import { generateKey } from '@/lib/tenantUtils';
 import { canAddSite, canHideBadge } from '@/lib/planLimits';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
-import { FileText, Plus, Globe, Check, Trash2 } from 'lucide-react';
+import { FileText, Plus, Globe, Check, Trash2, Upload, Loader2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -257,7 +257,23 @@ export default function WidgetStudio() {
 
 function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
   const [form, setForm] = useState(site);
+  const [uploading, setUploading] = useState(false);
   const allowHideBadge = canHideBadge(plan);
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      handleChange('brand_logo_url', file_url);
+    } catch (err) {
+      toast.error(err?.message || 'Could not upload the logo. Please try again.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const handleChange = (field, value) => {
     setForm(prev => {
@@ -334,7 +350,28 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <FormField label="Product Name" value={form.brand_product_name} onChange={v => handleChange('brand_product_name', v)} placeholder="e.g. Acme Privacy Center" />
-          <FormField label="Logo URL" value={form.brand_logo_url} onChange={v => handleChange('brand_logo_url', v)} placeholder="https://…/logo.png" />
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">Logo</Label>
+            <div className="flex items-center gap-3">
+              {form.brand_logo_url && (
+                <img src={form.brand_logo_url} alt="Logo preview" className="h-10 w-10 object-contain rounded border border-border bg-muted/40 p-0.5" onError={e => e.target.style.display = 'none'} />
+              )}
+              <label className="flex items-center gap-2 cursor-pointer h-9 px-3 rounded-md border border-border bg-white text-sm text-muted-foreground hover:bg-muted/40 transition-colors">
+                {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                {uploading ? 'Uploading…' : form.brand_logo_url ? 'Replace logo' : 'Upload logo'}
+                <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploading} />
+              </label>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[11px] text-muted-foreground shrink-0">or paste URL</span>
+              <Input
+                value={form.brand_logo_url || ''}
+                onChange={e => handleChange('brand_logo_url', e.target.value)}
+                placeholder="https://…/logo.png"
+                className="h-9 text-sm"
+              />
+            </div>
+          </div>
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block">Primary Color</Label>
             <div className="flex items-center gap-2">
