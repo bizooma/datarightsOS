@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
-import { addDays } from 'date-fns';
+import { Loader2, CheckCircle2, ArrowLeft, AlertCircle } from 'lucide-react';
 
 const REQUEST_TYPES = [
   { key: 'access', label: 'Access My Data', icon: '📋', description: 'Request a copy of all personal data we hold about you.' },
@@ -18,6 +17,7 @@ export default function PrivacyRightsDrawer({ site, primaryColor }) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
 
   function validate() {
     const e = {};
@@ -28,38 +28,37 @@ export default function PrivacyRightsDrawer({ site, primaryColor }) {
 
   async function submit(e) {
     e.preventDefault();
+    setSubmitError('');
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setLoading(true);
-    const now = new Date();
-    const deadline = addDays(now, 45);
+    try {
+      // Submit through the public intake endpoint — the single source of truth
+      // that generates the verification token, expiry, and fulfillment checklist,
+      // then triggers the acknowledgment email (which carries the confirmation link).
+      // Creating the record directly here would skip the token and produce a
+      // verification email with an empty confirmation link.
+      const { data } = await base44.functions.invoke('intakeEndpoint', {
+        type: 'rights_request',
+        site_key: site.site_key,
+        request_type: selected,
+        requester_name: form.name.trim(),
+        requester_email: form.email.trim(),
+        requester_state: form.state || undefined,
+        is_authorized_agent: form.is_agent,
+        agent_details: form.is_agent ? form.agent_details : undefined,
+      });
 
-    const request = await base44.entities.DataRightsRequest.create({
-      organization: site.organization,
-      site: site.id,
-      request_type: selected,
-      requester_name: form.name.trim(),
-      requester_email: form.email.trim(),
-      requester_state: form.state || undefined,
-      is_authorized_agent: form.is_agent,
-      agent_details: form.is_agent ? form.agent_details : undefined,
-      verification_status: 'unverified',
-      request_status: 'new',
-      received_date: now.toISOString(),
-      statutory_deadline: deadline.toISOString(),
-    });
-
-    await base44.entities.AuditEvent.create({
-      organization: site.organization,
-      related_request: request.id,
-      event_type: 'request_received',
-      actor: 'system',
-      description: `${selected} request submitted by ${form.name.trim()} (${form.email.trim()}) via the Privacy Center widget.`,
-    });
-
-    setLoading(false);
-    setSubmitted(true);
+      if (!data?.success) {
+        throw new Error(data?.error || 'Submission failed. Please try again.');
+      }
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (submitted) {
@@ -156,6 +155,12 @@ export default function PrivacyRightsDrawer({ site, primaryColor }) {
               placeholder="Name of your organization and authorization basis…"
             />
           </Field>
+        )}
+        {submitError && (
+          <div className="flex items-start gap-2 text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <p className="text-xs">{submitError}</p>
+          </div>
         )}
         <button
           type="submit"
