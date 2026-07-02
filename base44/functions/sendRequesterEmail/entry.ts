@@ -123,11 +123,16 @@ Deno.serve(async (req) => {
     };
 
     const businessName = pick(site?.business_name, org?.business_name) || (org?.name || '').trim();
-    const contactEmail = pick(site?.privacy_contact_email, org?.privacy_contact_email);
+    const configuredContact = pick(site?.privacy_contact_email, org?.privacy_contact_email);
 
-    // Never send from a wrong / platform identity silently. Instead of failing
-    // invisibly, record WHY on the request and in the audit trail so the missing
-    // requester email (e.g. verification link) is diagnosable.
+    // The acknowledgment email carries the single-use verification link — the
+    // requester CANNOT proceed without it. So we must never skip that send just
+    // because the subscriber hasn't configured a privacy contact email; we fall
+    // back to the verified sending address as reply-to and note it in the audit
+    // trail. Completion emails have no link, so a missing contact still skips.
+    const fromEmailEarly = Deno.env.get('RESEND_FROM_EMAIL');
+    const contactEmail = configuredContact || (kind === 'acknowledgment' ? fromEmailEarly : '');
+
     if (!contactEmail) {
       const reasonMsg = `Not sent ${new Date().toISOString().slice(0, 10)}: no privacy contact email configured for the organization. Set it in Settings → Requester Emails.`;
       await base44.asServiceRole.entities.DataRightsRequest.update(request_id, {
@@ -143,6 +148,16 @@ Deno.serve(async (req) => {
         });
       }
       return Response.json({ skipped: true, reason: 'no_contact_email' });
+    }
+
+    if (!configuredContact && kind === 'acknowledgment' && request.organization) {
+      await base44.asServiceRole.entities.AuditEvent.create({
+        organization: request.organization,
+        related_request: request_id,
+        event_type: 'notification_fallback',
+        actor: 'system',
+        description: `Verification email sent using the default reply-to address — no privacy contact email is configured. Set one in Settings → Requester Emails so requester replies reach you.`,
+      });
     }
 
     const submittedDate = fmtDate(request.received_date || request.created_date);
@@ -184,6 +199,24 @@ Deno.serve(async (req) => {
     const subject = renderTemplate(subjectTpl, values);
     const body = renderTemplate(bodyTpl, values);
 
+    // Build a simple HTML version from the plain-text body so the email is
+    // multipart (text + HTML). Plain-text-only mail is a common spam signal,
+    // and the verification link becomes a real clickable anchor here.
+    const escapeHtml = (s) => String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const htmlBody = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1a1a1a;">${
+      escapeHtml(body)
+        .split('\n')
+        .map((line) => {
+          const trimmed = line.trim();
+          if (verificationLink && trimmed === verificationLink) {
+            return `<p><a href="${verificationLink}" style="color:#0d7d74;font-weight:600;">Confirm my request</a></p>`;
+          }
+          return line.length ? `<p style="margin:0 0 12px;">${line}</p>` : '<br/>';
+        })
+        .join('')
+    }</div>`;
+
     // Send via Resend from the platform's verified domain, branded as the subscriber:
     //   from_name = subscriber business name, from_email = verified shared sender,
     //   reply_to = subscriber's privacy_contact_email (replies go to the subscriber).
@@ -207,6 +240,7 @@ Deno.serve(async (req) => {
           reply_to: contactEmail,
           subject,
           text: body,
+          html: htmlBody,
         }),
       });
       if (!resendRes.ok) {
