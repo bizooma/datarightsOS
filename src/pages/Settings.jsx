@@ -269,11 +269,22 @@ function TeamTab({ members, currentUser, orgId, isOwnerOrAdmin, refetch, plan })
   const handleInvite = async () => {
     if (!inviteEmail.trim()) return;
     setInviting(true);
-    await base44.users.inviteUser(inviteEmail.trim(), inviteRole);
-    toast({ title: 'Invitation sent', description: `Invite sent to ${inviteEmail.trim()} as ${inviteRole}.` });
-    setInviteEmail('');
-    setInviting(false);
-    refetch();
+    try {
+      // The platform User role only accepts 'admin' or 'user'; 'staff' maps to 'user'.
+      const platformRole = inviteRole === 'admin' ? 'admin' : 'user';
+      await base44.users.inviteUser(inviteEmail.trim(), platformRole);
+      toast({ title: 'Invitation sent', description: `Invite sent to ${inviteEmail.trim()} as ${inviteRole}.` });
+      setInviteEmail('');
+      refetch();
+    } catch (err) {
+      toast({
+        title: 'Invite failed',
+        description: err?.message || 'Could not send the invitation. Please check the email and try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setInviting(false);
+    }
   };
 
   const handleRemove = async (member) => {
