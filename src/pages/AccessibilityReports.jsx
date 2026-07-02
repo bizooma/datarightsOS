@@ -1,5 +1,6 @@
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
@@ -10,6 +11,7 @@ import { format } from 'date-fns';
 
 export default function AccessibilityReports() {
   const { orgId } = useCurrentUser();
+  const navigate = useNavigate();
 
   const { data: sites = [] } = useQuery({
     queryKey: ['sites', orgId],
@@ -72,7 +74,7 @@ export default function AccessibilityReports() {
               </tr>
             ) : (
               reports.map(r => (
-                <tr key={r.id} className="hover:bg-muted/40 transition-colors">
+                <tr key={r.id} onClick={() => navigate(`/accessibility/${r.id}`)} className="hover:bg-muted/40 transition-colors cursor-pointer">
                   <td className="px-4 py-3 text-sm">{siteMap[r.site]?.domain || '—'}</td>
                   <td className="px-4 py-3 text-[12px] text-primary truncate max-w-[200px]">{r.page_url}</td>
                   <td className="px-4 py-3 text-sm text-muted-foreground max-w-xs truncate">{r.description}</td>

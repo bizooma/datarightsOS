@@ -20,6 +20,7 @@ import ConsentLog from '@/pages/ConsentLog';
 import WidgetStudio from '@/pages/WidgetStudio';
 import AuditTrail from '@/pages/AuditTrail';
 import AccessibilityReports from '@/pages/AccessibilityReports';
+import AccessibilityReportDetail from '@/pages/AccessibilityReportDetail';
 import Settings from '@/pages/Settings';
 import KnowledgeBase from '@/pages/KnowledgeBase';
 import Support from '@/pages/Support';
@@ -60,6 +61,7 @@ const AuthenticatedApp = () => {
           <Route path="/widget-studio" element={<WidgetStudio />} />
           <Route path="/audit-trail" element={<AuditTrail />} />
           <Route path="/accessibility" element={<AccessibilityReports />} />
+          <Route path="/accessibility/:id" element={<AccessibilityReportDetail />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/knowledge-base" element={<KnowledgeBase />} />
           <Route path="/support" element={<Support />} />
