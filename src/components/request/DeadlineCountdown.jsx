@@ -28,9 +28,9 @@ export default function DeadlineCountdown({ deadline }) {
   const urgent = !overdue && days <= 7;
 
   return (
-    <Card className={overdue ? 'border-destructive' : urgent ? 'border-amber-400' : undefined}>
+    <Card className={overdue ? 'border-destructive bg-red-50' : urgent ? 'border-amber-400 bg-amber-50' : 'border-red-200 bg-red-50'}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+        <CardTitle className={`text-sm font-semibold flex items-center gap-1.5 ${overdue ? 'text-destructive' : 'text-red-700'}`}>
           <Clock className="w-3.5 h-3.5" />
           45-Day Deadline
         </CardTitle>
@@ -51,8 +51,8 @@ export default function DeadlineCountdown({ deadline }) {
 
 function TimeUnit({ value, label, overdue, urgent }) {
   return (
-    <div className={`rounded-lg py-3 text-center ${overdue ? 'bg-destructive/10' : urgent ? 'bg-amber-50' : 'bg-muted/50'}`}>
-      <div className={`text-2xl font-bold tabular-nums ${overdue ? 'text-destructive' : urgent ? 'text-amber-600' : 'text-foreground'}`}>
+    <div className={`rounded-lg py-3 text-center ${overdue ? 'bg-destructive/10' : urgent ? 'bg-amber-100' : 'bg-white/70'}`}>
+      <div className={`text-2xl font-bold tabular-nums ${overdue ? 'text-destructive' : urgent ? 'text-amber-600' : 'text-red-700'}`}>
         {String(value).padStart(2, '0')}
       </div>
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">{label}</div>
