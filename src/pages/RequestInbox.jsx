@@ -6,7 +6,7 @@ import { orgFilter, daysUntilDeadline, deadlineBgColor, formatRequestType, forma
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Inbox, Search, Filter, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,10 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import OnboardingChecklist from '@/components/onboarding/OnboardingChecklist';
 import FulfillmentGuidePanel from '@/components/request-inbox/FulfillmentGuidePanel';
-import { statusHint } from '@/lib/fulfillmentChecklist';
+import InlineStatusSelect from '@/components/request-inbox/InlineStatusSelect';
+import InlineAssignSelect from '@/components/request-inbox/InlineAssignSelect';
 
 export default function RequestInbox() {
   const { user, orgId } = useCurrentUser();
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState('all');
   const [siteFilter, setSiteFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -202,63 +204,42 @@ export default function RequestInbox() {
               sorted.map(req => {
                 const days = daysUntilDeadline(req.statutory_deadline);
                 const site = siteMap[req.site];
-                const assignee = userMap[req.assigned_to];
 
                 return (
                   <tr
                     key={req.id}
+                    onClick={() => navigate(`/request/${req.id}`)}
                     className="hover:bg-muted/40 transition-colors cursor-pointer group"
                   >
                     <td className="px-4 py-3">
-                      <Link to={`/request/${req.id}`} className="block">
-                        <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                          {req.requester_name}
-                        </p>
-                        <p className="text-[12px] text-muted-foreground">{req.requester_email}</p>
-                      </Link>
+                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                        {req.requester_name}
+                      </p>
+                      <p className="text-[12px] text-muted-foreground">{req.requester_email}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <Link to={`/request/${req.id}`}>
-                        <span className="text-sm text-foreground">{formatRequestType(req.request_type)}</span>
-                      </Link>
+                      <span className="text-sm text-foreground">{formatRequestType(req.request_type)}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <Link to={`/request/${req.id}`} className="inline-flex items-center gap-1.5">
-                        <StatusBadge status={req.request_status} />
-                        {statusHint(req.request_status, req.fulfillment_checklist) && (
-                          <span className="text-[11px] text-muted-foreground font-medium">
-                            · {statusHint(req.request_status, req.fulfillment_checklist)}
-                          </span>
-                        )}
-                      </Link>
+                      <InlineStatusSelect request={req} userEmail={user?.email} />
                     </td>
                     <td className="px-4 py-3">
-                      <Link to={`/request/${req.id}`}>
-                        <StatusBadge status={req.verification_status} />
-                      </Link>
+                      <StatusBadge status={req.verification_status} />
                     </td>
                     <td className="px-4 py-3">
-                      <Link to={`/request/${req.id}`}>
-                        {days !== null ? (
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${deadlineBgColor(days)}`}>
-                            {days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`}
-                          </span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">—</span>
-                        )}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link to={`/request/${req.id}`}>
-                        <span className="text-sm text-muted-foreground">
-                          {assignee ? assignee.full_name : '—'}
+                      {days !== null ? (
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${deadlineBgColor(days)}`}>
+                          {days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`}
                         </span>
-                      </Link>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
-                      <Link to={`/request/${req.id}`}>
-                        <span className="text-[12px] text-muted-foreground">{site?.domain || '—'}</span>
-                      </Link>
+                      <InlineAssignSelect request={req} users={users} userEmail={user?.email} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-[12px] text-muted-foreground">{site?.domain || '—'}</span>
                     </td>
                   </tr>
                 );
