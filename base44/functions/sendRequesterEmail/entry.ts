@@ -114,8 +114,23 @@ Deno.serve(async (req) => {
     const businessName = (org?.business_name || org?.name || '').trim();
     const contactEmail = (org?.privacy_contact_email || '').trim();
 
-    // Never send from a wrong / platform identity silently.
+    // Never send from a wrong / platform identity silently. Instead of failing
+    // invisibly, record WHY on the request and in the audit trail so the missing
+    // requester email (e.g. verification link) is diagnosable.
     if (!contactEmail) {
+      const reasonMsg = `Not sent ${new Date().toISOString().slice(0, 10)}: no privacy contact email configured for the organization. Set it in Settings → Requester Emails.`;
+      await base44.asServiceRole.entities.DataRightsRequest.update(request_id, {
+        [errorField]: reasonMsg,
+      });
+      if (request.organization) {
+        await base44.asServiceRole.entities.AuditEvent.create({
+          organization: request.organization,
+          related_request: request_id,
+          event_type: 'notification_skipped',
+          actor: 'system',
+          description: `${kind === 'acknowledgment' ? 'Acknowledgment/verification' : 'Completion'} email not sent — organization has no privacy contact email configured.`,
+        });
+      }
       return Response.json({ skipped: true, reason: 'no_contact_email' });
     }
 
