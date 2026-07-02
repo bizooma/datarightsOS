@@ -28,9 +28,9 @@ export default function DeadlineCountdown({ deadline }) {
   const urgent = !overdue && days <= 7;
 
   return (
-    <Card className={overdue ? 'border-destructive bg-red-50' : urgent ? 'border-amber-400 bg-amber-50' : 'border-red-200 bg-red-50'}>
+    <Card className={urgent && !overdue ? 'border-amber-400 bg-amber-50' : 'border-red-700 bg-red-600'}>
       <CardHeader className="pb-3">
-        <CardTitle className={`text-sm font-semibold flex items-center gap-1.5 ${overdue ? 'text-destructive' : 'text-red-700'}`}>
+        <CardTitle className={`text-sm font-semibold flex items-center gap-1.5 ${urgent && !overdue ? 'text-amber-700' : 'text-white'}`}>
           <Clock className="w-3.5 h-3.5" />
           45-Day Deadline
         </CardTitle>
@@ -41,7 +41,7 @@ export default function DeadlineCountdown({ deadline }) {
           <TimeUnit value={hours} label="Hours" overdue={overdue} urgent={urgent} />
           <TimeUnit value={minutes} label="Minutes" overdue={overdue} urgent={urgent} />
         </div>
-        <p className={`text-xs mt-3 text-center font-medium ${overdue ? 'text-destructive' : urgent ? 'text-amber-600' : 'text-muted-foreground'}`}>
+        <p className={`text-xs mt-3 text-center font-medium ${urgent && !overdue ? 'text-amber-700' : 'text-red-50'}`}>
           {overdue ? 'Statutory deadline passed' : 'remaining to fulfill this request'}
         </p>
       </CardContent>
@@ -51,11 +51,11 @@ export default function DeadlineCountdown({ deadline }) {
 
 function TimeUnit({ value, label, overdue, urgent }) {
   return (
-    <div className={`rounded-lg py-3 text-center ${overdue ? 'bg-destructive/10' : urgent ? 'bg-amber-100' : 'bg-white/70'}`}>
-      <div className={`text-2xl font-bold tabular-nums ${overdue ? 'text-destructive' : urgent ? 'text-amber-600' : 'text-red-700'}`}>
+    <div className={`rounded-lg py-3 text-center ${urgent && !overdue ? 'bg-amber-100' : 'bg-white/15'}`}>
+      <div className={`text-2xl font-bold tabular-nums ${urgent && !overdue ? 'text-amber-700' : 'text-white'}`}>
         {String(value).padStart(2, '0')}
       </div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">{label}</div>
+      <div className={`text-[10px] uppercase tracking-wider mt-0.5 ${urgent && !overdue ? 'text-amber-600' : 'text-red-100'}`}>{label}</div>
     </div>
   );
 }
