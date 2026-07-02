@@ -43,8 +43,12 @@ export default function RequestInbox() {
   });
 
   const { data: users = [] } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => base44.entities.User.list(),
+    queryKey: ['org-users', orgId],
+    queryFn: () => {
+      if (!orgId) return [];
+      return base44.entities.User.filter({ organization: orgId });
+    },
+    enabled: !!orgId,
   });
 
   const siteMap = Object.fromEntries(sites.map(s => [s.id, s]));
