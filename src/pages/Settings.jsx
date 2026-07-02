@@ -235,6 +235,15 @@ function BrandingTab({ org }) {
               <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploading} />
             </label>
           </div>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-[11px] text-muted-foreground shrink-0">or paste URL</span>
+            <Input
+              value={form.brand_logo_url}
+              onChange={e => setForm({ ...form, brand_logo_url: e.target.value })}
+              placeholder="https://example.com/logo.png"
+              className="h-9 text-sm"
+            />
+          </div>
         </div>
         <div>
           <Label className="text-xs text-muted-foreground mb-1.5 block">Primary Brand Color</Label>
