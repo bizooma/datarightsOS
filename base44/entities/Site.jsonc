@@ -40,6 +40,30 @@
       "type": "string",
       "description": "Site-specific primary brand color for the widget. Falls back to organization color if empty."
     },
+    "business_name": {
+      "type": "string",
+      "description": "Site-specific from-name on requester emails. Falls back to the organization's business name, then organization name."
+    },
+    "privacy_contact_email": {
+      "type": "string",
+      "description": "Site-specific reply-to address and contact shown to requesters. Falls back to the organization's privacy contact email. Requester emails are not sent if neither is set."
+    },
+    "ack_email_subject": {
+      "type": "string",
+      "description": "Site-specific acknowledgment email subject. Falls back to the organization's, then the default template."
+    },
+    "ack_email_body": {
+      "type": "string",
+      "description": "Site-specific acknowledgment email body. Falls back to the organization's, then the default template."
+    },
+    "completion_email_subject": {
+      "type": "string",
+      "description": "Site-specific completion email subject. Falls back to the organization's, then the default template."
+    },
+    "completion_email_body": {
+      "type": "string",
+      "description": "Site-specific completion email body. Falls back to the organization's, then the default template."
+    },
     "hide_branding": {
       "type": "boolean",
       "default": false,

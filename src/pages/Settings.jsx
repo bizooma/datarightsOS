@@ -102,7 +102,7 @@ export default function Settings() {
         <TabsContent value="requester-emails">
           {org && (
             isOwnerOrAdmin
-              ? <RequesterEmailsTab org={org} />
+              ? <RequesterEmailsTab org={org} sites={sites} />
               : <LockedTab label="Requester Emails" description="Only owners and admins can manage requester email settings." />
           )}
         </TabsContent>

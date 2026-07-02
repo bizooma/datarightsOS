@@ -106,13 +106,24 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: 'no_requester_email' });
     }
 
-    // Resolve subscriber identity
+    // Resolve subscriber identity. Per-site settings take priority over the
+    // org-wide defaults so each website (Proof/Agency multi-site) can send
+    // under its own identity; org values are the fallback.
     const org = request.organization
       ? await base44.asServiceRole.entities.Organization.get(request.organization)
       : null;
+    const site = request.site
+      ? await base44.asServiceRole.entities.Site.get(request.site)
+      : null;
 
-    const businessName = (org?.business_name || org?.name || '').trim();
-    const contactEmail = (org?.privacy_contact_email || '').trim();
+    const pick = (siteVal, orgVal) => {
+      const s = (siteVal || '').trim();
+      if (s) return s;
+      return (orgVal || '').trim();
+    };
+
+    const businessName = pick(site?.business_name, org?.business_name) || (org?.name || '').trim();
+    const contactEmail = pick(site?.privacy_contact_email, org?.privacy_contact_email);
 
     // Never send from a wrong / platform identity silently. Instead of failing
     // invisibly, record WHY on the request and in the audit trail so the missing
@@ -160,13 +171,14 @@ Deno.serve(async (req) => {
       type_specific_line: COMPLETION_TYPE_LINES[request.request_type] || '',
     };
 
+    // Templates: site override → org → hard-coded default.
     let subjectTpl, bodyTpl;
     if (kind === 'acknowledgment') {
-      subjectTpl = org?.ack_email_subject || DEFAULT_ACK_SUBJECT;
-      bodyTpl = org?.ack_email_body || DEFAULT_ACK_BODY;
+      subjectTpl = site?.ack_email_subject || org?.ack_email_subject || DEFAULT_ACK_SUBJECT;
+      bodyTpl = site?.ack_email_body || org?.ack_email_body || DEFAULT_ACK_BODY;
     } else {
-      subjectTpl = org?.completion_email_subject || DEFAULT_COMPLETION_SUBJECT;
-      bodyTpl = org?.completion_email_body || DEFAULT_COMPLETION_BODY;
+      subjectTpl = site?.completion_email_subject || org?.completion_email_subject || DEFAULT_COMPLETION_SUBJECT;
+      bodyTpl = site?.completion_email_body || org?.completion_email_body || DEFAULT_COMPLETION_BODY;
     }
 
     const subject = renderTemplate(subjectTpl, values);
