@@ -56,9 +56,15 @@ Deno.serve(async (req) => {
         const users = await base44.asServiceRole.entities.User.filter({ id: requestData.assigned_to });
         if (users[0]?.email) notifyEmails = [users[0].email];
       } else {
-        // Notify all org admins
-        const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-        notifyEmails = admins.map(u => u.email).filter(Boolean);
+        // Notify admins/owners belonging ONLY to this request's organization.
+        // Multi-tenant SaaS: never notify users from other organizations.
+        const orgAdmins = await base44.asServiceRole.entities.User.filter({
+          organization: requestData.organization,
+        });
+        notifyEmails = orgAdmins
+          .filter(u => ['admin', 'owner'].includes(u.role))
+          .map(u => u.email)
+          .filter(Boolean);
       }
 
       for (const email of notifyEmails) {
