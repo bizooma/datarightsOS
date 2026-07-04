@@ -21,14 +21,6 @@ const features = [
     link: '/data-privacy',
   },
   {
-    image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/77f1c255f_generated_image.png',
-    color: '#b58a2e',
-    title: 'Immutable audit trail',
-    description:
-      'Every consent choice and every request event is written to a tamper-evident log. Export it as a timestamped CSV any time — your proof of compliance in a regulatory inquiry or litigation hold.',
-    details: ['Timestamped event log per request', 'Consent receipt archive', 'CSV and report export', 'Organization-level isolation'],
-  },
-  {
     image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/61378b5e4_generated_image.png',
     color: '#0d7d74',
     title: 'AI use disclosure',
@@ -47,6 +39,15 @@ const features = [
     link: '/web-accessibility',
   },
 ];
+
+const auditTrail = {
+  image: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/77f1c255f_generated_image.png',
+  color: '#b58a2e',
+  title: 'Immutable audit trail',
+  description:
+    'Every consent choice and every request event is written to a tamper-evident log. Export it as a timestamped CSV any time — your proof of compliance in a regulatory inquiry or litigation hold.',
+  details: ['Timestamped event log per request', 'Consent receipt archive', 'CSV and report export', 'Organization-level isolation'],
+};
 
 export default function FeaturesSection() {
   return (
@@ -90,6 +91,26 @@ export default function FeaturesSection() {
               )}
             </div>
           ))}
+        </div>
+
+        <div className="mt-8 flex flex-col md:flex-row gap-6 md:gap-8 items-stretch rounded-xl border border-slate-100 overflow-hidden bg-white">
+          <div className="md:w-2/5 h-48 md:h-auto shrink-0">
+            <img src={auditTrail.image} alt={auditTrail.title} className="w-full h-full object-cover" />
+          </div>
+          <div className="flex-1 p-6 md:py-8 md:pr-8 md:pl-0">
+            <h3 className="font-semibold text-[#14202b] mb-2">{auditTrail.title}</h3>
+            <p className="text-sm text-slate-600 leading-relaxed mb-5 max-w-2xl">{auditTrail.description}</p>
+            <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2">
+              {auditTrail.details.map((d) => (
+                <li key={d} className="flex items-start gap-2 text-xs text-slate-500">
+                  <span className="mt-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${auditTrail.color}15` }}>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: auditTrail.color }} />
+                  </span>
+                  {d}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
