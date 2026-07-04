@@ -1,3 +1,5 @@
+import BizoomaNewsletter from './BizoomaNewsletter';
+
 export default function BizoomaSection() {
   return (
     <section className="bg-[#f7f8fa] py-20 px-6 border-t border-slate-100">
@@ -35,6 +37,7 @@ export default function BizoomaSection() {
             Rights OS — a single, installable layer that gives any website the consent management,
             data-rights workflows, and audit logging it needs to stay on the right side of the law.
           </p>
+          <BizoomaNewsletter />
         </div>
       </div>
     </section>
