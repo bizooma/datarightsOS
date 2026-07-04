@@ -9,6 +9,7 @@ import FaqSection from '@/components/marketing/FaqSection';
 import BizoomaSection from '@/components/marketing/BizoomaSection';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import MarketingNav from '@/components/marketing/MarketingNav';
+import HeyGenVideoWidget from '@/components/marketing/HeyGenVideoWidget';
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
@@ -34,6 +35,7 @@ export default function Home() {
       />
       <BizoomaSection />
       <MarketingFooter />
+      <HeyGenVideoWidget />
     </div>
   );
 }
