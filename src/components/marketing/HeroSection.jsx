@@ -46,8 +46,8 @@ export default function HeroSection() {
         <div className="w-full">
           <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10">
             <iframe
-              src="https://app.heygen.com/embeds/30d960a354394509b2d74d078baa9912"
-              title="Avatar Video"
+              src="https://app.heygen.com/embeds/4cd6db45b33847c990be5c2c9381b39d"
+              title="DataRights OS"
               frameBorder="0"
               allow="encrypted-media; fullscreen;"
               allowFullScreen
