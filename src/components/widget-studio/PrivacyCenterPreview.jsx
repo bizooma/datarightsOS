@@ -99,7 +99,7 @@ export default function PrivacyCenterPreview({ site }) {
                 borderRadius: 999, padding: '2px 7px', fontSize: 9.5, fontWeight: 600,
               }}>
                 <CheckCircle2 style={{ width: 10, height: 10 }} />
-                Compliant
+                Active
               </div>
             </div>
           </div>
