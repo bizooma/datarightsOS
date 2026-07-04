@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function HeroSection() {
   return (
@@ -33,13 +33,6 @@ export default function HeroSection() {
               Start free trial
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <a
-              href="#features"
-              className="inline-flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition-colors text-sm"
-            >
-              <Play className="w-3.5 h-3.5 text-[#0d7d74]" />
-              See how it works
-            </a>
           </div>
         </div>
 
