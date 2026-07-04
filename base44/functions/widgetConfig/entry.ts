@@ -27,6 +27,17 @@ Deno.serve(async (req) => {
   ]);
   const org = orgs[0] || {};
 
+  // Auto-activate: the first time the widget successfully loads on a site,
+  // flip its install status from pending to active.
+  if (site.install_status !== 'active') {
+    try {
+      await base44.asServiceRole.entities.Site.update(site.id, { install_status: 'active' });
+      site.install_status = 'active';
+    } catch (err) {
+      console.error('Failed to auto-activate site', site.id, err);
+    }
+  }
+
   // Only the Agency (white-label) plan can remove the "Powered by DataRightsOS" badge.
   // Core and Proof always show it, regardless of the site's hide_branding flag.
   const canHideBadge = org.plan === 'agency';
