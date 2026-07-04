@@ -46,6 +46,7 @@ Deno.serve(async (req) => {
     widget_position: site.widget_position || 'bottom-right',
     install_status: site.install_status || 'active',
     widget_theme: site.widget_theme || 'dark',
+    default_open: site.default_open !== false,
     honor_gpc: site.honor_gpc !== false,
     show_badge: showBadge,
     intro_video_url: site.intro_video_url || '',

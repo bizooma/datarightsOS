@@ -16,6 +16,7 @@ export default function PrivacyCenterPreview({ site }) {
   const productName = site.brand_product_name || org?.white_label_product_name || 'Privacy & Data Rights Center';
   const drawers = site.enabled_drawers || ['cookies', 'privacy_rights'];
   const isDark = (site.widget_theme || 'dark') !== 'light';
+  const openByDefault = site.default_open !== false;
   // Only Agency can hide the badge; otherwise it's always shown.
   const showBadge = !(org?.plan === 'agency' && site.hide_branding === true);
 
@@ -41,7 +42,10 @@ export default function PrivacyCenterPreview({ site }) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium text-muted-foreground">Live Preview</p>
+      <p className="text-xs font-medium text-muted-foreground">
+        Live Preview
+        {!openByDefault && <span className="ml-2 font-normal text-[11px]">— collapsed on load; visitors click the launcher to open</span>}
+      </p>
 
       {/* Simulated website background */}
       <div className="rounded-xl border border-border overflow-hidden shadow-sm relative"
@@ -57,10 +61,11 @@ export default function PrivacyCenterPreview({ site }) {
           <div className="h-2 bg-gray-300 rounded w-1/2" />
         </div>
 
-        {/* Command Center panel — positioned bottom-right */}
+        {/* Command Center panel — positioned bottom-right; hidden when the widget is collapsed by default */}
         <div
           className="absolute flex flex-col overflow-hidden"
           style={{
+            display: openByDefault ? 'flex' : 'none',
             bottom: 56,
             right: 12,
             width: 290,

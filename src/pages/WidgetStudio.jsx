@@ -340,6 +340,20 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
               </SelectContent>
             </Select>
           </div>
+          <div className="flex items-center justify-between pt-2 border-t border-border">
+            <div>
+              <p className="text-sm font-medium">Open by default</p>
+              <p className="text-[11px] text-muted-foreground">
+                {form.default_open === false
+                  ? 'The widget stays collapsed — visitors see only the launcher button until they click it.'
+                  : 'The widget panel opens automatically when a visitor lands on the site (desktop only; mobile always starts collapsed).'}
+              </p>
+            </div>
+            <Switch
+              checked={form.default_open !== false}
+              onCheckedChange={v => handleChange('default_open', v)}
+            />
+          </div>
         </CardContent>
       </Card>
 
