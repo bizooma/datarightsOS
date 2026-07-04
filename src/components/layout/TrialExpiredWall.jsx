@@ -1,8 +1,36 @@
-import { Link } from 'react-router-dom';
-import { Shield, Lock } from 'lucide-react';
+import { useState } from 'react';
+import { Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { base44 } from '@/api/base44Client';
 
-export default function TrialExpiredWall() {
+export default function TrialExpiredWall({ org }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleUpgrade() {
+    if (window.self !== window.top) {
+      alert('Checkout only works from the published app. Please open your live site to upgrade.');
+      return;
+    }
+    if (!org?.id) {
+      alert('Could not start checkout. Please try again.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data } = await base44.functions.invoke('createCheckoutSession', {
+        plan: 'core',
+        organization_id: org.id,
+        success_url: `${window.location.origin}/dashboard?checkout=success`,
+        cancel_url: `${window.location.origin}/settings?checkout=canceled`,
+      });
+      if (data?.url) window.location.href = data.url;
+      else { alert('Could not start checkout. Please try again.'); setLoading(false); }
+    } catch (e) {
+      alert('Could not start checkout. Please try again.');
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center space-y-6">
@@ -26,8 +54,8 @@ export default function TrialExpiredWall() {
           </ul>
         </div>
         <div className="flex flex-col gap-3">
-          <Button asChild className="w-full">
-            <Link to="/settings">Upgrade Now</Link>
+          <Button className="w-full" onClick={handleUpgrade} disabled={loading}>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Upgrade Now'}
           </Button>
           <button
             onClick={() => { window.base44?.auth?.logout?.('/'); }}

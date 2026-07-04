@@ -27,7 +27,7 @@ export default function AppLayout() {
       <div className="min-h-screen bg-background">
         <Sidebar />
         <main className="ml-60 min-h-screen flex items-center justify-center">
-          <TrialExpiredWall />
+          <TrialExpiredWall org={org} />
         </main>
       </div>
     );
