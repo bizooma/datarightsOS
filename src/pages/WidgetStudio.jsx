@@ -441,27 +441,29 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">Privacy Settings</CardTitle>
+          <p className="text-[11px] text-muted-foreground">Widget behavior and optional links. To write the actual policy text shown inside the widget, use the Legal Statements tab.</p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">Honor GPC</p>
-              <p className="text-[11px] text-muted-foreground">Automatically respect Global Privacy Control signals</p>
+              <p className="text-[11px] text-muted-foreground">When on, the widget automatically respects visitors' Global Privacy Control browser signals (auto opt-out of data selling).</p>
             </div>
             <Switch checked={form.honor_gpc} onCheckedChange={v => handleChange('honor_gpc', v)} />
           </div>
-          <FormField label="Privacy Policy URL" value={form.privacy_policy_url} onChange={v => handleChange('privacy_policy_url', v)} />
-          <FormField label="Policy Version" value={form.policy_version} onChange={v => handleChange('policy_version', v)} />
+          <FormField label="Privacy Policy URL" value={form.privacy_policy_url} onChange={v => handleChange('privacy_policy_url', v)} hint="Optional. Link to a privacy policy hosted on your own site. Leave blank if you write your policy in the Legal Statements tab." />
+          <FormField label="Policy Version" value={form.policy_version} onChange={v => handleChange('policy_version', v)} hint="A version stamp (e.g. 1.0) recorded on every consent record, so you have proof of which policy version a visitor agreed to." />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">Accessibility</CardTitle>
+          <p className="text-[11px] text-muted-foreground">Optional links and contact. To write the accessibility statement shown inside the widget, use the Legal Statements tab.</p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <FormField label="Accessibility Statement URL" value={form.accessibility_statement_url} onChange={v => handleChange('accessibility_statement_url', v)} />
-          <FormField label="Barrier Report Email" value={form.barrier_report_email} onChange={v => handleChange('barrier_report_email', v)} />
+          <FormField label="Accessibility Statement URL" value={form.accessibility_statement_url} onChange={v => handleChange('accessibility_statement_url', v)} hint="Optional. Link to an accessibility statement hosted on your own site. Leave blank if you write it in the Legal Statements tab." />
+          <FormField label="Barrier Report Email" value={form.barrier_report_email} onChange={v => handleChange('barrier_report_email', v)} hint="The inbox where accessibility barrier reports submitted through the widget are sent." />
         </CardContent>
       </Card>
 
@@ -484,7 +486,7 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
   );
 }
 
-function FormField({ label, value, onChange, placeholder }) {
+function FormField({ label, value, onChange, placeholder, hint }) {
   return (
     <div>
       <Label className="text-xs text-muted-foreground mb-1.5 block">{label}</Label>
@@ -494,6 +496,7 @@ function FormField({ label, value, onChange, placeholder }) {
         placeholder={placeholder || ''}
         className="h-9 text-sm"
       />
+      {hint && <p className="text-[11px] text-muted-foreground mt-1">{hint}</p>}
     </div>
   );
 }
