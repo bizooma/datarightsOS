@@ -93,7 +93,14 @@ export default function FeaturesSection() {
           ))}
         </div>
 
-        <div className="mt-8 flex flex-col md:flex-row gap-6 md:gap-8 items-stretch rounded-xl border border-slate-100 overflow-hidden bg-white">
+        <div className="mt-16 text-center mb-6">
+          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-[#b58a2e] mb-2">Our value proposition</span>
+          <h3 className="text-xl md:text-2xl font-bold text-[#14202b]">
+            This is what sets us apart and protects your business
+          </h3>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch rounded-2xl border-2 border-[#b58a2e]/30 overflow-hidden bg-[#b58a2e]/5 shadow-sm">
           <div className="md:w-2/5 h-48 md:h-auto shrink-0">
             <img src={auditTrail.image} alt={auditTrail.title} className="w-full h-full object-cover" />
           </div>
