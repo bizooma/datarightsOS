@@ -30,12 +30,22 @@ export default function HeyGenVideoWidget() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Play Data Rights video"
-          className="flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-primary text-primary-foreground shadow-2xl hover:bg-primary/90 transition-colors"
+          className="group relative block w-[130px] h-[200px] rounded-2xl overflow-hidden shadow-2xl border border-border bg-black"
         >
-          <span className="h-8 w-8 flex items-center justify-center rounded-full bg-white/20">
-            <Play className="w-4 h-4 fill-current" />
+          <img
+            src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/93ea73c5f_generated_image.png"
+            alt="Data Rights video"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="h-12 w-12 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg group-hover:scale-110 transition-transform">
+              <Play className="w-5 h-5 fill-current ml-0.5" />
+            </span>
+          </div>
+          <span className="absolute bottom-0 inset-x-0 px-2 py-1.5 text-[11px] font-medium text-white bg-gradient-to-t from-black/70 to-transparent text-center">
+            Watch video
           </span>
-          <span className="text-sm font-medium">Watch video</span>
         </button>
       )}
     </div>
