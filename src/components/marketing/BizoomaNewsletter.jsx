@@ -1,44 +1,30 @@
 import { useState } from 'react';
 import { Mail, CheckCircle2, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 export default function BizoomaNewsletter() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!email.trim()) return;
     setStatus('loading');
-
-    // Mailchimp's JSONP endpoint lets us submit without leaving the site.
-    const params = new URLSearchParams({
-      u: '621f128c71e19e8d9b92ff1e3',
-      id: '7f8858c903',
-      f_id: '00f8b5e5f0',
-      EMAIL: email.trim(),
-      b_621f128c71e19e8d9b92ff1e3_7f8858c903: '',
-    });
-    const url = `https://bizooma.us14.list-manage.com/subscribe/post-json?${params.toString()}&c=?`;
+    setErrorMsg('');
 
     try {
-      await new Promise((resolve, reject) => {
-        const cb = 'mcCallback_' + Date.now();
-        const script = document.createElement('script');
-        const timeout = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 10000);
-        function cleanup() {
-          clearTimeout(timeout);
-          delete window[cb];
-          script.remove();
-        }
-        window[cb] = () => { cleanup(); resolve(); };
-        script.src = url.replace('c=?', 'c=' + cb);
-        script.onerror = () => { cleanup(); reject(new Error('network')); };
-        document.body.appendChild(script);
-      });
-      setStatus('success');
-    } catch {
-      // Even if the JSONP callback fails, the request typically still reaches Mailchimp.
-      setStatus('success');
+      const res = await base44.functions.invoke('mailchimpSubscribe', { email: email.trim() });
+      if (res.data?.success) {
+        setStatus('success');
+      } else {
+        setErrorMsg(res.data?.error || 'Something went wrong. Please try again.');
+        setStatus('error');
+      }
+    } catch (err) {
+      setErrorMsg(err?.response?.data?.error || 'Something went wrong. Please try again.');
+      setStatus('error');
     }
   }
 
@@ -77,6 +63,9 @@ export default function BizoomaNewsletter() {
             {status === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Subscribe'}
           </button>
         </form>
+      )}
+      {status === 'error' && errorMsg && (
+        <p className="mt-2 text-xs text-red-600">{errorMsg}</p>
       )}
     </div>
   );
