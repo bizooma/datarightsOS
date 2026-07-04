@@ -10,9 +10,9 @@ export default function MarketingFooter() {
             <div className="mb-3">
               <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9c1b23b5f_logo-horizontal-reversed.svg" alt="Data Rights OS" className="h-12 object-contain" />
             </div>
-            <div className="text-slate-500 text-xs max-w-xs leading-relaxed space-y-3">
+            <div className="text-slate-200 text-xs max-w-xs leading-relaxed space-y-3">
               <p>
-                <span className="text-slate-300 font-semibold block mb-1">Compliance Is Becoming a Moving Target</span>
+                <span className="text-white font-semibold block mb-1">Compliance Is Becoming a Moving Target</span>
                 Privacy rights, accessibility statements, cookie disclosures, AI notices, and consumer request links are no longer "nice to have." Data RightS OS gives your website a simple way to display important statements and help visitors find the rights information they're looking for.
               </p>
               <p>
@@ -22,24 +22,24 @@ export default function MarketingFooter() {
           </div>
 
           <nav className="flex flex-wrap gap-x-7 gap-y-2">
-            <Link to="/about" className="text-slate-400 hover:text-white text-sm transition-colors">
+            <Link to="/about" className="text-slate-200 hover:text-white text-sm transition-colors">
               About
             </Link>
-            <Link to="/contact" className="text-slate-400 hover:text-white text-sm transition-colors">
+            <Link to="/contact" className="text-slate-200 hover:text-white text-sm transition-colors">
               Contact
             </Link>
-            <Link to="/login" className="text-slate-400 hover:text-white text-sm transition-colors">
+            <Link to="/login" className="text-slate-200 hover:text-white text-sm transition-colors">
               Log in
             </Link>
-            <Link to="/register" className="text-slate-400 hover:text-white text-sm transition-colors">
+            <Link to="/register" className="text-slate-200 hover:text-white text-sm transition-colors">
               Start free trial
             </Link>
           </nav>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-slate-600 text-xs">© 2026 <a href="https://bizooma.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Bizooma, LLC</a>. All Rights Reserved.</p>
-          <p className="text-slate-600 text-xs">Built for US state privacy law compliance.</p>
+          <p className="text-slate-300 text-xs">© 2026 <a href="https://bizooma.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Bizooma, LLC</a>. All Rights Reserved.</p>
+          <p className="text-slate-300 text-xs">Built for US state privacy law compliance.</p>
         </div>
       </div>
     </footer>
