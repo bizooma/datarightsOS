@@ -3,13 +3,15 @@ Allow: /
 
 Disallow: /dashboard
 Disallow: /analytics
-Disallow: /request
+Disallow: /request/
 Disallow: /consent-log
 Disallow: /widget-studio
 Disallow: /audit-trail
 Disallow: /accessibility
 Disallow: /settings
+Disallow: /knowledge-base
+Disallow: /support
 Disallow: /organizations
-Disallow: /admin
+Disallow: /admin/
 
 Sitemap: https://datarightsos.com/sitemap.xml
