@@ -1,3 +1,10 @@
+import { crypto } from 'https://deno.land/std@0.224.0/crypto/mod.ts';
+
+async function md5(text) {
+  const buf = await crypto.subtle.digest('MD5', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 Deno.serve(async (req) => {
   try {
     if (req.method !== 'POST') {
@@ -34,6 +41,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         email_address: email.trim(),
         status: 'subscribed',
+        tags: ['DataRightsOS'],
       }),
     });
 
@@ -43,8 +51,17 @@ Deno.serve(async (req) => {
       return Response.json({ success: true });
     }
 
-    // Already a member is a success from the user's perspective.
+    // Already a member is a success from the user's perspective — still tag them so we know the source.
     if (data?.title === 'Member Exists') {
+      const subscriberHash = await md5(email.trim().toLowerCase());
+      await fetch(`https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members/${subscriberHash}/tags`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `apikey ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tags: [{ name: 'DataRightsOS', status: 'active' }] }),
+      });
       return Response.json({ success: true, alreadySubscribed: true });
     }
 
