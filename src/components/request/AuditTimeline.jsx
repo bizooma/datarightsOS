@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
+import { formatInTimezone } from '@/lib/timezone';
 
 const EVENT_COLORS = {
   request_received: 'bg-blue-500',
@@ -22,7 +22,7 @@ const EVENT_LABELS = {
   note_added: 'Note Added',
 };
 
-export default function AuditTimeline({ events, isLoading }) {
+export default function AuditTimeline({ events, isLoading, timezone }) {
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -65,7 +65,7 @@ export default function AuditTimeline({ events, isLoading }) {
                   <p className="text-[10px] text-muted-foreground/70 mt-1">
                     {evt.actor}
                     {evt.created_date && (
-                      <> · {format(new Date(evt.created_date), 'MMM d, yyyy h:mm a')}</>
+                      <> · {formatInTimezone(evt.created_date, timezone, { withTime: true, withZone: true })}</>
                     )}
                   </p>
                 </div>

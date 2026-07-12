@@ -18,14 +18,16 @@ import BillingTab from '@/components/settings/BillingTab';
 import ProfileTab from '@/components/settings/ProfileTab';
 import IntegrationsTab from '@/components/settings/IntegrationsTab';
 import RequesterEmailsTab from '@/components/settings/RequesterEmailsTab';
+import RegionalTab from '@/components/settings/RegionalTab';
 import { canAddMember, canUseOutboundWebhook } from '@/lib/planLimits';
+import { Globe } from 'lucide-react';
 
 export default function Settings() {
   const { orgId, user, isOwnerOrAdmin } = useCurrentUser();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const activeTab = ['profile', 'branding', 'requester-emails', 'team', 'integrations', 'plan'].includes(tabParam) ? tabParam : 'profile';
+  const activeTab = ['profile', 'branding', 'regional', 'requester-emails', 'team', 'integrations', 'plan'].includes(tabParam) ? tabParam : 'profile';
 
   const { data: org, isLoading } = useQuery({
     queryKey: ['organization', orgId],
@@ -67,6 +69,10 @@ export default function Settings() {
             <Building2 className="w-3.5 h-3.5" />
             Branding
           </TabsTrigger>
+          <TabsTrigger value="regional" className="text-sm gap-1.5">
+            <Globe className="w-3.5 h-3.5" />
+            Regional
+          </TabsTrigger>
           <TabsTrigger value="requester-emails" className="text-sm gap-1.5">
             <Mail className="w-3.5 h-3.5" />
             Requester Emails
@@ -96,6 +102,14 @@ export default function Settings() {
             isOwnerOrAdmin
               ? <BrandingTab org={org} />
               : <ReadOnlyBranding org={org} />
+          )}
+        </TabsContent>
+
+        <TabsContent value="regional">
+          {org && (
+            isOwnerOrAdmin
+              ? <RegionalTab org={org} />
+              : <LockedTab label="Regional" description="Only owners and admins can change the organization timezone." />
           )}
         </TabsContent>
 

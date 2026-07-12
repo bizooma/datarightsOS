@@ -35,6 +35,11 @@
       "type": "string",
       "description": "Editable body for the completion email sent to requesters."
     },
+    "timezone": {
+      "type": "string",
+      "default": "America/New_York",
+      "description": "IANA timezone (e.g. America/Chicago) used to display deadlines, key dates, and audit timestamps in the dashboard. Stored dates remain UTC; this only affects presentation."
+    },
     "plan": {
       "type": "string",
       "enum": [

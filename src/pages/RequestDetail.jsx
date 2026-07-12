@@ -17,7 +17,7 @@ import RequesterEmailStatus from '@/components/request/RequesterEmailStatus';
 import { ArrowLeft, Clock, User, Mail, MapPin, Shield, FileText, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
+import { formatInTimezone } from '@/lib/timezone';
 
 export default function RequestDetail() {
   const { id } = useParams();
@@ -182,14 +182,15 @@ export default function RequestDetail() {
               <CardTitle className="text-sm font-semibold">Key Dates</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <DateRow label="Received" value={request.received_date || request.created_date} />
+              <DateRow label="Received" value={request.received_date || request.created_date} timezone={org?.timezone} />
               <DateRow
                 label="Statutory Deadline"
                 value={request.statutory_deadline}
                 highlight={days !== null && days <= 7}
                 overdue={days !== null && days < 0}
+                timezone={org?.timezone}
               />
-              <DateRow label="Fulfilled" value={request.fulfilled_date} />
+              <DateRow label="Fulfilled" value={request.fulfilled_date} timezone={org?.timezone} />
             </CardContent>
           </Card>
 
@@ -203,7 +204,7 @@ export default function RequestDetail() {
           />
 
           {/* Audit Timeline */}
-          <AuditTimeline events={auditEvents} isLoading={auditLoading} />
+          <AuditTimeline events={auditEvents} isLoading={auditLoading} timezone={org?.timezone} />
         </div>
       </div>
     </div>
@@ -222,14 +223,14 @@ function InfoRow({ icon: Icon, label, value }) {
   );
 }
 
-function DateRow({ label, value, highlight, overdue }) {
+function DateRow({ label, value, highlight, overdue, timezone }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-[12px] text-muted-foreground">{label}</span>
       <span className={`text-[12px] font-medium ${
         overdue ? 'text-destructive' : highlight ? 'text-amber-600' : 'text-foreground'
       }`}>
-        {value ? format(new Date(value), 'MMM d, yyyy') : '—'}
+        {value ? formatInTimezone(value, timezone, { withTime: false }) : '—'}
       </span>
     </div>
   );
