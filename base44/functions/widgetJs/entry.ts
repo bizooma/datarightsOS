@@ -282,6 +282,9 @@ Deno.serve(async (req) => {
       necessary: 'Strictly necessary', necessaryDesc: 'Required for the site. Always on.',
       functional: 'Functional', analytics: 'Analytics', advertising: 'Advertising',
       rejectAll: 'Reject all', acceptAll: 'Accept all', saveChoices: 'Save choices',
+      consentLine: 'We use cookies. Choose how this site can use them.',
+      manageSettings: 'Manage settings',
+      cookieStatusPrefix: 'Cookies:', cookieStatusCustom: 'customized', cookieStatusAccepted: 'all accepted', cookieStatusRejected: 'all rejected', cookieStatusChange: 'change',
       a11yTitle: 'Accessibility',
       a11yNote: 'This is a feedback & preferences tool, not a substitute for an accessible site.',
       a11yStatement: 'Accessibility statement', reportBarrier: 'Report an accessibility barrier',
@@ -316,6 +319,9 @@ Deno.serve(async (req) => {
       necessary: 'Estrictamente necesarias', necessaryDesc: 'Requeridas para el sitio. Siempre activas.',
       functional: 'Funcionales', analytics: 'Analíticas', advertising: 'Publicidad',
       rejectAll: 'Rechazar todo', acceptAll: 'Aceptar todo', saveChoices: 'Guardar opciones',
+      consentLine: 'Usamos cookies. Elija cómo este sitio puede usarlas.',
+      manageSettings: 'Administrar ajustes',
+      cookieStatusPrefix: 'Cookies:', cookieStatusCustom: 'personalizado', cookieStatusAccepted: 'todo aceptado', cookieStatusRejected: 'todo rechazado', cookieStatusChange: 'cambiar',
       a11yTitle: 'Accesibilidad',
       a11yNote: 'Esta es una herramienta de comentarios y preferencias, no un sustituto de un sitio accesible.',
       a11yStatement: 'Declaración de accesibilidad', reportBarrier: 'Reportar una barrera de accesibilidad',
@@ -331,7 +337,7 @@ Deno.serve(async (req) => {
     }
   };
 
-  function render(cfg, keepOpen) {
+  function render(cfg, keepOpen, forceOpen) {
     if (cfg.install_status && cfg.install_status !== 'active') { return; }
     var lang = localStorage.getItem('dros_lang') === 'es' ? 'es' : 'en';
     var t = I18N[lang];
@@ -425,6 +431,10 @@ Deno.serve(async (req) => {
       + '.btn{flex:1;border:none;cursor:pointer;font-weight:650;font-size:12.5px;padding:10px;border-radius:8px}'
       + '.btn.p{background:' + accent + ';color:#fff}.btn.g{background:' + itemBg + ';color:' + panelText + ';border:1px solid ' + divider + '}'
       + '.btn.t{background:none;color:' + panelSubText + ';border:none;font-weight:600;padding:8px;text-decoration:underline}'
+      + '.consentblk{border:1px solid ' + divider + ';background:' + itemBg + ';border-radius:11px;padding:12px;margin-bottom:12px}'
+      + '.consentblk .cl{font-size:12.5px;font-weight:600;color:' + panelText + ';margin:0 0 10px;line-height:1.4}'
+      + '.consentblk .manage{display:block;width:100%;text-align:center;background:none;border:none;cursor:pointer;font-size:11.5px;font-weight:600;color:' + panelSubText + ';text-decoration:underline;padding:9px 0 0;font-family:inherit}'
+      + '.ckstatus{font-size:10.5px;color:' + panelSubText + ';margin:8px 2px 0}.ckstatus button{background:none;border:none;cursor:pointer;color:' + accent + ';font-weight:650;text-decoration:underline;font-size:10.5px;padding:0;font-family:inherit}'
       + '.rights{display:grid;grid-template-columns:1fr 1fr;gap:8px}'
       + '.rb{border:1px solid ' + divider + ';background:' + itemBg + ';border-radius:9px;padding:10px;cursor:pointer;text-align:left;font-size:12px;font-weight:650;color:' + panelText + '}'
       + '.rb:hover,.rb.sel{border-color:' + accent + ';background:' + accent + '22}'
@@ -457,6 +467,11 @@ Deno.serve(async (req) => {
     }
     var yt = ytEmbed(cfg.intro_video_url);
 
+    // State-aware first layer: a decision exists if grants are stored, or GPC has already been applied.
+    var storedGrants = readGrants();
+    var hasDecision = !!storedGrants || (cfg.honor_gpc && GPC);
+    var showConsentBlock = showCookies && !hasDecision;
+
     // Professional photographic header images for the action cards.
     var IMG = {
       rights: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=400&q=70',
@@ -477,13 +492,20 @@ Deno.serve(async (req) => {
       + (yt ? '<div class="vid"><iframe src="' + yt + '" title="Intro" allowfullscreen></iframe></div>' : '')
       + ((cfg.honor_gpc && GPC) ? '<div class="gpc"><div><b>' + esc(t.gpcTitle) + '</b><p>' + esc(t.gpcBody) + '</p></div></div>' : '')
       + '<div id="HOME">'
+      + (showConsentBlock ? '<div class="consentblk"><p class="cl">' + esc(t.consentLine) + '</p><div class="btnrow"><button class="btn g" id="HR">' + esc(t.rejectAll) + '</button><button class="btn g" id="HA">' + esc(t.acceptAll) + '</button></div><button class="manage" id="HM">' + esc(t.manageSettings) + '</button></div>' : '')
       + '<div class="cmdsearch"><span style="font-size:13px;color:' + panelSubText + '">&#128269;</span><input id="CMDQ" placeholder="' + esc(t.searchPlaceholder) + '"></div>'
       + '<div class="cardgrid">'
       + (showRights ? '<button class="ccard" data-card="rights" data-kw="' + esc(t.rightsTitle) + '"><div class="chead" style="background-image:url(' + IMG.rights + ')"><div class="ctitle">' + esc(t.cardRights) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardRightsSub) + '</div></div></button>' : '')
       + (showCookies ? '<button class="ccard" data-card="cookies" data-kw="' + esc(t.cookieTitle) + '"><div class="chead" style="background-image:url(' + IMG.cookies + ')"><div class="ctitle">' + esc(t.cardCookies) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardCookiesSub) + '</div></div></button>' : '')
       + (showA11y ? '<button class="ccard" data-card="a11y" data-kw="' + esc(t.a11yTitle) + '"><div class="chead" style="background-image:url(' + IMG.a11y + ')"><div class="ctitle">' + esc(t.cardA11y) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardA11ySub) + '</div></div></button>' : '')
       + (showAI ? '<button class="ccard" data-card="ai" data-kw="' + esc(t.aiTitle) + '"><div class="chead" style="background-image:url(' + IMG.ai + ')"><div class="ctitle">' + esc(t.cardAI) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardAISub) + '</div></div></button>' : '')
-      + '</div></div>'
+      + '</div>'
+      + ((showCookies && storedGrants) ? (function () {
+          var lbl = storedGrants.analytics && storedGrants.advertising && storedGrants.functional ? t.cookieStatusAccepted
+            : (!storedGrants.analytics && !storedGrants.advertising && !storedGrants.functional ? t.cookieStatusRejected : t.cookieStatusCustom);
+          return '<div class="ckstatus">' + esc(t.cookieStatusPrefix) + ' ' + esc(lbl) + ' · <button id="CKCH">' + esc(t.cookieStatusChange) + '</button></div>';
+        })() : '')
+      + '</div>'
       + '<div id="SECTIONS">'
       + (showRights ? '<div class="section hidden" data-section="rights"><button class="backbtn" data-back>&#8249; ' + esc(t.backHome) + '</button><div class="drawer open" data-d><button class="dh" data-t>' + esc(t.rightsTitle) + '<span>&#9662;</span></button><div class="db">'
         + '<div class="rights">'
@@ -547,8 +569,10 @@ Deno.serve(async (req) => {
     // On mobile, never auto-open the panel — show only the launcher so it doesn't cover the page.
     // On desktop, only auto-open when the site is configured to open by default (default_open !== false).
     var isMobile = (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches) || window.innerWidth <= 640;
+    // Auto-open only while no consent decision exists. After any decision, the launcher stays available
+    // but the panel no longer auto-opens on page load. (Language re-render passes keepOpen and should stay open.)
     var openByDefault = cfg.default_open !== false;
-    if (keepOpen && openByDefault && !isMobile) { P.classList.remove('hidden'); L.classList.add('hidden'); }
+    if (((keepOpen && openByDefault && !hasDecision) || forceOpen) && !isMobile) { P.classList.remove('hidden'); L.classList.add('hidden'); }
     L.onclick = function () { P.classList.remove('hidden'); L.classList.add('hidden'); };
     $('X').onclick = function () { P.classList.add('hidden'); L.classList.remove('hidden'); };
 
@@ -558,8 +582,9 @@ Deno.serve(async (req) => {
         var next = b.getAttribute('data-lang');
         if (next === lang) return;
         localStorage.setItem('dros_lang', next);
+        var wasOpen = !P.classList.contains('hidden');
         host.remove();
-        render(cfg, true);
+        render(cfg, true, wasOpen);
       };
     });
 
@@ -628,6 +653,19 @@ Deno.serve(async (req) => {
         post({ type: 'consent', action: 'accept_all', necessary: true, functional: grants.functional, analytics: grants.analytics, advertising: grants.advertising, enforcement: enf });
         toast(t.tPrefsSaved);
       };
+
+      // First-layer consent block: same enforcement path as the panel buttons, then
+      // re-render so the block is replaced by the returning-visitor state (tiles + status).
+      function decideAndRerender(action, grants) {
+        var enf = applyDecision(grants, { persisted: false });
+        post({ type: 'consent', action: action, necessary: true, functional: grants.functional, analytics: grants.analytics, advertising: grants.advertising, enforcement: enf });
+        host.remove();
+        render(cfg, true, true);
+      }
+      if ($('HA')) $('HA').onclick = function () { decideAndRerender('accept_all', { functional: true, analytics: true, advertising: GPC ? false : true }); };
+      if ($('HR')) $('HR').onclick = function () { decideAndRerender('reject_all', { functional: false, analytics: false, advertising: false }); };
+      if ($('HM')) $('HM').onclick = function () { showSection('cookies'); };
+      if ($('CKCH')) $('CKCH').onclick = function () { showSection('cookies'); };
     }
 
     if (showRights) {
