@@ -285,6 +285,7 @@ Deno.serve(async (req) => {
       consentLine: 'We use cookies. Choose how this site can use them.',
       manageSettings: 'Manage settings',
       cookieStatusPrefix: 'Cookies:', cookieStatusCustom: 'customized', cookieStatusAccepted: 'all accepted', cookieStatusRejected: 'all rejected', cookieStatusChange: 'change',
+      cookieStatusAcceptedSub: '✓ Accepted all · change', cookieStatusRejectedSub: '✕ Rejected all · change', cookieStatusCustomSub: 'Customized · change', cookieStatusGpc: 'GPC honored · review',
       a11yTitle: 'Accessibility',
       a11yNote: 'This is a feedback & preferences tool, not a substitute for an accessible site.',
       a11yStatement: 'Accessibility statement', reportBarrier: 'Report an accessibility barrier',
@@ -322,6 +323,7 @@ Deno.serve(async (req) => {
       consentLine: 'Usamos cookies. Elija cómo este sitio puede usarlas.',
       manageSettings: 'Administrar ajustes',
       cookieStatusPrefix: 'Cookies:', cookieStatusCustom: 'personalizado', cookieStatusAccepted: 'todo aceptado', cookieStatusRejected: 'todo rechazado', cookieStatusChange: 'cambiar',
+      cookieStatusAcceptedSub: '✓ Todo aceptado · cambiar', cookieStatusRejectedSub: '✕ Todo rechazado · cambiar', cookieStatusCustomSub: 'Personalizado · cambiar', cookieStatusGpc: 'GPC respetado · revisar',
       a11yTitle: 'Accesibilidad',
       a11yNote: 'Esta es una herramienta de comentarios y preferencias, no un sustituto de un sitio accesible.',
       a11yStatement: 'Declaración de accesibilidad', reportBarrier: 'Reportar una barrera de accesibilidad',
@@ -399,6 +401,7 @@ Deno.serve(async (req) => {
       + '.cmdsearch input{flex:1;border:none;background:none;outline:none;font-size:12.5px;color:' + panelText + ';font-family:inherit}'
       + '.cmdsearch input::placeholder{color:' + panelSubText + '}'
       + '.cardgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:4px}'
+      + '.cardgrid.threeup .ccard:first-child{grid-column:1 / -1}'
       + '.ccard{border:1px solid ' + divider + ';background:' + itemBg + ';border-radius:11px;overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column;padding:0;transition:border-color .15s,box-shadow .15s,transform .15s}'
       + '.ccard:hover{border-color:' + accent + ';box-shadow:0 8px 22px -10px rgba(20,32,43,.5);transform:translateY(-1px)}'
       + '.ccard .chead{position:relative;height:64px;background-size:cover;background-position:center}'
@@ -469,8 +472,19 @@ Deno.serve(async (req) => {
 
     // State-aware first layer: a decision exists if grants are stored, or GPC has already been applied.
     var storedGrants = readGrants();
-    var hasDecision = !!storedGrants || (cfg.honor_gpc && GPC);
+    var gpcApplied = cfg.honor_gpc && GPC;
+    var hasDecision = !!storedGrants || gpcApplied;
     var showConsentBlock = showCookies && !hasDecision;
+
+    // Status-aware subtitle for the Cookies tile once a decision exists.
+    var cookieTileSub = t.cardCookiesSub;
+    if (gpcApplied) {
+      cookieTileSub = t.cookieStatusGpc;
+    } else if (storedGrants) {
+      if (storedGrants.analytics && storedGrants.advertising && storedGrants.functional) cookieTileSub = t.cookieStatusAcceptedSub;
+      else if (!storedGrants.analytics && !storedGrants.advertising && !storedGrants.functional) cookieTileSub = t.cookieStatusRejectedSub;
+      else cookieTileSub = t.cookieStatusCustomSub;
+    }
 
     // Professional photographic header images for the action cards.
     var IMG = {
@@ -494,17 +508,12 @@ Deno.serve(async (req) => {
       + '<div id="HOME">'
       + (showConsentBlock ? '<div class="consentblk"><p class="cl">' + esc(t.consentLine) + '</p><div class="btnrow"><button class="btn g" id="HR">' + esc(t.rejectAll) + '</button><button class="btn g" id="HA">' + esc(t.acceptAll) + '</button></div><button class="manage" id="HM">' + esc(t.manageSettings) + '</button></div>' : '')
       + '<div class="cmdsearch"><span style="font-size:13px;color:' + panelSubText + '">&#128269;</span><input id="CMDQ" placeholder="' + esc(t.searchPlaceholder) + '"></div>'
-      + '<div class="cardgrid">'
+      + '<div class="cardgrid' + (showConsentBlock ? ' threeup' : '') + '">'
       + (showRights ? '<button class="ccard" data-card="rights" data-kw="' + esc(t.rightsTitle) + '"><div class="chead" style="background-image:url(' + IMG.rights + ')"><div class="ctitle">' + esc(t.cardRights) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardRightsSub) + '</div></div></button>' : '')
-      + (showCookies ? '<button class="ccard" data-card="cookies" data-kw="' + esc(t.cookieTitle) + '"><div class="chead" style="background-image:url(' + IMG.cookies + ')"><div class="ctitle">' + esc(t.cardCookies) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardCookiesSub) + '</div></div></button>' : '')
+      + ((showCookies && !showConsentBlock) ? '<button class="ccard" data-card="cookies" data-kw="' + esc(t.cookieTitle) + '"><div class="chead" style="background-image:url(' + IMG.cookies + ')"><div class="ctitle">' + esc(t.cardCookies) + '</div></div><div class="cbody"><div class="csub">' + esc(cookieTileSub) + '</div></div></button>' : '')
       + (showA11y ? '<button class="ccard" data-card="a11y" data-kw="' + esc(t.a11yTitle) + '"><div class="chead" style="background-image:url(' + IMG.a11y + ')"><div class="ctitle">' + esc(t.cardA11y) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardA11ySub) + '</div></div></button>' : '')
       + (showAI ? '<button class="ccard" data-card="ai" data-kw="' + esc(t.aiTitle) + '"><div class="chead" style="background-image:url(' + IMG.ai + ')"><div class="ctitle">' + esc(t.cardAI) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardAISub) + '</div></div></button>' : '')
       + '</div>'
-      + ((showCookies && storedGrants) ? (function () {
-          var lbl = storedGrants.analytics && storedGrants.advertising && storedGrants.functional ? t.cookieStatusAccepted
-            : (!storedGrants.analytics && !storedGrants.advertising && !storedGrants.functional ? t.cookieStatusRejected : t.cookieStatusCustom);
-          return '<div class="ckstatus">' + esc(t.cookieStatusPrefix) + ' ' + esc(lbl) + ' · <button id="CKCH">' + esc(t.cookieStatusChange) + '</button></div>';
-        })() : '')
       + '</div>'
       + '<div id="SECTIONS">'
       + (showRights ? '<div class="section hidden" data-section="rights"><button class="backbtn" data-back>&#8249; ' + esc(t.backHome) + '</button><div class="drawer open" data-d><button class="dh" data-t>' + esc(t.rightsTitle) + '<span>&#9662;</span></button><div class="db">'
@@ -665,7 +674,6 @@ Deno.serve(async (req) => {
       if ($('HA')) $('HA').onclick = function () { decideAndRerender('accept_all', { functional: true, analytics: true, advertising: GPC ? false : true }); };
       if ($('HR')) $('HR').onclick = function () { decideAndRerender('reject_all', { functional: false, analytics: false, advertising: false }); };
       if ($('HM')) $('HM').onclick = function () { showSection('cookies'); };
-      if ($('CKCH')) $('CKCH').onclick = function () { showSection('cookies'); };
     }
 
     if (showRights) {
