@@ -281,7 +281,7 @@ Deno.serve(async (req) => {
       cookieTitle: 'Cookie preferences',
       necessary: 'Strictly necessary', necessaryDesc: 'Required for the site. Always on.',
       functional: 'Functional', analytics: 'Analytics', advertising: 'Advertising',
-      rejectAll: 'Reject all', saveChoices: 'Save choices',
+      rejectAll: 'Reject all', acceptAll: 'Accept all', saveChoices: 'Save choices',
       a11yTitle: 'Accessibility',
       a11yNote: 'This is a feedback & preferences tool, not a substitute for an accessible site.',
       a11yStatement: 'Accessibility statement', reportBarrier: 'Report an accessibility barrier',
@@ -315,7 +315,7 @@ Deno.serve(async (req) => {
       cookieTitle: 'Preferencias de cookies',
       necessary: 'Estrictamente necesarias', necessaryDesc: 'Requeridas para el sitio. Siempre activas.',
       functional: 'Funcionales', analytics: 'Analíticas', advertising: 'Publicidad',
-      rejectAll: 'Rechazar todo', saveChoices: 'Guardar opciones',
+      rejectAll: 'Rechazar todo', acceptAll: 'Aceptar todo', saveChoices: 'Guardar opciones',
       a11yTitle: 'Accesibilidad',
       a11yNote: 'Esta es una herramienta de comentarios y preferencias, no un sustituto de un sitio accesible.',
       a11yStatement: 'Declaración de accesibilidad', reportBarrier: 'Reportar una barrera de accesibilidad',
@@ -424,6 +424,7 @@ Deno.serve(async (req) => {
       + '.btnrow{display:flex;gap:8px;margin-top:12px}'
       + '.btn{flex:1;border:none;cursor:pointer;font-weight:650;font-size:12.5px;padding:10px;border-radius:8px}'
       + '.btn.p{background:' + accent + ';color:#fff}.btn.g{background:' + itemBg + ';color:' + panelText + ';border:1px solid ' + divider + '}'
+      + '.btn.t{background:none;color:' + panelSubText + ';border:none;font-weight:600;padding:8px;text-decoration:underline}'
       + '.rights{display:grid;grid-template-columns:1fr 1fr;gap:8px}'
       + '.rb{border:1px solid ' + divider + ';background:' + itemBg + ';border-radius:9px;padding:10px;cursor:pointer;text-align:left;font-size:12px;font-weight:650;color:' + panelText + '}'
       + '.rb:hover,.rb.sel{border-color:' + accent + ';background:' + accent + '22}'
@@ -500,7 +501,8 @@ Deno.serve(async (req) => {
         + '<div class="row"><div><div class="lbl">' + esc(t.functional) + '</div></div><label class="sw"><input type="checkbox" id="cf"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="row"><div><div class="lbl">' + esc(t.analytics) + '</div></div><label class="sw"><input type="checkbox" id="ca"><span class="tr"></span><span class="kn"></span></label></div>'
         + '<div class="row"><div><div class="lbl">' + esc(t.advertising) + '</div></div><label class="sw"><input type="checkbox" id="cad"><span class="tr"></span><span class="kn"></span></label></div>'
-        + '<div class="btnrow"><button class="btn g" id="CR">' + esc(t.rejectAll) + '</button><button class="btn p" id="CS">' + esc(t.saveChoices) + '</button></div>'
+        + '<div class="btnrow"><button class="btn g" id="CR">' + esc(t.rejectAll) + '</button><button class="btn g" id="CA">' + esc(t.acceptAll) + '</button></div>'
+        + '<button class="btn t" id="CS" style="width:100%;margin-top:8px">' + esc(t.saveChoices) + '</button>'
         + '</div></div></div>' : '')
       + (showA11y ? '<div class="section hidden" data-section="a11y"><button class="backbtn" data-back>&#8249; ' + esc(t.backHome) + '</button><div class="drawer open" data-d><button class="dh" data-t>' + esc(t.a11yTitle) + '<span>&#9662;</span></button><div class="db">'
         + '<div class="note">' + esc(t.a11yNote) + '</div>'
@@ -618,6 +620,13 @@ Deno.serve(async (req) => {
         if ($('cf')) $('cf').checked = false; if ($('ca')) $('ca').checked = false; if ($('cad')) $('cad').checked = false;
         post({ type: 'consent', action: 'reject_all', necessary: true, functional: false, analytics: false, advertising: false, enforcement: enf });
         toast(t.tRejected);
+      };
+      $('CA').onclick = function () {
+        var grants = { functional: true, analytics: true, advertising: GPC ? false : true };
+        var enf = applyDecision(grants, { persisted: false });
+        if ($('cf')) $('cf').checked = true; if ($('ca')) $('ca').checked = true; if ($('cad')) $('cad').checked = grants.advertising;
+        post({ type: 'consent', action: 'accept_all', necessary: true, functional: grants.functional, analytics: grants.analytics, advertising: grants.advertising, enforcement: enf });
+        toast(t.tPrefsSaved);
       };
     }
 
