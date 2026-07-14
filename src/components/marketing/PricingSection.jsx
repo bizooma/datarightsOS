@@ -7,7 +7,7 @@ const plans = [
     price: '$99',
     period: '/mo',
     description: 'For a single site that needs solid privacy compliance.',
-    cta: 'Get started',
+    cta: 'Start Free Trial',
     planKey: 'core',
     highlight: false,
     features: [
@@ -25,7 +25,7 @@ const plans = [
     price: '$299',
     period: '/mo',
     description: 'For firms and agencies running multiple client sites.',
-    cta: 'Get started',
+    cta: 'Start Free Trial',
     planKey: 'proof',
     highlight: true,
     badge: 'Most popular',
