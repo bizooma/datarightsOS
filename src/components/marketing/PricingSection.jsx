@@ -62,11 +62,10 @@ const plans = [
 export default function PricingSection() {
   const navigate = useNavigate();
 
-  // Paid plans require an account first. Send visitors to registration with the
-  // chosen plan; after they create + verify their account, they're taken straight
-  // to Stripe checkout and then to their dashboard.
-  const handleGetStarted = (planKey) => {
-    navigate(`/register?plan=${planKey}`);
+  // Everyone starts on the free 7-day trial. After creating an account they can
+  // upgrade to a paid plan any time from Settings → Billing.
+  const handleGetStarted = () => {
+    navigate('/register');
   };
 
   return (
@@ -150,7 +149,7 @@ export default function PricingSection() {
                 </a>
               ) : (
                 <button
-                  onClick={() => handleGetStarted(plan.planKey)}
+                  onClick={handleGetStarted}
                   className={`w-full inline-flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition-colors ${
                     plan.highlight
                       ? 'bg-[#0d7d74] text-white hover:bg-[#0a6b63]'

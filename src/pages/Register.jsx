@@ -8,13 +8,10 @@ import AuthLayout from "@/components/AuthLayout";
 
 export default function Register() {
   // Registration is social-only. Providers verify email ownership themselves,
-  // so there's no one-time code step. Preserve any ?plan= param through OAuth
-  // so paid signups continue to Stripe checkout after login.
-  const plan = new URLSearchParams(window.location.search).get("plan");
-  const fromUrl = plan ? `/dashboard?plan=${plan}` : "/dashboard";
-
+  // so there's no one-time code step. Everyone starts on the free trial and can
+  // upgrade from Settings → Billing later.
   const handleProvider = (provider) => {
-    base44.auth.loginWithProvider(provider, fromUrl);
+    base44.auth.loginWithProvider(provider, "/dashboard");
   };
 
   return (
