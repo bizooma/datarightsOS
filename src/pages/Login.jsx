@@ -4,8 +4,9 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Mail, Lock, Loader2, Eye, EyeOff, Home } from "lucide-react";
+import { Mail, Lock, Loader2, Eye, EyeOff, Home } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
+import SocialAuthButtons from "@/components/SocialAuthButtons";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,6 +14,9 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  // Email/password login stays available (hidden by default) so existing
+  // accounts — like the platform admin — can still sign in.
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,6 +70,26 @@ export default function Login() {
         </div>
       )}
 
+      <SocialAuthButtons fromUrl="/dashboard" />
+
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center text-xs">
+          <span className="bg-card px-2 text-muted-foreground">or</span>
+        </div>
+      </div>
+
+      {!showEmailLogin ? (
+        <button
+          type="button"
+          onClick={() => setShowEmailLogin(true)}
+          className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Sign in with email and password
+        </button>
+      ) : (
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
@@ -124,6 +148,7 @@ export default function Login() {
           )}
         </Button>
       </form>
+      )}
     </AuthLayout>
   );
 }
