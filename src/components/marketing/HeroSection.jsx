@@ -33,6 +33,11 @@ export default function HeroSection() {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+
+        <p className="text-sm text-white/80 max-w-xl mx-auto leading-relaxed mt-6">
+          See that widget in the lower-left corner? That's the product — live on this very
+          page. What you're experiencing right now is exactly what your visitors will get.
+        </p>
       </div>
     </section>
   );
