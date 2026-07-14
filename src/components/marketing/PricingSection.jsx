@@ -1,7 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Check, Loader2, ArrowRight } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { Link, useNavigate } from 'react-router-dom';
+import { Check, ArrowRight } from 'lucide-react';
 
 const plans = [
   {
@@ -62,33 +60,13 @@ const plans = [
 ];
 
 export default function PricingSection() {
-  const [loadingPlan, setLoadingPlan] = useState(null);
+  const navigate = useNavigate();
 
-  const handleCheckout = async (planKey) => {
-    if (window.self !== window.top) {
-      alert('Checkout works only from the published app. Please open the live site in a new tab to subscribe.');
-      return;
-    }
-    setLoadingPlan(planKey);
-    try {
-      const res = await base44.functions.invoke('createCheckoutSession', {
-        plan: planKey,
-        success_url: `${window.location.origin}/dashboard?checkout=success`,
-        cancel_url: `${window.location.origin}/?checkout=canceled`,
-      });
-      const url = res?.data?.url || res?.url;
-      if (url) {
-        window.location.href = url;
-      } else {
-        console.error('No checkout URL in response', res);
-        alert('Unable to start checkout. Please try again.');
-        setLoadingPlan(null);
-      }
-    } catch (err) {
-      console.error('Checkout error', err);
-      alert('Unable to start checkout. Please try again.');
-      setLoadingPlan(null);
-    }
+  // Paid plans require an account first. Send visitors to registration with the
+  // chosen plan; after they create + verify their account, they're taken straight
+  // to Stripe checkout and then to their dashboard.
+  const handleGetStarted = (planKey) => {
+    navigate(`/register?plan=${planKey}`);
   };
 
   return (
@@ -172,15 +150,13 @@ export default function PricingSection() {
                 </a>
               ) : (
                 <button
-                  onClick={() => handleCheckout(plan.planKey)}
-                  disabled={loadingPlan === plan.planKey}
-                  className={`w-full inline-flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-60 ${
+                  onClick={() => handleGetStarted(plan.planKey)}
+                  className={`w-full inline-flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition-colors ${
                     plan.highlight
                       ? 'bg-[#0d7d74] text-white hover:bg-[#0a6b63]'
                       : 'border border-slate-200 text-[#14202b] hover:bg-slate-50'
                   }`}
                 >
-                  {loadingPlan === plan.planKey && <Loader2 className="w-4 h-4 animate-spin" />}
                   {plan.cta}
                 </button>
               )}

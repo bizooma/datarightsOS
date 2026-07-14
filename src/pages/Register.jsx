@@ -46,8 +46,10 @@ export default function Register() {
       }
       // Provision a free trial organization for the brand-new user so they
       // land in the dashboard on a 7-day trial with the clock started.
+      let orgId = null;
       try {
         const me = await base44.auth.me();
+        orgId = me?.organization || null;
         if (me && !me.organization) {
           const org = await base44.entities.Organization.create({
             name: (me.full_name || email.split("@")[0]) + "'s Organization",
@@ -55,11 +57,38 @@ export default function Register() {
             trial_started_at: new Date().toISOString(),
           });
           await base44.auth.updateMe({ organization: org.id, role: "owner" });
+          orgId = org.id;
         }
       } catch (provisionErr) {
         // Non-fatal: the user can still complete org setup later.
         console.error("Trial org provisioning failed", provisionErr);
       }
+
+      // If the visitor arrived via a paid plan on the pricing table, take them
+      // straight to Stripe checkout (now tied to their real org) instead of the
+      // dashboard. On successful payment Stripe redirects them to the dashboard.
+      const plan = new URLSearchParams(window.location.search).get("plan");
+      if (plan && orgId) {
+        try {
+          const res = await base44.functions.invoke("createCheckoutSession", {
+            plan,
+            organization_id: orgId,
+            success_url: `${window.location.origin}/dashboard?checkout=success`,
+            cancel_url: `${window.location.origin}/dashboard?checkout=canceled`,
+          });
+          const url = res?.data?.url || res?.url;
+          if (url) {
+            window.location.href = url;
+            return;
+          }
+          console.error("No checkout URL in response", res);
+        } catch (checkoutErr) {
+          console.error("Checkout error", checkoutErr);
+        }
+        // Checkout failed to start — fall through to the dashboard so the account
+        // isn't stranded; they can upgrade from Settings.
+      }
+
       window.location.href = "/";
     } catch (err) {
       setError(err.message || "Invalid verification code");

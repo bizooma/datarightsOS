@@ -2,8 +2,8 @@ import Stripe from 'npm:stripe@17.3.1';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const PRICE_TO_PLAN = {
-  'price_1TlqqhPVRIZOMWziK37kGeae': 'core',
-  'price_1TlqqhPVRIZOMWzi6HymX1Eu': 'proof',
+  'price_1TlqlJEV6sbsDlR8DGP4QpH6': 'core',
+  'price_1TlqnTEV6sbsDlR8JPOeWIEz': 'proof',
 };
 
 Deno.serve(async (req) => {
