@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Sidebar from './Sidebar';
@@ -9,32 +8,19 @@ import { base44 } from '@/api/base44Client';
 import { isTrialExpired } from '@/lib/planLimits';
 
 export default function AppLayout() {
-  const { user, orgId, loading, isSuperAdmin } = useCurrentUser();
-  const [provisionedOrgId, setProvisionedOrgId] = useState(null);
+  const { user, loading, isSuperAdmin } = useCurrentUser();
 
-  // First-time users have no organization yet. Auto-provision one on the free
-  // trial so the dashboard works and the 7-day countdown starts immediately.
-  useEffect(() => {
-    if (loading || !user || orgId || isSuperAdmin || provisionedOrgId) return;
-    base44.functions
-      .invoke('ensureOrganization', {})
-      .then((res) => {
-        const newOrg = res?.data?.organization;
-        if (newOrg?.id) setProvisionedOrgId(newOrg.id);
-      })
-      .catch(() => {});
-  }, [loading, user, orgId, isSuperAdmin, provisionedOrgId]);
-
-  const effectiveOrgId = orgId || provisionedOrgId;
-
+  // Resolve the org through ensureOrganization for every (non-super-admin) user.
+  // It returns the existing org or provisions a fresh trial one, and — crucially —
+  // it runs with the service role, so it always returns the org data even when a
+  // user-scoped Organization query would 403 right after a fresh Google sign-up.
   const { data: org } = useQuery({
-    queryKey: ['organization', effectiveOrgId],
+    queryKey: ['organization', user?.id],
     queryFn: async () => {
-      if (!effectiveOrgId) return null;
-      const orgs = await base44.entities.Organization.filter({ id: effectiveOrgId });
-      return orgs[0] || null;
+      const res = await base44.functions.invoke('ensureOrganization', {});
+      return res?.data?.organization || null;
     },
-    enabled: !!effectiveOrgId,
+    enabled: !loading && !!user && !isSuperAdmin,
     staleTime: 60_000,
   });
 
