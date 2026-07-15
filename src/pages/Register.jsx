@@ -53,6 +53,10 @@ export default function Register() {
         By continuing you agree to our{" "}
         <Link to="/terms-of-service" className="text-primary hover:underline">
           Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link to="/privacy-policy" className="text-primary hover:underline">
+          Privacy Policy
         </Link>
         .
       </p>
