@@ -36,6 +36,7 @@ import DataPrivacy from '@/pages/DataPrivacy';
 import AiDisclosure from '@/pages/AiDisclosure';
 import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import PublicSupport from '@/pages/PublicSupport';
 
 const AuthenticatedApp = () => {
   const { authError } = useAuth();
@@ -80,6 +81,7 @@ const AuthenticatedApp = () => {
       <Route path="/ai-disclosure" element={<AiDisclosure />} />
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/support-request" element={<PublicSupport />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

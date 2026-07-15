@@ -14,6 +14,7 @@ export default function MarketingNav({ isAuthenticated }) {
           <a href="#who" className="hover:text-white transition-colors">Who it's for</a>
           <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
           <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy</Link>
+          <Link to="/support-request" className="hover:text-white transition-colors">Support</Link>
         </nav>
 
         <div className="flex items-center gap-3">

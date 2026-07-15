@@ -28,6 +28,9 @@ export default function MarketingFooter() {
             <Link to="/contact" className="text-slate-200 hover:text-white text-sm transition-colors">
               Contact
             </Link>
+            <Link to="/support-request" className="text-slate-200 hover:text-white text-sm transition-colors">
+              Support
+            </Link>
             <Link to="/login" className="text-slate-200 hover:text-white text-sm transition-colors">
               Log in
             </Link>
