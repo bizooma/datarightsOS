@@ -10,8 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, LogIn, X, Check, Plus } from 'lucide-react';
+import { Building2, LogIn, X, Check, Plus, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -22,6 +26,7 @@ export default function Organizations() {
     () => sessionStorage.getItem('dros_impersonate_org') || null
   );
   const [showCreate, setShowCreate] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const { data: orgs = [], isLoading } = useQuery({
     queryKey: ['all-organizations'],
@@ -36,6 +41,22 @@ export default function Organizations() {
       toast.success('Organization created');
       setShowCreate(false);
     },
+  });
+
+  const deleteOrgMutation = useMutation({
+    mutationFn: (id) => base44.entities.Organization.delete(id),
+    onSuccess: (_, id) => {
+      // If we were impersonating the org that was just deleted, clear it.
+      if (sessionStorage.getItem('dros_impersonate_org') === id) {
+        sessionStorage.removeItem('dros_impersonate_org');
+        sessionStorage.removeItem('dros_impersonate_org_name');
+        setImpersonatingOrgId(null);
+      }
+      queryClient.invalidateQueries({ queryKey: ['all-organizations'] });
+      toast.success('Organization deleted');
+      setDeleteTarget(null);
+    },
+    onError: () => toast.error('Failed to delete organization'),
   });
 
   if (!loading && !isSuperAdmin) return <Navigate to="/" replace />;
@@ -158,16 +179,21 @@ export default function Organizations() {
                     {org.created_date ? new Date(org.created_date).toLocaleDateString() : '—'}
                   </td>
                   <td className="px-4 py-3">
-                    {impersonatingOrgId === org.id ? (
-                      <Button size="sm" variant="outline" className="h-7 text-xs text-amber-700 border-amber-300" onClick={clearImpersonation}>
-                        <X className="w-3 h-3 mr-1" />Exit
+                    <div className="flex items-center justify-end gap-1">
+                      {impersonatingOrgId === org.id ? (
+                        <Button size="sm" variant="outline" className="h-7 text-xs text-amber-700 border-amber-300" onClick={clearImpersonation}>
+                          <X className="w-3 h-3 mr-1" />Exit
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground hover:text-foreground" onClick={() => impersonate(org)}>
+                          <LogIn className="w-3 h-3 mr-1" />
+                          Enter
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive" onClick={() => setDeleteTarget(org)}>
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
-                    ) : (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground hover:text-foreground" onClick={() => impersonate(org)}>
-                        <LogIn className="w-3 h-3 mr-1" />
-                        Enter
-                      </Button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -175,6 +201,28 @@ export default function Organizations() {
           </tbody>
         </table>
       </div>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete organization?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes <strong>{deleteTarget?.name}</strong>. This cannot be undone.
+              Users linked to it will no longer have an organization.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteOrgMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteOrgMutation.mutate(deleteTarget.id)}
+              disabled={deleteOrgMutation.isPending}
+            >
+              {deleteOrgMutation.isPending ? 'Deleting…' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
