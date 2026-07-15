@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Sidebar from './Sidebar';
@@ -8,16 +9,32 @@ import { base44 } from '@/api/base44Client';
 import { isTrialExpired } from '@/lib/planLimits';
 
 export default function AppLayout() {
-  const { orgId, isSuperAdmin } = useCurrentUser();
+  const { user, orgId, loading, isSuperAdmin } = useCurrentUser();
+  const [provisionedOrgId, setProvisionedOrgId] = useState(null);
+
+  // First-time users have no organization yet. Auto-provision one on the free
+  // trial so the dashboard works and the 7-day countdown starts immediately.
+  useEffect(() => {
+    if (loading || !user || orgId || isSuperAdmin || provisionedOrgId) return;
+    base44.functions
+      .invoke('ensureOrganization', {})
+      .then((res) => {
+        const newOrg = res?.data?.organization;
+        if (newOrg?.id) setProvisionedOrgId(newOrg.id);
+      })
+      .catch(() => {});
+  }, [loading, user, orgId, isSuperAdmin, provisionedOrgId]);
+
+  const effectiveOrgId = orgId || provisionedOrgId;
 
   const { data: org } = useQuery({
-    queryKey: ['organization', orgId],
+    queryKey: ['organization', effectiveOrgId],
     queryFn: async () => {
-      if (!orgId) return null;
-      const orgs = await base44.entities.Organization.filter({ id: orgId });
+      if (!effectiveOrgId) return null;
+      const orgs = await base44.entities.Organization.filter({ id: effectiveOrgId });
       return orgs[0] || null;
     },
-    enabled: !!orgId,
+    enabled: !!effectiveOrgId,
     staleTime: 60_000,
   });
 
