@@ -14,7 +14,7 @@ export default function HeroSection() {
           Built for US state privacy law compliance
         </div>
 
-        <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-bold text-white leading-[1.1] tracking-tight mb-6 whitespace-nowrap">
+        <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-bold text-white leading-[1.1] tracking-tight mb-6 text-balance lg:whitespace-nowrap">
           Compliance You Can Actually Prove
         </h1>
 

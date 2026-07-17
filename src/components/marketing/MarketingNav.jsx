@@ -29,7 +29,7 @@ export default function MarketingNav({ isAuthenticated }) {
             <>
               <Link
                 to="/login"
-                className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+                className="text-sm font-medium text-slate-300 hover:text-white transition-colors whitespace-nowrap"
               >
                 Log in
               </Link>
