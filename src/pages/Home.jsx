@@ -14,7 +14,7 @@ export default function Home() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen bg-white text-[#14202b]">
+    <div className="min-h-screen bg-white text-[#14202b] overflow-x-hidden">
       <MarketingNav isAuthenticated={isAuthenticated} />
       <HeroSection />
       <ProblemSection />
