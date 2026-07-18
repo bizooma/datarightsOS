@@ -70,8 +70,9 @@ Deno.serve(async (req) => {
     analytics: ['_ga', '_gid', '_gat', '__utm', '_hj', 'amplitude', 'mp_', 'ajs_', '_clck', '_clsk'],
     // First-party advertising cookies we can clear: Meta _fbp/_fbc, TikTok _ttp,
     // LinkedIn first-party li_fat_id and other li_* set on our domain, Google _gcl*,
-    // Microsoft MUID, Pinterest _pin_unauth. ('fr'/'IDE' are typically third-party — see note.)
-    advertising: ['_fbp', '_fbc', 'fr', '_gcl', 'IDE', 'test_cookie', 'MUID', '_ttp', '_pin_unauth', 'personalization_id', 'li_fat_id', 'li_gc', 'li_mc', 'li_sugr', 'lms_ads', 'UserMatchHistory'],
+    // Microsoft MUID, Pinterest _pin_unauth. ('fr'/'IDE'/'test_cookie' removed — they are
+    // third-party-only and, matched as prefixes, could clobber unrelated host cookies.)
+    advertising: ['_fbp', '_fbc', '_gcl', 'MUID', '_ttp', '_pin_unauth', 'personalization_id', 'li_fat_id', 'li_gc', 'li_mc', 'li_sugr', 'lms_ads', 'UserMatchHistory'],
     functional: ['intercom-', '_hp2_', 'yt-remote', 'wistia']
   };
   // localStorage / sessionStorage key fragments set by trackers, swept on deny.
@@ -121,7 +122,7 @@ Deno.serve(async (req) => {
     deniedCats.forEach(function (cat) {
       (COOKIE_SIGNATURES[cat] || []).forEach(function (sig) {
         present.forEach(function (cn) {
-          if (cn.indexOf(sig) === 0 || cn.indexOf(sig) > -1) { deleteCookie(cn); cleared.push(cn); }
+          if (cn.indexOf(sig) === 0) { deleteCookie(cn); cleared.push(cn); }
         });
       });
     });
@@ -214,7 +215,7 @@ Deno.serve(async (req) => {
     var leaked = false;
     deniedCats.forEach(function (cat) {
       (COOKIE_SIGNATURES[cat] || []).forEach(function (sig) {
-        present.forEach(function (cn) { if (cn.indexOf(sig) > -1) leaked = true; });
+        present.forEach(function (cn) { if (cn.indexOf(sig) === 0) leaked = true; });
       });
     });
     var ranGated = false;
@@ -290,6 +291,16 @@ Deno.serve(async (req) => {
       advertising: !!priorGrants.advertising,
       enforcement: bootEnf
     });
+
+    // Boot may run before the DOM is fully parsed, so gated tags placed below this
+    // snippet won't exist yet when applyDecision first calls activateGatedTags. Re-run
+    // activation once the DOM is ready; the data-dros-activated guard prevents doubles.
+    var reactivate = function () { activateGatedTags(priorGrants); };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', reactivate);
+    } else {
+      reactivate();
+    }
   }
 
   var DEFAULT = { product_name: 'Privacy & Data Rights Center', logo_url: 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/b5c7df386_vault.png', primary_color: '#0d7d74',
@@ -337,7 +348,7 @@ Deno.serve(async (req) => {
       largerText: 'Larger text', highContrast: 'High contrast', monochrome: 'Monochrome',
       reduceMotion: 'Reduce motion', oversizeCursor: 'Oversize cursor', screenReader: 'Screen reader optimized',
       aiTitle: 'AI Use Disclosure',
-      aiNote: 'In compliance with FTC guidelines and California AB 302, this site discloses when and how artificial intelligence is used to interact with you.',
+      aiNote: 'This site discloses when and how artificial intelligence is used to interact with you.',
       tPrefsSaved: 'Preferences saved', tRejected: 'All optional cookies rejected',
       tEmailReq: 'Email is required', tReqLogged: 'Request logged. Confirmation sent.', tReportSent: 'Report sent. Thank you.',
       effective: 'Effective'
@@ -375,7 +386,7 @@ Deno.serve(async (req) => {
       largerText: 'Texto más grande', highContrast: 'Alto contraste', monochrome: 'Monocromo',
       reduceMotion: 'Reducir movimiento', oversizeCursor: 'Cursor grande', screenReader: 'Optimizado para lector de pantalla',
       aiTitle: 'Divulgación de Uso de IA',
-      aiNote: 'En cumplimiento con las directrices de la FTC y la ley AB 302 de California, este sitio divulga cuándo y cómo se utiliza la inteligencia artificial para interactuar con usted.',
+      aiNote: 'Este sitio divulga cuándo y cómo se utiliza la inteligencia artificial para interactuar con usted.',
       tPrefsSaved: 'Preferencias guardadas', tRejected: 'Todas las cookies opcionales rechazadas',
       tEmailReq: 'El correo electrónico es obligatorio', tReqLogged: 'Solicitud registrada. Confirmación enviada.', tReportSent: 'Reporte enviado. Gracias.',
       effective: 'Vigente'
