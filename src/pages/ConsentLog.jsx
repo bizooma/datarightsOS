@@ -6,6 +6,7 @@ import { exportToCSV, formatStatus } from '@/lib/tenantUtils';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import GeoDeviceInsights from '@/components/consent-log/GeoDeviceInsights';
+import UnmanagedTrackerAlert from '@/components/consent-log/UnmanagedTrackerAlert';
 import ColumnHeader from '@/components/consent-log/ColumnHeader';
 import EnforcementStatus, { getEnforcementState } from '@/components/consent-log/EnforcementStatus';
 import EnforcementDetail from '@/components/consent-log/EnforcementDetail';
@@ -113,6 +114,9 @@ export default function ConsentLog() {
           </Button>
         }
       />
+
+      {/* Persistent warning for ungated trackers detected in the last 7 days */}
+      {!isLoading && <UnmanagedTrackerAlert records={records} />}
 
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4">

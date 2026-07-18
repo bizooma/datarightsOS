@@ -60,22 +60,39 @@ Deno.serve(async (req) => {
   var CATS = ['functional', 'analytics', 'advertising'];
 
   // Known cookie name fragments per category, for cleanup of already-set cookies.
+  // NOTE ON THIRD-PARTY COOKIES: Some tracker cookies are set on the tracker's OWN
+  // domain (e.g. LinkedIn 'bcookie'/'lidc'/'li_sugr' on .linkedin.com, Google 'IDE' on
+  // .doubleclick.net, Meta 'fr' on .facebook.com) and/or are HttpOnly. Those are NOT
+  // readable or deletable from this first-party context via document.cookie — we cannot
+  // clear them here and do not pretend to. Only first-party cookies (set on the site's
+  // own domain and JS-readable) below can actually be removed by clearCategoryCookies.
   var COOKIE_SIGNATURES = {
     analytics: ['_ga', '_gid', '_gat', '__utm', '_hj', 'amplitude', 'mp_', 'ajs_', '_clck', '_clsk'],
-    advertising: ['_fbp', '_fbc', 'fr', '_gcl', 'IDE', 'test_cookie', 'MUID', '_ttp', '_pin_unauth', 'personalization_id'],
+    // First-party advertising cookies we can clear: Meta _fbp/_fbc, TikTok _ttp,
+    // LinkedIn first-party li_fat_id and other li_* set on our domain, Google _gcl*,
+    // Microsoft MUID, Pinterest _pin_unauth. ('fr'/'IDE' are typically third-party — see note.)
+    advertising: ['_fbp', '_fbc', 'fr', '_gcl', 'IDE', 'test_cookie', 'MUID', '_ttp', '_pin_unauth', 'personalization_id', 'li_fat_id', 'li_gc', 'li_mc', 'li_sugr', 'lms_ads', 'UserMatchHistory'],
     functional: ['intercom-', '_hp2_', 'yt-remote', 'wistia']
   };
-  // Script src fragments that identify unmanaged (not-wired-through-widget) trackers.
+  // localStorage / sessionStorage key fragments set by trackers, swept on deny.
+  var STORAGE_SIGNATURES = {
+    analytics: ['_ga', 'amplitude', 'mp_', 'ajs_', 'hjViewportId', 'hjActiveViewportIds', '_hjSession'],
+    advertising: ['_fbp', '_fbc', 'fbq', 'ttq', '_tt_', 'li_', '_gcl', 'doubleclick'],
+    functional: ['intercom', 'wistia']
+  };
+  // Tracker signatures that identify unmanaged (not-wired-through-widget) tags.
+  // Each is matched against BOTH inline script text AND src URLs (see scanUnmanaged).
   var UNMANAGED_SIGNATURES = [
-    { name: 'Google Analytics / gtag', re: /googletagmanager\\.com|google-analytics\\.com/i, cat: 'analytics' },
-    { name: 'Google Tag Manager', re: /googletagmanager\\.com\\/gtm/i, cat: 'analytics' },
-    { name: 'Meta / Facebook Pixel', re: /connect\\.facebook\\.net/i, cat: 'advertising' },
-    { name: 'TikTok Pixel', re: /analytics\\.tiktok\\.com/i, cat: 'advertising' },
-    { name: 'LinkedIn Insight', re: /snap\\.licdn\\.com/i, cat: 'advertising' },
-    { name: 'Hotjar', re: /static\\.hotjar\\.com/i, cat: 'analytics' },
+    { name: 'Google Analytics / GA4', re: /googletagmanager\\.com\\/gtag|google-analytics\\.com|\\bG-[A-Z0-9]{6,}\\b|gtag\\(\\s*['"]config['"]\\s*,\\s*['"]G-/i, cat: 'analytics' },
+    { name: 'Google Tag Manager', re: /googletagmanager\\.com\\/gtm|\\bGTM-[A-Z0-9]{4,}\\b/i, cat: 'analytics' },
+    { name: 'Google Ads', re: /googleads\\.g\\.doubleclick\\.net|googleadservices\\.com|\\bAW-[0-9]{6,}\\b|gtag\\(\\s*['"]config['"]\\s*,\\s*['"]AW-/i, cat: 'advertising' },
+    { name: 'Meta / Facebook Pixel', re: /connect\\.facebook\\.net|facebook\\.com\\/tr|\\bfbq\\s*\\(/i, cat: 'advertising' },
+    { name: 'TikTok Pixel', re: /analytics\\.tiktok\\.com|\\bttq\\./i, cat: 'advertising' },
+    { name: 'LinkedIn Insight', re: /snap\\.licdn\\.com|px\\.ads\\.linkedin\\.com|_linkedin_partner_id/i, cat: 'advertising' },
+    { name: 'Hotjar', re: /static\\.hotjar\\.com|\\bhj\\s*\\(/i, cat: 'analytics' },
     { name: 'Hubspot', re: /js\\.hs-scripts\\.com|js\\.hsforms\\.net/i, cat: 'analytics' },
-    { name: 'Segment', re: /cdn\\.segment\\.com/i, cat: 'analytics' },
-    { name: 'Twitter / X Pixel', re: /static\\.ads-twitter\\.com/i, cat: 'advertising' }
+    { name: 'Segment', re: /cdn\\.segment\\.com|analytics\\.track\\(/i, cat: 'analytics' },
+    { name: 'Twitter / X Pixel', re: /static\\.ads-twitter\\.com|\\btwq\\s*\\(/i, cat: 'advertising' }
   ];
 
   function readGrants() {
@@ -105,6 +122,25 @@ Deno.serve(async (req) => {
       (COOKIE_SIGNATURES[cat] || []).forEach(function (sig) {
         present.forEach(function (cn) {
           if (cn.indexOf(sig) === 0 || cn.indexOf(sig) > -1) { deleteCookie(cn); cleared.push(cn); }
+        });
+      });
+    });
+    // Sweep localStorage/sessionStorage keys set by trackers in denied categories.
+    // (Third-party storage on the tracker's own origin is not accessible here — same
+    // limitation noted for third-party cookies above — so only same-origin keys clear.)
+    ['localStorage', 'sessionStorage'].forEach(function (store) {
+      var s;
+      try { s = window[store]; } catch (e) { return; }
+      if (!s) return;
+      var keys = [];
+      try { for (var i = 0; i < s.length; i++) keys.push(s.key(i)); } catch (e) { return; }
+      deniedCats.forEach(function (cat) {
+        (STORAGE_SIGNATURES[cat] || []).forEach(function (sig) {
+          keys.forEach(function (k) {
+            if (k && k.indexOf(sig) > -1 && k.indexOf('dros_') !== 0) {
+              try { s.removeItem(k); cleared.push(store + ':' + k); } catch (e) {}
+            }
+          });
         });
       });
     });
@@ -151,12 +187,19 @@ Deno.serve(async (req) => {
 
   function scanUnmanaged(deniedCats) {
     var found = [];
-    var scripts = document.querySelectorAll('script[src]');
+    // Scan EVERY script element — inline text content AND src URLs — so inline
+    // bootstraps (Meta fbq, LinkedIn _linkedin_partner_id, TikTok ttq, gtag configs)
+    // are caught, not just external src loads.
+    var scripts = document.querySelectorAll('script');
     scripts.forEach(function (s) {
-      // Tags wired through the widget are gated (type=text/plain) and excluded from this scan.
+      // Exclude tags wired through the widget: gated <script type="text/plain" data-dros-category>.
+      if (s.getAttribute('type') === 'text/plain' && s.getAttribute('data-dros-category') !== null) return;
+      // Also skip our own activated clones so we don't flag tags we intentionally loaded.
       var src = s.getAttribute('src') || '';
+      var text = s.textContent || '';
+      var hay = src + '\\n' + text;
       UNMANAGED_SIGNATURES.forEach(function (sig) {
-        if (sig.re.test(src) && deniedCats.indexOf(sig.cat) > -1 && found.indexOf(sig.name) === -1) {
+        if (sig.re.test(hay) && deniedCats.indexOf(sig.cat) > -1 && found.indexOf(sig.name) === -1) {
           found.push(sig.name);
         }
       });
