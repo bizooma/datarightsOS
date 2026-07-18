@@ -39,8 +39,8 @@ export default function CookieConsent() {
               Your cookie banner is now a legal document. Treat it like one.
             </h1>
             <p className="mt-6 text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              One widget that honors opt-out signals, controls your tracking tags, and keeps you on
-              the right side of 20 state privacy laws.
+              One widget that honors opt-out signals, controls your tracking tags, and is built for
+              twenty state privacy laws.
             </p>
             <div className="mt-9 flex items-center justify-center gap-3">
               <Link

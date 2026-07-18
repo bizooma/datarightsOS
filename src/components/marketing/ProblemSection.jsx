@@ -9,7 +9,7 @@ export default function ProblemSection() {
             Privacy enforcement is no longer theoretical.
           </h2>
           <p className="text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Nineteen US states now have comprehensive consumer privacy laws. Regulators are issuing
+            Twenty US states now have comprehensive consumer privacy laws. Regulators are issuing
             seven- and eight-figure settlements. Demand letters from consumer rights organizations
             are rising fast. Most websites are dangerously exposed.
           </p>

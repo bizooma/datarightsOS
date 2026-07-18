@@ -3,7 +3,7 @@ export const urgencyCards = [
     tag: 'Trend',
     stat: '19 States',
     headline: 'Not Just California Anymore',
-    body: 'More than a dozen U.S. states now have comprehensive consumer privacy laws, and the patchwork keeps expanding. Businesses need a clear way to publish privacy rights, opt-out instructions, and consumer request pathways.',
+    body: 'Twenty U.S. states now have comprehensive consumer privacy laws, and the patchwork keeps expanding. Businesses need a clear way to publish privacy rights, opt-out instructions, and consumer request pathways.',
   },
   {
     tag: 'New Law',

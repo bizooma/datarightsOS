@@ -20,8 +20,8 @@ export default function HeroSection() {
 
         <p className="text-lg text-white max-w-2xl mx-auto leading-relaxed mb-10">
           Add it to any website with one line of code, auto generated in your dashboard. Every cookie
-          choice and privacy request gets honored, tracked to its legal deadline, and recorded in an
-          audit trail that holds up in court.
+          choice and privacy request gets captured, enforced, and tracked to its legal deadline, then
+          recorded in a court-ready audit trail.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
