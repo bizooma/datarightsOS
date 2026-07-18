@@ -74,8 +74,8 @@ export default function AiDisclosure() {
             </p>
             <p>
               The trend isn't confined to California. Utah's AI Policy Act already requires businesses to
-              disclose generative-AI use in consumer interactions when asked — and proactively for
-              regulated professions, and Colorado's AI Act — focused on AI
+              disclose generative-AI use in consumer interactions when asked (proactively for
+              regulated professions), and Colorado's AI Act — focused on AI
               that drives consequential decisions — is set to take effect in 2027. The common thread
               across all of them is a "clear and conspicuous" disclosure obligation whenever a reasonable
               person might not realize AI is involved. Vague footnotes and buried terms won't satisfy that
