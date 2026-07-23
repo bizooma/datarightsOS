@@ -1,0 +1,41 @@
+{
+  "name": "Daily trial expiry check",
+  "description": "Daily job that deactivates sites belonging to trial organizations whose 7-day trial has expired, so the widget stops rendering on their websites.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 6,
+      "interval_unit": "hours",
+      "interval_anchor": "2026-06-28T12:56:21.450000",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_trial_expiry_check",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "checkSubscriptionStatus",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

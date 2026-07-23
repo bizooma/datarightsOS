@@ -1,0 +1,41 @@
+{
+  "name": "Trial 2-day reminder email",
+  "description": "Daily job that emails trial users when 2 days remain so they can upgrade before their widget is disabled.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 14 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "trial_2_day_reminder_email",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "trialReminder",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}
