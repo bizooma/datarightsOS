@@ -1,0 +1,40 @@
+{
+  "name": "Trial Signup \u2014 Welcome Email",
+  "description": "When a new trial Organization is created at signup, send the owner the welcome / getting-started email.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Organization",
+      "events": [
+        "create"
+      ]
+    },
+    "condition": "${ .trigger.data.plan == \"trial\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "trial_signup_welcome_email",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_welcome": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendTrialWelcome",
+            "args": {
+              "organization_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send welcome email",
+            "description": "New trial owner"
+          }
+        }
+      }
+    ]
+  }
+}
