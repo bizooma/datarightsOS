@@ -561,7 +561,6 @@ Deno.serve(async (req) => {
       + ((cfg.honor_gpc && GPC) ? '<div class="gpc"><div><b>' + esc(t.gpcTitle) + '</b><p>' + esc(t.gpcBody) + '</p></div></div>' : '')
       + '<div id="HOME">'
       + (showConsentBlock ? '<div class="consentblk"><p class="cl">' + esc(t.consentLine) + '</p><div class="btnrow"><button class="btn g" id="HR">' + esc(t.rejectAll) + '</button><button class="btn g" id="HA">' + esc(t.acceptAll) + '</button></div><button class="manage" id="HM">' + esc(t.manageSettings) + '</button></div>' : '')
-      + '<div class="cmdsearch"><span style="font-size:13px;color:' + panelSubText + '">&#128269;</span><input id="CMDQ" placeholder="' + esc(t.searchPlaceholder) + '"></div>'
       + '<div class="cardgrid' + (showConsentBlock ? ' threeup' : '') + '">'
       + (showRights ? '<button class="ccard" data-card="rights" data-kw="' + esc(t.rightsTitle) + '"><div class="chead" style="background-image:url(' + IMG.rights + ')"><div class="ctitle">' + esc(t.cardRights) + '</div></div><div class="cbody"><div class="csub">' + esc(t.cardRightsSub) + '</div></div></button>' : '')
       + ((showCookies && !showConsentBlock) ? '<button class="ccard" data-card="cookies" data-kw="' + esc(t.cookieTitle) + '"><div class="chead" style="background-image:url(' + IMG.cookies + ')"><div class="ctitle">' + esc(t.cardCookies) + '</div></div><div class="cbody"><div class="csub">' + esc(cookieTileSub) + '</div></div></button>' : '')
@@ -665,18 +664,6 @@ Deno.serve(async (req) => {
     }
     q('[data-card]').forEach(function (c) { c.onclick = function () { showSection(c.getAttribute('data-card')); }; });
     q('[data-back]').forEach(function (b) { b.onclick = showHome; });
-
-    // Search filters the action cards on the home view.
-    var CMDQ = $('CMDQ');
-    if (CMDQ) {
-      CMDQ.oninput = function () {
-        var term = CMDQ.value.toLowerCase().trim();
-        q('[data-card]').forEach(function (c) {
-          var kw = (c.getAttribute('data-kw') || '').toLowerCase();
-          c.style.display = (!term || kw.indexOf(term) > -1) ? '' : 'none';
-        });
-      };
-    }
 
     // Reflect any stored decision in the cookie toggles so the panel matches reality.
     (function () {
