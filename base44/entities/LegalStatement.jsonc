@@ -62,7 +62,7 @@
     "read": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
+          "data.organization": "{{user.data.organization}}"
         },
         {
           "user_condition": {
@@ -74,7 +74,7 @@
     "write": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
+          "data.organization": "{{user.data.organization}}"
         },
         {
           "user_condition": {
