@@ -179,5 +179,43 @@
     "request_type",
     "requester_name",
     "requester_email"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization": "{{user.data.organization}}"
+        },
+        {
+          "user_condition": {
+            "role": "bizooma_superadmin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization": "{{user.data.organization}}"
+        },
+        {
+          "user_condition": {
+            "role": "bizooma_superadmin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization": "{{user.data.organization}}"
+        },
+        {
+          "user_condition": {
+            "role": "bizooma_superadmin"
+          }
+        }
+      ]
+    }
+  }
 }
