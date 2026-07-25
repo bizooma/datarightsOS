@@ -34,13 +34,28 @@ export default function Organizations() {
     enabled: isSuperAdmin,
   });
 
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ['all-users'],
+    queryFn: () => base44.entities.User.list('-created_date'),
+    enabled: isSuperAdmin,
+  });
+
   const createOrgMutation = useMutation({
-    mutationFn: (data) => base44.entities.Organization.create(data),
+    mutationFn: async ({ ownerId, ...data }) => {
+      const org = await base44.entities.Organization.create(data);
+      // If an owner was chosen, link them to the new org and make them the owner.
+      if (ownerId) {
+        await base44.entities.User.update(ownerId, { organization: org.id, role: 'owner' });
+      }
+      return org;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['all-users'] });
       toast.success('Organization created');
       setShowCreate(false);
     },
+    onError: () => toast.error('Failed to create organization'),
   });
 
   const deleteOrgMutation = useMutation({
@@ -119,6 +134,7 @@ export default function Organizations() {
 
       {showCreate && (
         <CreateOrgForm
+          users={allUsers}
           onSubmit={(data) => createOrgMutation.mutate(data)}
           onCancel={() => setShowCreate(false)}
           isPending={createOrgMutation.isPending}
@@ -227,14 +243,18 @@ export default function Organizations() {
   );
 }
 
-function CreateOrgForm({ onSubmit, onCancel, isPending }) {
+function CreateOrgForm({ users = [], onSubmit, onCancel, isPending }) {
   const [form, setForm] = useState({
     name: '',
     plan: 'trial',
     white_label_product_name: 'Privacy & Data Rights Center',
     brand_primary_color: '#0d7d74',
     billing_status: 'active',
+    ownerId: '',
   });
+
+  // Only offer users who aren't already tied to an organization.
+  const availableUsers = users.filter(u => !u.organization);
 
   return (
     <Card className="mb-6">
@@ -268,6 +288,21 @@ function CreateOrgForm({ onSubmit, onCancel, isPending }) {
             <input type="color" value={form.brand_primary_color} onChange={e => setForm({ ...form, brand_primary_color: e.target.value })} className="w-9 h-9 rounded border border-border cursor-pointer" />
             <Input value={form.brand_primary_color} onChange={e => setForm({ ...form, brand_primary_color: e.target.value })} className="h-9 text-sm font-mono w-28" />
           </div>
+        </div>
+        <div className="col-span-2">
+          <Label className="text-xs text-muted-foreground mb-1.5 block">Owner (optional)</Label>
+          <Select value={form.ownerId || 'none'} onValueChange={v => setForm({ ...form, ownerId: v === 'none' ? '' : v })}>
+            <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="No owner" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No owner</SelectItem>
+              {availableUsers.map(u => (
+                <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}{u.full_name ? ` — ${u.email}` : ''}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-[11px] text-muted-foreground mt-1.5">
+            Only users not already linked to an organization appear here. The selected user becomes the owner.
+          </p>
         </div>
         <div className="col-span-2 flex gap-2 justify-end">
           <Button size="sm" variant="outline" className="h-9" onClick={onCancel}>Cancel</Button>
