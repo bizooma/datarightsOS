@@ -92,6 +92,15 @@
     "stripe_subscription_id": {
       "type": "string",
       "description": "Stripe subscription ID for this organization"
+    },
+    "referral_source": {
+      "type": "string",
+      "description": "Partner referral code captured from the ?ref= query parameter at signup (first-touch attribution). Permanent once set; not editable by the subscriber. Used for commission runs and passed to Stripe metadata."
+    },
+    "referral_captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the referral_source was captured and attributed to this organization at signup."
     }
   },
   "required": [

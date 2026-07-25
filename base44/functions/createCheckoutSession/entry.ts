@@ -1,4 +1,5 @@
 import Stripe from 'npm:stripe@17.3.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const PRICE_IDS = {
   core: 'price_1TlqlJEV6sbsDlR8DGP4QpH6',
@@ -22,6 +23,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid plan' }, { status: 400, headers: CORS });
     }
 
+    // Look up the org's referral attribution so every payment is self-documenting
+    // in Stripe and portable to Rewardful/FirstPromoter later.
+    let referralSource = '';
+    if (organization_id) {
+      try {
+        const base44 = createClientFromRequest(req);
+        const orgs = await base44.asServiceRole.entities.Organization.filter({ id: organization_id });
+        referralSource = orgs[0]?.referral_source || '';
+      } catch (e) {
+        console.error('createCheckoutSession: failed to load referral_source:', e.message);
+      }
+    }
+
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
     const session = await stripe.checkout.sessions.create({
@@ -33,11 +47,13 @@ Deno.serve(async (req) => {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
         plan,
         organization_id: organization_id || '',
+        ...(referralSource ? { referral_source: referralSource } : {}),
       },
       subscription_data: {
         metadata: {
           plan,
           organization_id: organization_id || '',
+          ...(referralSource ? { referral_source: referralSource } : {}),
         },
       },
     });

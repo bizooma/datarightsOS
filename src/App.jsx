@@ -7,6 +7,8 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import { useEffect } from 'react';
+import { captureReferral } from '@/lib/referral';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -88,6 +90,10 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
+  useEffect(() => {
+    captureReferral();
+  }, []);
+
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>

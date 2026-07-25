@@ -6,6 +6,7 @@ import TrialCountdownBanner from './TrialCountdownBanner';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import { base44 } from '@/api/base44Client';
 import { isTrialExpired } from '@/lib/planLimits';
+import { getStoredReferral } from '@/lib/referral';
 
 export default function AppLayout() {
   const { user, loading, isSuperAdmin } = useCurrentUser();
@@ -17,7 +18,9 @@ export default function AppLayout() {
   const { data: org } = useQuery({
     queryKey: ['organization', user?.id],
     queryFn: async () => {
-      const res = await base44.functions.invoke('ensureOrganization', {});
+      const res = await base44.functions.invoke('ensureOrganization', {
+        referral_source: getStoredReferral() || undefined,
+      });
       return res?.data?.organization || null;
     },
     enabled: !loading && !!user && !isSuperAdmin,

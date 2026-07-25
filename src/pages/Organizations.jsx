@@ -28,6 +28,7 @@ export default function Organizations() {
   const [showCreate, setShowCreate] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [refFilter, setRefFilter] = useState('');
 
   const { data: orgs = [], isLoading } = useQuery({
     queryKey: ['all-organizations'],
@@ -112,6 +113,10 @@ export default function Organizations() {
     toast.success('Returned to super admin view');
   }
 
+  const filteredOrgs = refFilter.trim()
+    ? orgs.filter(o => (o.referral_source || '').toLowerCase().includes(refFilter.trim().toLowerCase()))
+    : orgs;
+
   const planColors = {
     trial: 'bg-gray-100 text-gray-600',
     core: 'bg-blue-50 text-blue-700',
@@ -175,6 +180,20 @@ export default function Organizations() {
         />
       )}
 
+      <div className="mb-3 flex items-center gap-2 max-w-xs">
+        <Input
+          value={refFilter}
+          onChange={e => setRefFilter(e.target.value)}
+          className="h-9 text-sm"
+          placeholder="Filter by referral source…"
+        />
+        {refFilter && (
+          <Button size="sm" variant="ghost" className="h-9 px-2 text-muted-foreground" onClick={() => setRefFilter('')}>
+            <X className="w-3.5 h-3.5" />
+          </Button>
+        )}
+      </div>
+
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         <table className="w-full">
           <thead>
@@ -182,6 +201,7 @@ export default function Organizations() {
               <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">Organization</th>
               <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">Plan</th>
               <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">Billing</th>
+              <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">Referral</th>
               <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">Brand Color</th>
               <th className="text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-3">Created</th>
               <th className="px-4 py-3" />
@@ -191,19 +211,19 @@ export default function Organizations() {
             {isLoading ? (
               Array(3).fill(0).map((_, i) => (
                 <tr key={i}>
-                  {Array(6).fill(0).map((_, j) => (
+                  {Array(7).fill(0).map((_, j) => (
                     <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
                   ))}
                 </tr>
               ))
-            ) : orgs.length === 0 ? (
+            ) : filteredOrgs.length === 0 ? (
               <tr>
-                <td colSpan={6}>
-                  <EmptyState icon={Building2} title="No organizations" description="Organizations will appear here." />
+                <td colSpan={7}>
+                  <EmptyState icon={Building2} title="No organizations" description={refFilter ? 'No organizations match that referral source.' : 'Organizations will appear here.'} />
                 </td>
               </tr>
             ) : (
-              orgs.map(org => (
+              filteredOrgs.map(org => (
                 <tr key={org.id} className={`hover:bg-muted/40 transition-colors ${impersonatingOrgId === org.id ? 'bg-amber-50/60' : ''}`}>
                   <td className="px-4 py-3">
                     <p className="text-sm font-medium">{org.name}</p>
@@ -218,6 +238,13 @@ export default function Organizations() {
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium border ${billingColors[org.billing_status] || ''}`}>
                       {org.billing_status}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {org.referral_source ? (
+                      <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary/10 text-primary font-mono">{org.referral_source}</span>
+                    ) : (
+                      <span className="text-[12px] text-muted-foreground">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">

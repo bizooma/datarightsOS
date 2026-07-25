@@ -12,6 +12,15 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+    // Referral attribution captured client-side (first-touch, ?ref= cookie/localStorage).
+    let referralSource = '';
+    try {
+      const body = await req.json();
+      referralSource = (body?.referral_source || '').toString().trim().slice(0, 200);
+    } catch {
+      // No body / not JSON — fine, no referral to attribute.
+    }
+
     // 1. Already has an org — nothing to do.
     if (user.organization) {
       const existing = await base44.asServiceRole.entities.Organization.filter({ id: user.organization });
@@ -52,6 +61,10 @@ Deno.serve(async (req) => {
       plan: 'trial',
       trial_started_at: now,
       billing_status: 'active',
+      // Permanent partner attribution — cookie expiry no longer matters once stored here.
+      ...(referralSource
+        ? { referral_source: referralSource, referral_captured_at: now }
+        : {}),
     });
 
     await base44.asServiceRole.entities.User.update(user.id, {
