@@ -50,7 +50,7 @@
         },
         {
           "user_condition": {
-            "role": "bizooma_superadmin"
+            "role": "admin"
           }
         }
       ]
@@ -62,7 +62,7 @@
         },
         {
           "user_condition": {
-            "role": "bizooma_superadmin"
+            "role": "admin"
           }
         }
       ]
@@ -74,7 +74,7 @@
         },
         {
           "user_condition": {
-            "role": "bizooma_superadmin"
+            "role": "admin"
           }
         }
       ]
