@@ -83,7 +83,7 @@ function RequesterEmailsForm({ scope, org, site }) {
 
   const updateMutation = useMutation({
     mutationFn: (data) => isOrg
-      ? base44.entities.Organization.update(org.id, data)
+      ? base44.functions.invoke('updateOrganizationSettings', { organization_id: org.id, updates: data })
       : base44.entities.Site.update(site.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization'] });

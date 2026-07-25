@@ -225,7 +225,7 @@ function BrandingTab({ org }) {
   }
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Organization.update(org.id, data),
+    mutationFn: (data) => base44.functions.invoke('updateOrganizationSettings', { organization_id: org.id, updates: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization'] });
       toast({ title: 'Branding saved', description: 'Your organization branding has been updated.' });

@@ -51,7 +51,7 @@ export default function IntegrationsTab({ org }) {
   const [testResult, setTestResult] = useState(null);
 
   const saveMutation = useMutation({
-    mutationFn: (data) => base44.entities.Organization.update(org.id, data),
+    mutationFn: (data) => base44.functions.invoke('updateOrganizationSettings', { organization_id: org.id, updates: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization'] });
       toast({ title: 'Integration saved', description: 'Your outbound webhook settings have been updated.' });
@@ -116,7 +116,7 @@ export default function IntegrationsTab({ org }) {
       // Persist current URL/secret first so the backend test hits the latest values.
       let nextSecret = secret || generateSecret();
       if (!secret) setSecret(nextSecret);
-      await base44.entities.Organization.update(org.id, { webhook_url: url, webhook_secret: nextSecret });
+      await base44.functions.invoke('updateOrganizationSettings', { organization_id: org.id, updates: { webhook_url: url, webhook_secret: nextSecret } });
       const res = await base44.functions.invoke('testOutboundWebhook', { organization_id: org.id });
       setTestResult(res.data);
       queryClient.invalidateQueries({ queryKey: ['organization'] });

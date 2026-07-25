@@ -29,7 +29,7 @@ export default function RegionalTab({ org }) {
   const detectedIsDifferent = detected && detected !== timezone;
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Organization.update(org.id, data),
+    mutationFn: (data) => base44.functions.invoke('updateOrganizationSettings', { organization_id: org.id, updates: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization'] });
       toast({ title: 'Timezone saved', description: 'Dashboard dates now display in your timezone.' });
