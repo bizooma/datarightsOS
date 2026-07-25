@@ -457,6 +457,18 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
           </div>
           <FormField label="Privacy Policy URL" value={form.privacy_policy_url} onChange={v => handleChange('privacy_policy_url', v)} hint="Optional. Link to a privacy policy hosted on your own site. Leave blank if you write your policy in the Legal Statements tab." />
           <FormField label="Policy Version" value={form.policy_version} onChange={v => handleChange('policy_version', v)} hint="A version stamp (e.g. 1.0) recorded on every consent record, so you have proof of which policy version a visitor agreed to." />
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">Intake Rate Limit (requests/hour)</Label>
+            <Input
+              type="number"
+              min="1"
+              value={form.intake_rate_limit_per_hour ?? 100}
+              onChange={e => handleChange('intake_rate_limit_per_hour', e.target.value === '' ? '' : Number(e.target.value))}
+              placeholder="100"
+              className="h-9 text-sm w-40"
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Max privacy requests accepted from this site's widget per hour before extra submissions are turned away and pointed to your privacy contact email. Protects email deliverability from abuse. Default 100. A separate cap of 3/hour per email address always applies.</p>
+          </div>
         </CardContent>
       </Card>
 
