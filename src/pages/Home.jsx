@@ -1,3 +1,4 @@
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import HeroSection from '@/components/marketing/HeroSection';
 import ProblemSection from '@/components/marketing/ProblemSection';
@@ -12,6 +13,12 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
+
+  // Signed-in users (including freshly-invited ones landing here after verifying)
+  // go straight to the dashboard instead of seeing the public marketing page.
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-white text-[#14202b] overflow-x-hidden">
