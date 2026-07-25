@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
@@ -133,7 +134,10 @@ export default function WidgetStudio() {
         actions={
           <div className="flex items-center gap-2">
             {atSiteLimit && (
-              <span className="text-[11px] text-amber-600">Site limit reached — upgrade to add more</span>
+              <span className="text-[11px] text-amber-600">
+                Site limit reached —{' '}
+                <Link to="/settings?tab=plan" className="font-semibold underline hover:text-amber-700">upgrade to add more</Link>
+              </span>
             )}
             <Button size="sm" className="h-9 text-sm" onClick={() => setShowAddForm(true)} disabled={atSiteLimit} title={atSiteLimit ? 'Site limit reached for your plan' : undefined}>
               <Plus className="w-3.5 h-3.5 mr-1.5" />
