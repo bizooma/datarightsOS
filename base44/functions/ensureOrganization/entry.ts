@@ -13,10 +13,13 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     // Referral attribution captured client-side (first-touch, ?ref= cookie/localStorage).
+    // Validate server-side too — partner slugs only (alphanumerics, _-, 1–64 chars).
+    const REF_PATTERN = /^[a-zA-Z0-9_-]{1,64}$/;
     let referralSource = '';
     try {
       const body = await req.json();
-      referralSource = (body?.referral_source || '').toString().trim().slice(0, 200);
+      const candidate = (body?.referral_source || '').toString().trim();
+      if (REF_PATTERN.test(candidate)) referralSource = candidate;
     } catch {
       // No body / not JSON — fine, no referral to attribute.
     }

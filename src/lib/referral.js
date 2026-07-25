@@ -6,6 +6,10 @@ const COOKIE_NAME = 'dros_ref';
 const STORAGE_KEY = 'dros_ref';
 const MAX_AGE_DAYS = 90;
 
+// Referral codes are partner slugs: alphanumerics, underscore, hyphen, 1–64 chars.
+// Anything else is rejected outright (prevents junk/injection in attribution + Stripe metadata).
+const REF_PATTERN = /^[a-zA-Z0-9_-]{1,64}$/;
+
 function readCookie(name) {
   const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
   return match ? decodeURIComponent(match[1]) : null;
@@ -30,8 +34,8 @@ export function captureReferral() {
     const existing = readCookie(COOKIE_NAME) || localStorage.getItem(STORAGE_KEY);
     if (existing) return;
 
-    const clean = ref.trim().slice(0, 200);
-    if (!clean) return;
+    const clean = ref.trim();
+    if (!REF_PATTERN.test(clean)) return;
 
     writeCookie(COOKIE_NAME, clean, MAX_AGE_DAYS);
     localStorage.setItem(STORAGE_KEY, clean);

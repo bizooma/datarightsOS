@@ -20,7 +20,6 @@ export default function BillingTab({ org, siteCount, memberCount }) {
     try {
       const { data } = await base44.functions.invoke('createCheckoutSession', {
         plan,
-        organization_id: org.id,
         success_url: `${window.location.origin}/dashboard?checkout=success`,
         cancel_url: `${window.location.origin}/dashboard?checkout=canceled`,
       });

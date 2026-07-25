@@ -17,23 +17,35 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return Response.json({ error: 'Method Not Allowed' }, { status: 405, headers: CORS });
 
   try {
-    const { plan, organization_id, success_url, cancel_url } = await req.json();
+    const { plan, success_url, cancel_url } = await req.json();
     const priceId = PRICE_IDS[plan];
     if (!priceId) {
       return Response.json({ error: 'Invalid plan' }, { status: 400, headers: CORS });
     }
 
+    // Derive the organization from the authenticated user — NEVER trust a
+    // client-supplied organization_id. Prevents a caller from driving a
+    // checkout/upgrade against an org they don't belong to.
+    const base44 = createClientFromRequest(req);
+    let user;
+    try {
+      user = await base44.auth.me();
+    } catch {
+      return Response.json({ error: 'Authentication required' }, { status: 401, headers: CORS });
+    }
+    const organization_id = user?.organization;
+    if (!organization_id) {
+      return Response.json({ error: 'No organization associated with this account' }, { status: 403, headers: CORS });
+    }
+
     // Look up the org's referral attribution so every payment is self-documenting
     // in Stripe and portable to Rewardful/FirstPromoter later.
     let referralSource = '';
-    if (organization_id) {
-      try {
-        const base44 = createClientFromRequest(req);
-        const orgs = await base44.asServiceRole.entities.Organization.filter({ id: organization_id });
-        referralSource = orgs[0]?.referral_source || '';
-      } catch (e) {
-        console.error('createCheckoutSession: failed to load referral_source:', e.message);
-      }
+    try {
+      const orgs = await base44.asServiceRole.entities.Organization.filter({ id: organization_id });
+      referralSource = orgs[0]?.referral_source || '';
+    } catch (e) {
+      console.error('createCheckoutSession: failed to load referral_source:', e.message);
     }
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
@@ -41,8 +53,8 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: success_url || `${req.headers.get('origin') || ''}/dashboard?checkout=success`,
-      cancel_url: cancel_url || `${req.headers.get('origin') || ''}/settings?checkout=canceled`,
+      success_url: success_url || `${req.headers.get('origin') || 'https://app.base44.com'}/dashboard?checkout=success`,
+      cancel_url: cancel_url || `${req.headers.get('origin') || 'https://app.base44.com'}/settings?checkout=canceled`,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
         plan,
