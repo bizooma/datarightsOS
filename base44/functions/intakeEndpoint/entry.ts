@@ -2,8 +2,21 @@
  * Public intake endpoint — authenticated only by a valid site_key.
  * POST /intakeEndpoint
  * Body: { type: "consent" | "rights_request", site_key: string, ...payload }
+ *
+ * Rights-request throttle: because a rights_request triggers an acknowledgment
+ * email to a submitter-supplied address (our sending domain → arbitrary inbox),
+ * the endpoint is rate-limited to protect deliverability. Two windowed caps,
+ * both measured against DataRightsRequest.created_date:
+ *   - per site:  max SITE_MAX new requests in WINDOW_MINUTES
+ *   - per email: max EMAIL_MAX new requests (same site + email) in WINDOW_MINUTES
+ * Exceeding either returns HTTP 429 with a clear message; throttled attempts are
+ * logged. Consent events are not throttled (they send no email).
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+
+const WINDOW_MINUTES = 60;
+const SITE_MAX = 20;
+const EMAIL_MAX = 3;
 
 Deno.serve(async (req) => {
   // CORS headers for widget cross-origin POSTs
@@ -67,6 +80,37 @@ Deno.serve(async (req) => {
 
       if (!request_type || !requester_name || !requester_email) {
         return Response.json({ error: 'request_type, requester_name, requester_email are required' }, { status: 400, headers: corsHeaders });
+      }
+
+      // Rate limit before creating anything: a rights_request sends an
+      // acknowledgment email to requester_email, so an unthrottled form is an
+      // open relay against our sending domain. Cap per site and per email over
+      // a rolling window, keyed on created_date.
+      const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
+      const normalizedEmail = String(requester_email).trim().toLowerCase();
+
+      const recentForSite = await base44.asServiceRole.entities.DataRightsRequest.filter({
+        site: site.id,
+        created_date: { $gte: windowStart },
+      });
+
+      if ((recentForSite || []).length >= SITE_MAX) {
+        console.log(`[intake] THROTTLED site ${site.id} (${site.domain}): ${recentForSite.length} requests in last ${WINDOW_MINUTES}m (cap ${SITE_MAX}). Rejected email=${normalizedEmail}.`);
+        return Response.json(
+          { error: `Too many requests. This site has reached its limit of ${SITE_MAX} privacy requests per hour. Please try again later.` },
+          { status: 429, headers: corsHeaders },
+        );
+      }
+
+      const recentForEmail = (recentForSite || []).filter(
+        (r) => String(r.requester_email || '').trim().toLowerCase() === normalizedEmail,
+      );
+      if (recentForEmail.length >= EMAIL_MAX) {
+        console.log(`[intake] THROTTLED email ${normalizedEmail} on site ${site.id} (${site.domain}): ${recentForEmail.length} requests in last ${WINDOW_MINUTES}m (cap ${EMAIL_MAX}).`);
+        return Response.json(
+          { error: `Too many requests. You've already submitted ${EMAIL_MAX} privacy requests for this site in the past hour. Please try again later or contact us directly.` },
+          { status: 429, headers: corsHeaders },
+        );
       }
 
       const now = new Date();
