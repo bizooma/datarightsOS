@@ -12,10 +12,15 @@ import MarketingFooter from '@/components/marketing/MarketingFooter';
 import MarketingNav from '@/components/marketing/MarketingNav';
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoadingAuth } = useAuth();
 
-  // Signed-in users (including freshly-invited ones landing here after verifying)
-  // go straight to the dashboard instead of seeing the public marketing page.
+  // Wait for the auth check to finish before deciding — otherwise a logged-in
+  // user is briefly treated as anonymous and sees the marketing page flash.
+  if (isLoadingAuth) {
+    return <div className="min-h-screen bg-white" />;
+  }
+
+  // Signed-in users go straight to the dashboard instead of the public marketing page.
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
