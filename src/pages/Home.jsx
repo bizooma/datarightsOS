@@ -1,4 +1,5 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import HeroSection from '@/components/marketing/HeroSection';
 import ProblemSection from '@/components/marketing/ProblemSection';
@@ -28,6 +29,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white text-[#14202b] overflow-x-hidden">
       <MarketingNav isAuthenticated={isAuthenticated} />
+      <div className="bg-[#0d7d74] text-white">
+        <div className="max-w-6xl mx-auto px-6 py-2.5 flex flex-col sm:flex-row items-center justify-center gap-2 text-sm text-center">
+          <span>Been invited to a team? Log in to access your dashboard.</span>
+          <Link to="/login" className="inline-flex items-center gap-1.5 font-semibold underline underline-offset-2 hover:no-underline">
+            Log in
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
       <HeroSection />
       <ProblemSection />
       <FeaturesSection />
