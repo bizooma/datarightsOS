@@ -7,15 +7,21 @@
  * email to a submitter-supplied address (our sending domain → arbitrary inbox),
  * the endpoint is rate-limited to protect deliverability. Two windowed caps,
  * both measured against DataRightsRequest.created_date:
- *   - per site:  max SITE_MAX new requests in WINDOW_MINUTES
- *   - per email: max EMAIL_MAX new requests (same site + email) in WINDOW_MINUTES
- * Exceeding either returns HTTP 429 with a clear message; throttled attempts are
- * logged. Consent events are not throttled (they send no email).
+ *   - per site:  Site.intake_rate_limit_per_hour (default 100) new requests in the window
+ *   - per email: max EMAIL_MAX new requests (same site + email) in the window
+ *
+ * A throttle here would block a consumer from exercising a legal right, so the
+ * 429 is never a bare error: it points the consumer to the site's privacy
+ * contact email so they always have a way through. Throttled attempts are
+ * logged with site, timestamp, and email to tell abuse from a legitimate surge
+ * after the fact. Applies ONLY to this public intake endpoint — subscriber
+ * dashboard actions create DataRightsRequest rows through the authenticated SDK
+ * and never pass through here. Consent events are not throttled (no email).
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const WINDOW_MINUTES = 60;
-const SITE_MAX = 20;
+const DEFAULT_SITE_MAX = 100;
 const EMAIL_MAX = 3;
 
 Deno.serve(async (req) => {
@@ -85,19 +91,36 @@ Deno.serve(async (req) => {
       // Rate limit before creating anything: a rights_request sends an
       // acknowledgment email to requester_email, so an unthrottled form is an
       // open relay against our sending domain. Cap per site and per email over
-      // a rolling window, keyed on created_date.
+      // a rolling window, keyed on created_date. A throttle must never dead-end
+      // a real person exercising a legal right, so the 429 always routes them to
+      // the site's privacy contact email.
       const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
       const normalizedEmail = String(requester_email).trim().toLowerCase();
+      const siteMax = Number(site.intake_rate_limit_per_hour) > 0
+        ? Number(site.intake_rate_limit_per_hour)
+        : DEFAULT_SITE_MAX;
+
+      // Resolve the contact the consumer can reach directly (site → org fallback).
+      let contactEmail = (site.privacy_contact_email || '').trim();
+      if (!contactEmail && site.organization) {
+        try {
+          const org = await base44.asServiceRole.entities.Organization.get(site.organization);
+          contactEmail = (org?.privacy_contact_email || '').trim();
+        } catch { /* fall through to generic guidance */ }
+      }
+      const contactSentence = contactEmail
+        ? `Please email ${contactEmail} to submit your request.`
+        : `Please contact the business directly to submit your request.`;
 
       const recentForSite = await base44.asServiceRole.entities.DataRightsRequest.filter({
         site: site.id,
         created_date: { $gte: windowStart },
       });
 
-      if ((recentForSite || []).length >= SITE_MAX) {
-        console.log(`[intake] THROTTLED site ${site.id} (${site.domain}): ${recentForSite.length} requests in last ${WINDOW_MINUTES}m (cap ${SITE_MAX}). Rejected email=${normalizedEmail}.`);
+      if ((recentForSite || []).length >= siteMax) {
+        console.log(`[intake] THROTTLED site: site_id=${site.id} domain=${site.domain} email=${normalizedEmail} count=${recentForSite.length} cap=${siteMax} window=${WINDOW_MINUTES}m at=${new Date().toISOString()}`);
         return Response.json(
-          { error: `Too many requests. This site has reached its limit of ${SITE_MAX} privacy requests per hour. Please try again later.` },
+          { error: `We're receiving an unusually high number of requests right now. ${contactSentence}` },
           { status: 429, headers: corsHeaders },
         );
       }
@@ -106,9 +129,9 @@ Deno.serve(async (req) => {
         (r) => String(r.requester_email || '').trim().toLowerCase() === normalizedEmail,
       );
       if (recentForEmail.length >= EMAIL_MAX) {
-        console.log(`[intake] THROTTLED email ${normalizedEmail} on site ${site.id} (${site.domain}): ${recentForEmail.length} requests in last ${WINDOW_MINUTES}m (cap ${EMAIL_MAX}).`);
+        console.log(`[intake] THROTTLED email: site_id=${site.id} domain=${site.domain} email=${normalizedEmail} count=${recentForEmail.length} cap=${EMAIL_MAX} window=${WINDOW_MINUTES}m at=${new Date().toISOString()}`);
         return Response.json(
-          { error: `Too many requests. You've already submitted ${EMAIL_MAX} privacy requests for this site in the past hour. Please try again later or contact us directly.` },
+          { error: `We've already received several requests from this email address in the past hour. ${contactSentence}` },
           { status: 429, headers: corsHeaders },
         );
       }

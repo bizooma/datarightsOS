@@ -136,6 +136,11 @@
       "type": "string",
       "default": "1.0",
       "description": "Current privacy policy version"
+    },
+    "intake_rate_limit_per_hour": {
+      "type": "number",
+      "default": 100,
+      "description": "Max privacy rights requests accepted from this site's public widget per rolling hour before the intake endpoint returns a graceful 'too many requests' response that points the consumer to the privacy contact email. Protects our sending-domain deliverability from abuse while allowing legitimate surges (e.g. after a breach notice). A per-email cap of 3/hour is enforced separately and is not configurable."
     }
   },
   "required": [
