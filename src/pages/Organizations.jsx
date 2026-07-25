@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, LogIn, X, Check, Plus, Trash2 } from 'lucide-react';
+import { Building2, LogIn, X, Check, Plus, Trash2, UserPlus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -26,6 +26,7 @@ export default function Organizations() {
     () => sessionStorage.getItem('dros_impersonate_org') || null
   );
   const [showCreate, setShowCreate] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const { data: orgs = [], isLoading } = useQuery({
@@ -56,6 +57,16 @@ export default function Organizations() {
       setShowCreate(false);
     },
     onError: () => toast.error('Failed to create organization'),
+  });
+
+  const inviteUserMutation = useMutation({
+    mutationFn: ({ email, role }) => base44.users.inviteUser(email, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-users'] });
+      toast.success('Invitation sent');
+      setShowInvite(false);
+    },
+    onError: (e) => toast.error(e?.message || 'Failed to invite user'),
   });
 
   const deleteOrgMutation = useMutation({
@@ -117,6 +128,10 @@ export default function Organizations() {
                 Exit Impersonation
               </Button>
             )}
+            <Button size="sm" variant="outline" className="h-9 text-sm" onClick={() => setShowInvite(true)}>
+              <UserPlus className="w-3.5 h-3.5 mr-1.5" />
+              Invite User
+            </Button>
             <Button size="sm" className="h-9 text-sm" onClick={() => setShowCreate(true)}>
               <Plus className="w-3.5 h-3.5 mr-1.5" />
               New Organization
@@ -130,6 +145,14 @@ export default function Organizations() {
           ⚡ You are impersonating: <strong>{sessionStorage.getItem('dros_impersonate_org_name')}</strong>.
           All actions you take will affect this organization. <button className="underline ml-1" onClick={clearImpersonation}>Exit</button>
         </div>
+      )}
+
+      {showInvite && (
+        <InviteUserForm
+          onSubmit={(data) => inviteUserMutation.mutate(data)}
+          onCancel={() => setShowInvite(false)}
+          isPending={inviteUserMutation.isPending}
+        />
       )}
 
       {showCreate && (
@@ -240,6 +263,49 @@ export default function Organizations() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+function InviteUserForm({ onSubmit, onCancel, isPending }) {
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('owner');
+
+  return (
+    <Card className="mb-6">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold">Invite User</CardTitle>
+      </CardHeader>
+      <CardContent className="grid grid-cols-2 gap-4 max-w-2xl">
+        <div>
+          <Label className="text-xs text-muted-foreground mb-1.5 block">Email *</Label>
+          <Input value={email} onChange={e => setEmail(e.target.value)} type="email" className="h-9 text-sm" placeholder="client@example.com" />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground mb-1.5 block">Role</Label>
+          <Select value={role} onValueChange={setRole}>
+            <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="owner">Owner</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="staff">Staff</SelectItem>
+              <SelectItem value="user">User</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="col-span-2">
+          <p className="text-[11px] text-muted-foreground">
+            The user receives an email invite to set their own password. Once they appear in the list, assign them to an organization via New Organization → Owner.
+          </p>
+        </div>
+        <div className="col-span-2 flex gap-2 justify-end">
+          <Button size="sm" variant="outline" className="h-9" onClick={onCancel}>Cancel</Button>
+          <Button size="sm" className="h-9" onClick={() => onSubmit({ email: email.trim(), role })} disabled={!email.trim() || isPending}>
+            <Check className="w-3.5 h-3.5 mr-1.5" />
+            Send Invite
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
