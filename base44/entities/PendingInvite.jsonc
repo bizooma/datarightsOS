@@ -1,0 +1,37 @@
+{
+  "name": "PendingInvite",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Lowercased email address the invite was sent to"
+    },
+    "organization": {
+      "type": "string",
+      "description": "Reference to the Organization the invited user should be assigned to on first login"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "admin",
+        "staff"
+      ],
+      "default": "staff",
+      "description": "Role the invited user should have once assigned"
+    },
+    "consumed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this invite has been applied to a user account already"
+    },
+    "invited_by": {
+      "type": "string",
+      "description": "Email of the user who sent the invite"
+    }
+  },
+  "required": [
+    "email",
+    "organization"
+  ]
+}

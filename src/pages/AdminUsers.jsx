@@ -15,12 +15,13 @@ import { UserPlus, Trash2, PauseCircle, PlayCircle, Search } from 'lucide-react'
 import { toast } from 'sonner';
 
 export default function AdminUsers() {
-  const { isSuperAdmin, user } = useCurrentUser();
+  const { isSuperAdmin, orgId, user } = useCurrentUser();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [newEmail, setNewEmail] = useState('');
-  const [newRole, setNewRole] = useState('user');
+  const [newRole, setNewRole] = useState('staff');
+  const [newOrgId, setNewOrgId] = useState('');
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['all-users'],
@@ -34,13 +35,29 @@ export default function AdminUsers() {
 
   const orgMap = Object.fromEntries(orgs.map(o => [o.id, o]));
 
+  // Super admin picks any org; a regular admin subscriber is locked to their own org.
+  const targetOrgId = isSuperAdmin ? newOrgId : orgId;
+
   const inviteMutation = useMutation({
-    mutationFn: () => base44.users.inviteUser(newEmail.trim(), newRole),
+    mutationFn: async () => {
+      const email = newEmail.trim().toLowerCase();
+      // Record which org the invited user should join on first login.
+      await base44.entities.PendingInvite.create({
+        email,
+        organization: targetOrgId,
+        role: newRole,
+        invited_by: user?.email,
+      });
+      // The platform invite is scoped to app-level role only; org is applied on first login.
+      const appRole = newRole === 'staff' ? 'user' : 'admin';
+      return base44.users.inviteUser(email, appRole);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-users'] });
       setShowAddForm(false);
       setNewEmail('');
-      setNewRole('user');
+      setNewRole('staff');
+      setNewOrgId('');
       toast.success('Invitation sent');
     },
     onError: () => toast.error('Failed to send invitation'),
@@ -90,8 +107,8 @@ export default function AdminUsers() {
       {showAddForm && (
         <Card className="mb-6">
           <CardContent className="pt-5">
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
+            <div className="flex items-end gap-3 flex-wrap">
+              <div className="flex-1 min-w-[200px]">
                 <Label className="text-xs text-muted-foreground mb-1.5 block">Email</Label>
                 <Input
                   placeholder="user@example.com"
@@ -100,21 +117,37 @@ export default function AdminUsers() {
                   className="h-9 text-sm"
                 />
               </div>
+              {isSuperAdmin && (
+                <div className="w-56">
+                  <Label className="text-xs text-muted-foreground mb-1.5 block">Organization</Label>
+                  <Select value={newOrgId} onValueChange={setNewOrgId}>
+                    <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select org…" /></SelectTrigger>
+                    <SelectContent>
+                      {orgs.map(o => (
+                        <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="w-36">
                 <Label className="text-xs text-muted-foreground mb-1.5 block">Role</Label>
                 <Select value={newRole} onValueChange={setNewRole}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="staff">Staff</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <Button size="sm" className="h-9" onClick={() => inviteMutation.mutate()} disabled={!newEmail.trim() || inviteMutation.isPending}>
+              <Button size="sm" className="h-9" onClick={() => inviteMutation.mutate()} disabled={!newEmail.trim() || !targetOrgId || inviteMutation.isPending}>
                 {inviteMutation.isPending ? 'Sending…' : 'Send Invite'}
               </Button>
               <Button size="sm" variant="outline" className="h-9" onClick={() => setShowAddForm(false)}>Cancel</Button>
             </div>
+            {!isSuperAdmin && (
+              <p className="text-[11px] text-muted-foreground mt-2">The invited user will join your organization.</p>
+            )}
           </CardContent>
         </Card>
       )}

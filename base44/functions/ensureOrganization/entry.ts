@@ -1,15 +1,18 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
-// Ensures the signed-in user has an Organization. If they don't, creates one on
-// the free trial plan, links it to the user, and makes them the owner.
-// Idempotent: returns the existing org if one is already linked.
+// Ensures the signed-in user has an Organization.
+// Order of resolution:
+//  1. Already linked to an org -> return it (idempotent).
+//  2. A pending invite exists for their email -> link them to THAT org with the
+//     invited role, mark the invite consumed. (No new org created.)
+//  3. Otherwise -> create a fresh trial org and make them the owner.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Already has an org — nothing to do.
+    // 1. Already has an org — nothing to do.
     if (user.organization) {
       const existing = await base44.asServiceRole.entities.Organization.filter({ id: user.organization });
       if (existing[0]) {
@@ -17,7 +20,28 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Create a fresh trial organization for this user.
+    // 2. Look for a pending invite matching this user's email.
+    const email = (user.email || '').toLowerCase();
+    if (email) {
+      const invites = await base44.asServiceRole.entities.PendingInvite.filter({
+        email,
+        consumed: false,
+      });
+      const invite = invites[0];
+      if (invite?.organization) {
+        const orgs = await base44.asServiceRole.entities.Organization.filter({ id: invite.organization });
+        if (orgs[0]) {
+          await base44.asServiceRole.entities.User.update(user.id, {
+            organization: invite.organization,
+            role: invite.role || 'staff',
+          });
+          await base44.asServiceRole.entities.PendingInvite.update(invite.id, { consumed: true });
+          return Response.json({ created: false, invited: true, organization: orgs[0] });
+        }
+      }
+    }
+
+    // 3. No invite — create a fresh trial organization for this user.
     const now = new Date().toISOString();
     const orgName = user.full_name
       ? `${user.full_name}'s Organization`
@@ -30,7 +54,6 @@ Deno.serve(async (req) => {
       billing_status: 'active',
     });
 
-    // Link the org to the user and make them the owner.
     await base44.asServiceRole.entities.User.update(user.id, {
       organization: org.id,
       role: 'owner',

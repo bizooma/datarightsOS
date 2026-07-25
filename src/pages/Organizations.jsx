@@ -60,7 +60,17 @@ export default function Organizations() {
   });
 
   const inviteUserMutation = useMutation({
-    mutationFn: ({ email, role }) => base44.users.inviteUser(email, role),
+    mutationFn: async ({ email, role, organization }) => {
+      const cleanEmail = email.toLowerCase();
+      await base44.entities.PendingInvite.create({
+        email: cleanEmail,
+        organization,
+        role,
+        invited_by: user?.email,
+      });
+      const appRole = role === 'staff' ? 'user' : 'admin';
+      return base44.users.inviteUser(cleanEmail, appRole);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-users'] });
       toast.success('Invitation sent');
@@ -149,6 +159,7 @@ export default function Organizations() {
 
       {showInvite && (
         <InviteUserForm
+          orgs={orgs}
           onSubmit={(data) => inviteUserMutation.mutate(data)}
           onCancel={() => setShowInvite(false)}
           isPending={inviteUserMutation.isPending}
@@ -266,9 +277,10 @@ export default function Organizations() {
   );
 }
 
-function InviteUserForm({ onSubmit, onCancel, isPending }) {
+function InviteUserForm({ orgs = [], onSubmit, onCancel, isPending }) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('owner');
+  const [organization, setOrganization] = useState('');
 
   return (
     <Card className="mb-6">
@@ -288,18 +300,28 @@ function InviteUserForm({ onSubmit, onCancel, isPending }) {
               <SelectItem value="owner">Owner</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="staff">Staff</SelectItem>
-              <SelectItem value="user">User</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="col-span-2">
+          <Label className="text-xs text-muted-foreground mb-1.5 block">Organization *</Label>
+          <Select value={organization} onValueChange={setOrganization}>
+            <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select organization…" /></SelectTrigger>
+            <SelectContent>
+              {orgs.map(o => (
+                <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         <div className="col-span-2">
           <p className="text-[11px] text-muted-foreground">
-            The user receives an email invite to set their own password. Once they appear in the list, assign them to an organization via New Organization → Owner.
+            The user receives an email invite to set their own password. When they first log in, they're automatically assigned to the chosen organization with the selected role — no new organization is created for them.
           </p>
         </div>
         <div className="col-span-2 flex gap-2 justify-end">
           <Button size="sm" variant="outline" className="h-9" onClick={onCancel}>Cancel</Button>
-          <Button size="sm" className="h-9" onClick={() => onSubmit({ email: email.trim(), role })} disabled={!email.trim() || isPending}>
+          <Button size="sm" className="h-9" onClick={() => onSubmit({ email: email.trim(), role, organization })} disabled={!email.trim() || !organization || isPending}>
             <Check className="w-3.5 h-3.5 mr-1.5" />
             Send Invite
           </Button>
