@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
     const asStringList = (v) => Array.isArray(v) ? v.map(x => sanitize(String(x), 120)).filter(Boolean).slice(0, 50) : [];
 
     await base44.asServiceRole.entities.ConsentRecord.create({
+      organization: site.organization,
       site: site.id,
       visitor_id: visitorId,
       action: body.action,
@@ -125,6 +126,7 @@ Deno.serve(async (req) => {
 
   } else if (type === 'accessibility_report') {
     await base44.asServiceRole.entities.AccessibilityReport.create({
+      organization: site.organization,
       site: site.id,
       page_url: sanitize(body.page_url, 500),
       description: sanitize(body.description, 2000),

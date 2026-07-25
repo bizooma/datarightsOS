@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
       const receiptId = 'cr_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10);
 
       const record = await base44.asServiceRole.entities.ConsentRecord.create({
+        organization: site.organization,
         site: site.id,
         visitor_id: visitor_id || ('v_anon_' + Math.random().toString(36).substring(2, 12)),
         action,

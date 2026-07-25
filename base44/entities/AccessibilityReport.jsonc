@@ -2,6 +2,10 @@
   "name": "AccessibilityReport",
   "type": "object",
   "properties": {
+    "organization": {
+      "type": "string",
+      "description": "Reference to Organization (denormalized from the site at intake, for tenant scoping)"
+    },
     "site": {
       "type": "string",
       "description": "Reference to Site"
