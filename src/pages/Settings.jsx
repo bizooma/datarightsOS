@@ -20,23 +20,33 @@ import IntegrationsTab from '@/components/settings/IntegrationsTab';
 import RequesterEmailsTab from '@/components/settings/RequesterEmailsTab';
 import RegionalTab from '@/components/settings/RegionalTab';
 import { canAddMember, canUseOutboundWebhook } from '@/lib/planLimits';
+import { getStoredReferral } from '@/lib/referral';
 import { Globe } from 'lucide-react';
 
 export default function Settings() {
-  const { orgId, user, isOwnerOrAdmin } = useCurrentUser();
+  const { orgId, user, loading, isSuperAdmin, isOwnerOrAdmin } = useCurrentUser();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const activeTab = ['profile', 'branding', 'regional', 'requester-emails', 'team', 'integrations', 'plan'].includes(tabParam) ? tabParam : 'profile';
 
+  // Resolve the org through ensureOrganization (service role) — same path AppLayout
+  // uses — so it works even when a user-scoped Organization read would return nothing
+  // (missing user.organization link or RLS blocking the direct filter). For an
+  // impersonating super-admin, fall back to the direct read of the impersonated org.
   const { data: org, isLoading } = useQuery({
-    queryKey: ['organization', orgId],
+    queryKey: ['organization', orgId, user?.id],
     queryFn: async () => {
-      if (!orgId) return null;
-      const orgs = await base44.entities.Organization.filter({ id: orgId });
-      return orgs[0] || null;
+      if (isSuperAdmin && orgId) {
+        const orgs = await base44.entities.Organization.filter({ id: orgId });
+        return orgs[0] || null;
+      }
+      const res = await base44.functions.invoke('ensureOrganization', {
+        referral_source: getStoredReferral() || undefined,
+      });
+      return res?.data?.organization || null;
     },
-    enabled: !!orgId,
+    enabled: !loading && !!user,
   });
 
   const { data: teamMembers = [], refetch: refetchTeam } = useQuery({
@@ -53,7 +63,7 @@ export default function Settings() {
 
   const siteCount = sites.length;
 
-  if (isLoading) return <Skeleton className="h-64 w-full rounded-lg" />;
+  if (loading || isLoading) return <Skeleton className="h-64 w-full rounded-lg" />;
 
   return (
     <div>
