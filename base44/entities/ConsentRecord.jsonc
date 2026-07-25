@@ -2,6 +2,10 @@
   "name": "ConsentRecord",
   "type": "object",
   "properties": {
+    "organization": {
+      "type": "string",
+      "description": "Reference to Organization (denormalized from the site at intake, for tenant scoping)"
+    },
     "site": {
       "type": "string",
       "description": "Reference to Site"
@@ -101,5 +105,43 @@
   "required": [
     "site",
     "action"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization": "{{user.data.organization}}"
+        },
+        {
+          "user_condition": {
+            "role": "bizooma_superadmin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization": "{{user.data.organization}}"
+        },
+        {
+          "user_condition": {
+            "role": "bizooma_superadmin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization": "{{user.data.organization}}"
+        },
+        {
+          "user_condition": {
+            "role": "bizooma_superadmin"
+          }
+        }
+      ]
+    }
+  }
 }
