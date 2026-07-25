@@ -118,7 +118,7 @@ export default function BillingTab({ org, siteCount, memberCount }) {
       {org.plan !== 'agency' && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold">Upgrade Plan</CardTitle>
+            <CardTitle className="text-sm font-semibold">{org.plan === 'trial' ? 'Start a Paid Plan' : 'Upgrade Plan'}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -152,7 +152,7 @@ export default function BillingTab({ org, siteCount, memberCount }) {
               })}
             </div>
             <p className="text-[11px] text-muted-foreground mt-3">
-              To upgrade your plan, contact <a href="mailto:sales@datarightsos.com" className="underline">sales@datarightsos.com</a>.
+              Pick a plan to start your paid subscription instantly — you'll be redirected to secure checkout. The Agency plan is sales-assisted.
             </p>
           </CardContent>
         </Card>
