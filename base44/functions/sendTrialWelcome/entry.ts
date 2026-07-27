@@ -30,6 +30,41 @@ Deno.serve(async (req) => {
     const fullName = owners[0]?.full_name || '';
     const firstName = fullName ? fullName.split(' ')[0] : 'there';
 
+    // Internal alert: notify the team whenever a new trial starts. Uses Resend
+    // directly so it reliably reaches an internal address (not a registered app user).
+    try {
+      const resendApiKey = Deno.env.get('RESEND_API_KEY');
+      const fromEmail = Deno.env.get('RESEND_FROM_EMAIL');
+      if (resendApiKey && fromEmail) {
+        const signupTime = org.trial_started_at || org.created_date || new Date().toISOString();
+        const alertRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: `DataRightsOS <${fromEmail}>`,
+            to: ['joe@bizooma.com'],
+            reply_to: email,
+            subject: `🎉 New trial signup: ${org.name}`,
+            text: `A new free trial just started on DataRightsOS.\n\n` +
+              `Organization: ${org.name}\n` +
+              `Owner: ${fullName || '(no name)'} <${email}>\n` +
+              (org.referral_source ? `Referral: ${org.referral_source}\n` : '') +
+              `Signed up: ${signupTime}\n`,
+          }),
+        });
+        if (!alertRes.ok) {
+          console.error(`sendTrialWelcome internal alert failed ${alertRes.status}: ${await alertRes.text()}`);
+        }
+      } else {
+        console.log('sendTrialWelcome: Resend not configured, skipping internal alert');
+      }
+    } catch (e) {
+      console.error('sendTrialWelcome internal alert error', e?.message || e);
+    }
+
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: email,
       subject: "Welcome to DataRightsOS, Your 7-day trial just started. Here's where to begin.",
