@@ -97,6 +97,34 @@
       "default": "bottom-right",
       "description": "Corner position of the widget launcher button"
     },
+    "widget_layout": {
+      "type": "string",
+      "enum": [
+        "floating",
+        "bar"
+      ],
+      "default": "floating",
+      "description": "How the first-visit consent moment appears on desktop/tablet: 'floating' (a card panel, current behavior) or 'bar' (a horizontal bar fixed across the bottom of the viewport). Presentation only \u2014 consent logic, GPC enforcement, and everything downstream are identical in both layouts. On mobile both layouts always render the consent moment as the bottom bar. After a choice is recorded, both layouts collapse to the same small pill launcher."
+    },
+    "launcher_position": {
+      "type": "string",
+      "enum": [
+        "bottom-right",
+        "bottom-left",
+        "bottom-center"
+      ],
+      "default": "bottom-right",
+      "description": "Corner/position of the MINIMIZED launcher pill. Independent of widget_position (which affects the floating panel). Lets subscribers place the launcher clear of host-site UI."
+    },
+    "launcher_offset_bottom": {
+      "type": "number",
+      "default": 0,
+      "description": "Distance in px to lift the minimized launcher (and the bar-layout consent bar) up from the bottom of the viewport, so it clears a host site's fixed bottom navigation. Applied on all screen sizes. iOS PWA safe-area inset is always added on top of this automatically. Default 0."
+    },
+    "launcher_offset_bottom_mobile": {
+      "type": "number",
+      "description": "Optional mobile-only override for launcher_offset_bottom (px). Most sites only have a bottom nav on mobile. If unset (null), mobile inherits launcher_offset_bottom."
+    },
     "widget_theme": {
       "type": "string",
       "enum": [

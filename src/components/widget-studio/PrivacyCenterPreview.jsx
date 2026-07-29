@@ -17,6 +17,11 @@ export default function PrivacyCenterPreview({ site }) {
   const drawers = site.enabled_drawers || ['cookies', 'privacy_rights'];
   const isDark = (site.widget_theme || 'dark') !== 'light';
   const openByDefault = site.default_open !== false;
+  const layout = site.widget_layout === 'bar' ? 'bar' : 'floating';
+  const launcherPos = site.launcher_position || 'bottom-right';
+  const launcherOffset = Number(site.launcher_offset_bottom) || 0;
+  // Preview is a desktop-sized frame, so it reflects the desktop behavior of the chosen layout.
+  const showBar = layout === 'bar';
   // Only Agency can hide the badge; otherwise it's always shown.
   const showBadge = !(org?.plan === 'agency' && site.hide_branding === true);
 
@@ -61,11 +66,11 @@ export default function PrivacyCenterPreview({ site }) {
           <div className="h-2 bg-gray-300 rounded w-1/2" />
         </div>
 
-        {/* Command Center panel — positioned bottom-right; hidden when the widget is collapsed by default */}
+        {/* Command Center panel — positioned bottom-right; hidden when collapsed by default or in bar layout */}
         <div
           className="absolute flex flex-col overflow-hidden"
           style={{
-            display: openByDefault ? 'flex' : 'none',
+            display: (openByDefault && !showBar) ? 'flex' : 'none',
             bottom: 56,
             right: 12,
             width: 290,
@@ -176,16 +181,51 @@ export default function PrivacyCenterPreview({ site }) {
           )}
         </div>
 
-        {/* Launcher button */}
+        {/* Bottom-bar consent moment — shown in bar layout instead of the floating panel */}
+        {showBar && (
+          <div
+            style={{
+              position: 'absolute', left: 0, right: 0, bottom: launcherOffset,
+              background: panelBg, color: panelText,
+              borderTop: `1px solid ${divider}`,
+              boxShadow: '0 -8px 30px -10px rgba(20,32,43,0.35)',
+              padding: '12px 14px',
+              display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            }}
+          >
+            <div style={{ flex: '1 1 180px', minWidth: 140, fontSize: 12, fontWeight: 600, color: panelText, lineHeight: 1.4 }}>
+              We use cookies. Choose how this site can use them.
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              {['Reject all', 'Accept all', 'Manage settings'].map((lbl, i) => (
+                <div key={lbl} style={{
+                  border: `1px solid ${i === 1 ? accent : divider}`,
+                  background: i === 1 ? accent : cardBg,
+                  color: i === 1 ? '#fff' : panelText,
+                  borderRadius: 8, padding: '8px 14px', fontSize: 11.5, fontWeight: 650, cursor: 'default',
+                }}>{lbl}</div>
+              ))}
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: accent, textDecoration: 'underline' }}>Privacy Center</span>
+            </div>
+          </div>
+        )}
+
+        {/* Launcher button — honors launcher position & bottom offset (collapsed state) */}
         <div
           style={{
-            position: 'absolute', bottom: 12, right: 12,
+            position: 'absolute', bottom: 12 + launcherOffset,
+            ...(launcherPos === 'bottom-left'
+              ? { left: 12 }
+              : launcherPos === 'bottom-center'
+                ? { left: '50%', transform: 'translateX(-50%)' }
+                : { right: 12 }),
             background: launcherBg, color: launcherColor,
             border: launcherBorder,
             borderRadius: 999, padding: '8px 12px',
             fontSize: 11, fontWeight: 600,
             boxShadow: '0 8px 24px -6px rgba(20,32,43,0.4)',
-            display: 'flex', alignItems: 'center', gap: 6,
+            display: showBar ? 'none' : 'flex', alignItems: 'center', gap: 6,
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             cursor: 'default',
           }}
@@ -194,6 +234,11 @@ export default function PrivacyCenterPreview({ site }) {
           Privacy &amp; Data Rights
         </div>
       </div>
+      {showBar && (
+        <p className="text-[11px] text-muted-foreground">
+          Bar layout: this is the first-visit consent moment. After a choice, it collapses to the launcher pill (shown when you switch to the floating layout). On phones both layouts use this bar.
+        </p>
+      )}
     </div>
   );
 }

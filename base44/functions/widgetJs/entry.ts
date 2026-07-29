@@ -428,6 +428,22 @@ Deno.serve(async (req) => {
     var showAI = drawers.indexOf('ai_disclosure') > -1;
 
     var pos = cfg.widget_position || 'bottom-right';
+
+    // Minimized-launcher placement — explicit config, no host auto-detection.
+    // Configurable bottom offset (to clear a host fixed bottom nav) + iOS PWA safe-area inset,
+    // with an optional mobile-specific override. Horizontal position: bottom-right/left/center.
+    var isMobileViewport = (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches) || window.innerWidth <= 640;
+    var offDesktop = Number(cfg.launcher_offset_bottom) || 0;
+    var offMobileRaw = cfg.launcher_offset_bottom_mobile;
+    var offMobile = (offMobileRaw === null || offMobileRaw === undefined || offMobileRaw === '') ? offDesktop : (Number(offMobileRaw) || 0);
+    var launcherOffset = isMobileViewport ? offMobile : offDesktop;
+    // Always add the iOS home-indicator safe area so the launcher clears it in standalone PWA mode.
+    var launcherBottomCSS = 'calc(' + launcherOffset + 'px + env(safe-area-inset-bottom, 0px) + 22px)';
+    var lpos = cfg.launcher_position || 'bottom-right';
+    var launcherPosCSS = lpos === 'bottom-left' ? 'left:22px;right:auto;transform:none'
+      : lpos === 'bottom-center' ? 'left:50%;right:auto;transform:translateX(-50%)'
+      : 'right:22px;left:auto;transform:none';
+
     var posCSS = pos === 'bottom-left' ? 'left:22px;bottom:22px;right:auto;top:auto'
       : pos === 'top-right' ? 'right:22px;top:22px;bottom:auto;left:auto'
       : pos === 'top-left' ? 'left:22px;top:22px;bottom:auto;right:auto'
@@ -440,7 +456,7 @@ Deno.serve(async (req) => {
     var css = ''
       + ':host{all:initial}'
       + '*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}'
-      + '.launcher{position:fixed;' + posCSS + ';z-index:2147483000;display:flex;align-items:center;gap:8px;background:' + launcherBg + ';color:' + launcherColor + ';border:' + launcherBorder + ';cursor:pointer;padding:11px 15px;border-radius:999px;box-shadow:0 14px 40px -10px rgba(20,32,43,.45);font-size:13px;font-weight:600}'
+      + '.launcher{position:fixed;bottom:' + launcherBottomCSS + ';' + launcherPosCSS + ';z-index:2147483000;display:flex;align-items:center;gap:8px;background:' + launcherBg + ';color:' + launcherColor + ';border:' + launcherBorder + ';cursor:pointer;padding:11px 15px;border-radius:999px;box-shadow:0 14px 40px -10px rgba(20,32,43,.45);font-size:13px;font-weight:600}'
       + '.launcher .dot{width:7px;height:7px;border-radius:50%;background:' + accent + '}'
       + '.panel{position:fixed;' + panelCSS + ';z-index:2147483001;width:380px;max-width:calc(100vw - 28px);max-height:86vh;background:' + panelBg + ';border-radius:16px;box-shadow:0 18px 50px -12px rgba(20,32,43,.4);display:flex;flex-direction:column;overflow:hidden;border:1px solid ' + panelBorder + '}'
       + '.hidden{display:none !important}'
@@ -517,7 +533,16 @@ Deno.serve(async (req) => {
       + '.modal-body *{color:' + panelText + ' !important}'
       + '.modal-body h1,.modal-body h2,.modal-body h3{margin:12px 0 4px}'
       + '.modal-body p{margin:0 0 8px}.modal-body ul,.modal-body ol{padding-left:18px;margin:0 0 8px}'
-      + '.modal-body a{text-decoration:underline}';
+      + '.modal-body a{text-decoration:underline}'
+      // --- Bar layout (first-visit consent moment) — presentation only ---
+      + '.cbar{position:fixed;left:0;right:0;bottom:0;z-index:2147483001;background:' + panelBg + ';color:' + panelText + ';border-top:1px solid ' + divider + ';box-shadow:0 -10px 40px -12px rgba(20,32,43,.35);padding:14px 18px;padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px) + ' + launcherOffset + 'px);display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-height:15vh;overflow:auto}'
+      + '.cbar .cbmsg{flex:1 1 240px;min-width:200px;font-size:13px;font-weight:600;color:' + panelText + ';line-height:1.4}'
+      + '.cbar .cbactions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}'
+      + '.cbar .cbbtn{border:1px solid ' + divider + ';cursor:pointer;font-weight:650;font-size:12.5px;padding:10px 18px;border-radius:8px;background:' + itemBg + ';color:' + panelText + ';min-width:104px;text-align:center;font-family:inherit}'
+      + '.cbar .cbbtn.p{background:' + accent + ';color:#fff;border-color:' + accent + '}'
+      + '.cbar .cblink{background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:' + accent + ';text-decoration:underline;padding:6px 2px;font-family:inherit}'
+      + '.cbar:focus-visible,.cbar .cbbtn:focus-visible,.cbar .cblink:focus-visible,.launcher:focus-visible{outline:3px solid ' + accent + ';outline-offset:2px}'
+      + '@media (max-width:640px){.cbar{max-height:none;flex-direction:column;align-items:stretch}.cbar .cbactions{flex-direction:column;align-items:stretch}.cbar .cbbtn{width:100%}}';
 
     function ytEmbed(url) {
       var m = (url || '').match(/(?:youtu\\.be\\/|v=)([\\w-]{11})/); return m ? 'https://www.youtube.com/embed/' + m[1] + '?rel=0' : '';
@@ -548,9 +573,27 @@ Deno.serve(async (req) => {
       ai: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=400&q=70'
     };
 
+    // Layout decision for the FIRST-VISIT consent moment (presentation only).
+    // Desktop/tablet honors the subscriber's widget_layout; mobile always uses the bar
+    // (a floating card on a phone is strictly worse). After a decision exists, neither
+    // renders — both collapse to the same launcher pill.
+    var useBar = showConsentBlock && (isMobileViewport || (cfg.widget_layout === 'bar'));
+
+    var barHtml = useBar ? ''
+      + '<div class="cbar" id="CBAR" role="dialog" aria-modal="false" aria-label="' + esc(t.cookieTitle) + '" tabindex="-1">'
+      + '<div class="cbmsg">' + esc(t.consentLine) + '</div>'
+      + '<div class="cbactions">'
+      + '<button class="cbbtn" id="BR2">' + esc(t.rejectAll) + '</button>'
+      + '<button class="cbbtn" id="BA2">' + esc(t.acceptAll) + '</button>'
+      + '<button class="cbbtn" id="BM2">' + esc(t.manageSettings) + '</button>'
+      + '<button class="cblink" id="BPC">' + esc(t.launcher) + '</button>'
+      + '</div>'
+      + '</div>' : '';
+
     var html = ''
       + '<style>' + css + '</style>'
-      + '<button class="launcher" id="L"><span class="dot"></span>' + esc(t.launcher) + '</button>'
+      + '<button class="launcher' + (useBar ? ' hidden' : '') + '" id="L"><span class="dot"></span>' + esc(t.launcher) + '</button>'
+      + barHtml
       + '<div class="panel hidden" id="P">'
       + '<div class="phead"><div class="crest">' + (cfg.logo_url ? '<img src="' + esc(cfg.logo_url) + '">' : 'D') + '</div>'
       + '<div><h2>' + esc(cfg.product_name) + '</h2><div class="pill"><span class="pdot"></span>' + esc(t.statusCompliant) + '</div></div>'
@@ -626,17 +669,26 @@ Deno.serve(async (req) => {
     var $ = function (id) { return root.getElementById ? root.getElementById(id) : root.querySelector('#' + id); };
     var q = function (s) { return root.querySelectorAll(s); };
 
-    var L = $('L'), P = $('P'), T = $('T'), tt;
+    var L = $('L'), P = $('P'), T = $('T'), CBAR = $('CBAR'), tt;
     function toast(m) { T.textContent = m; T.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { T.classList.remove('show'); }, 2200); }
     // On mobile, never auto-open the panel — show only the launcher so it doesn't cover the page.
     // On desktop, only auto-open when the site is configured to open by default (default_open !== false).
-    var isMobile = (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches) || window.innerWidth <= 640;
+    var isMobile = isMobileViewport;
     // Auto-open only while no consent decision exists. After any decision, the launcher stays available
     // but the panel no longer auto-opens on page load. (Language re-render passes keepOpen and should stay open.)
     var openByDefault = cfg.default_open !== false;
-    if (((keepOpen && openByDefault && !hasDecision) || forceOpen) && !isMobile) { P.classList.remove('hidden'); L.classList.add('hidden'); }
+    // When the bar is the first-visit consent moment, the floating panel does NOT auto-open;
+    // the bar owns that moment. forceOpen (e.g. after a language re-render that was open) still opens.
+    if (((keepOpen && openByDefault && !hasDecision && !useBar) || forceOpen) && !isMobile) { P.classList.remove('hidden'); L.classList.add('hidden'); }
     L.onclick = function () { P.classList.remove('hidden'); L.classList.add('hidden'); };
-    $('X').onclick = function () { P.classList.add('hidden'); L.classList.remove('hidden'); };
+    $('X').onclick = function () { P.classList.add('hidden'); if (!useBar) L.classList.remove('hidden'); };
+
+    // Accessibility: announce the bar on appear (focus it) and keep it keyboard-operable.
+    // Escape must NOT dismiss it without a choice — the consent moment stays until a decision.
+    if (CBAR) {
+      setTimeout(function () { try { CBAR.focus(); } catch (e) {} }, 50);
+      CBAR.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); } });
+    }
 
     // Language picker — persist choice and re-render the panel in the new language (keeping it open).
     q('[data-lang]').forEach(function (b) {
@@ -715,6 +767,14 @@ Deno.serve(async (req) => {
       if ($('HA')) $('HA').onclick = function () { decideAndRerender('accept_all', { functional: true, analytics: true, advertising: GPC ? false : true }); };
       if ($('HR')) $('HR').onclick = function () { decideAndRerender('reject_all', { functional: false, analytics: false, advertising: false }); };
       if ($('HM')) $('HM').onclick = function () { showSection('cookies'); };
+
+      // Bar-layout consent buttons — identical enforcement path as the card/panel.
+      // Accept/Reject have equal prominence (same button size/weight; see .cbbtn CSS).
+      if ($('BA2')) $('BA2').onclick = function () { decideAndRerender('accept_all', { functional: true, analytics: true, advertising: GPC ? false : true }); };
+      if ($('BR2')) $('BR2').onclick = function () { decideAndRerender('reject_all', { functional: false, analytics: false, advertising: false }); };
+      // Manage settings / Privacy Center — open the existing panel (unchanged), one tap to statements & rights.
+      if ($('BM2')) $('BM2').onclick = function () { P.classList.remove('hidden'); showSection('cookies'); };
+      if ($('BPC')) $('BPC').onclick = function () { P.classList.remove('hidden'); showHome(); };
     }
 
     if (showRights) {

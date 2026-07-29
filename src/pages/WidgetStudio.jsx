@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
 import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
+import LayoutPicker from '@/components/widget-studio/LayoutPicker';
 import LegalStatementsEditor from '@/components/widget-studio/LegalStatementsEditor';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -322,6 +323,11 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
               </SelectContent>
             </Select>
           </div>
+          <LayoutPicker
+            value={form.widget_layout || 'floating'}
+            accent={form.brand_primary_color || '#0d7d74'}
+            onChange={v => handleChange('widget_layout', v)}
+          />
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block">Widget Position</Label>
             <Select value={form.widget_position || 'bottom-right'} onValueChange={v => handleChange('widget_position', v)}>
@@ -333,6 +339,43 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
                 <SelectItem value="top-left">Top Left</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="pt-2 border-t border-border space-y-4">
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Launcher Position (when minimized)</Label>
+              <Select value={form.launcher_position || 'bottom-right'} onValueChange={v => handleChange('launcher_position', v)}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                  <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                  <SelectItem value="bottom-center">Bottom Center</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Distance from bottom of screen (px)</Label>
+              <Input
+                type="number"
+                min="0"
+                value={form.launcher_offset_bottom ?? 0}
+                onChange={e => handleChange('launcher_offset_bottom', e.target.value === '' ? 0 : Number(e.target.value))}
+                placeholder="0"
+                className="h-9 text-sm w-40"
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">Lifts the launcher (and the bottom-bar consent moment) above a host site's fixed bottom navigation. A site with a 72px bottom nav sets ~80. The iPhone home-indicator safe area is always cleared automatically.</p>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Mobile bottom distance override (px, optional)</Label>
+              <Input
+                type="number"
+                min="0"
+                value={form.launcher_offset_bottom_mobile ?? ''}
+                onChange={e => handleChange('launcher_offset_bottom_mobile', e.target.value === '' ? null : Number(e.target.value))}
+                placeholder="inherits desktop value"
+                className="h-9 text-sm w-56"
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">Many sites only have a bottom nav on mobile. Leave blank to reuse the value above on all screens.</p>
+            </div>
           </div>
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block">Widget Theme</Label>
