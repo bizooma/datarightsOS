@@ -558,15 +558,22 @@ Deno.serve(async (req) => {
       // --- Persistent bar mode: launcher variant (bottom-anchored rounded-square) ---
       + '.launcher.barlauncher{bottom:' + barLauncherBottomCSS + ';' + barLauncherPosCSS + ';border-radius:12px;padding:12px 16px}'
       // --- Persistent bar mode: expanded panel as a full-width bottom bar (desktop/tablet) ---
+      // Target ~30vh; 45vh is a ceiling, not a target. Reads as a bar, not a takeover.
       + '.panel.barpanel{left:0;right:0;bottom:0;top:auto;width:100%;max-width:100%;max-height:45vh;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom, 0px)}'
-      + '.panel.barpanel .body{display:flex;flex-direction:row;flex-wrap:wrap;gap:0 24px;align-items:flex-start}'
-      + '.panel.barpanel #HOME{flex:1 1 100%}'
-      + '.panel.barpanel .cardgrid{grid-template-columns:repeat(3,1fr)}'
-      + '.panel.barpanel .cardgrid.threeup{grid-template-columns:repeat(3,1fr)}'
+      + '.panel.barpanel .body{padding:12px 20px}'
+      + '.panel.barpanel #HOME,.panel.barpanel #SECTIONS{width:100%}'
+      // Four action cards in ONE row (4 equal columns, no wrap to a second row).
+      + '.panel.barpanel .cardgrid,.panel.barpanel .cardgrid.threeup{grid-template-columns:repeat(4,1fr)}'
       + '.panel.barpanel .cardgrid.threeup .ccard:first-child{grid-column:auto}'
-      + '.panel.barpanel #SECTIONS,.panel.barpanel #HOME{width:100%}'
-      // --- Persistent bar mode on mobile: expanded panel as a bottom sheet ---
-      + '@media (max-width:640px){.panel.barpanel{max-height:85vh}.panel.barpanel .body{flex-direction:column;flex-wrap:nowrap;gap:0}.panel.barpanel .cardgrid,.panel.barpanel .cardgrid.threeup{grid-template-columns:1fr 1fr}}'
+      // Halve the card image height; keep title + one-line subtitle.
+      + '.panel.barpanel .ccard .chead{height:34px}'
+      + '.panel.barpanel .ccard .cbody{padding:6px 10px 8px}'
+      // Statement links in a single thin one-line row beneath the cards.
+      + '.panel.barpanel .stmtlinks{flex-wrap:nowrap;overflow:hidden;justify-content:center;padding:7px 20px}'
+      // --- Tablet: 2x2 grid. ---
+      + '@media (min-width:641px) and (max-width:900px){.panel.barpanel .cardgrid,.panel.barpanel .cardgrid.threeup{grid-template-columns:1fr 1fr}}'
+      // --- Persistent bar mode on mobile: expanded panel as a bottom sheet (single column, 85vh). ---
+      + '@media (max-width:640px){.panel.barpanel{max-height:85vh}.panel.barpanel .body{padding:12px 16px}.panel.barpanel .ccard .chead{height:54px}.panel.barpanel .cardgrid,.panel.barpanel .cardgrid.threeup{grid-template-columns:1fr 1fr}.panel.barpanel .stmtlinks{flex-wrap:wrap}}'
       // Backdrop behind the expanded bar/sheet so it reads as a modal surface.
       + '.barbackdrop{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,0.35)}'
       + '.barpanel:focus-visible{outline:3px solid ' + accent + ';outline-offset:-3px}';
@@ -823,11 +830,13 @@ Deno.serve(async (req) => {
 
       // First-layer consent block: same enforcement path as the panel buttons, then
       // re-render so the block is replaced by the returning-visitor state (tiles + status).
+      // In BAR mode a consent choice must COLLAPSE to the launcher, never auto-expand the panel
+      // (forceOpen=false). In floating mode the panel stays open as before (forceOpen=true).
       function decideAndRerender(action, grants) {
         var enf = applyDecision(grants, { persisted: false });
         post({ type: 'consent', action: action, necessary: true, functional: grants.functional, analytics: grants.analytics, advertising: grants.advertising, enforcement: enf });
         host.remove();
-        render(cfg, true, true);
+        render(cfg, true, !barMode);
       }
       if ($('HA')) $('HA').onclick = function () { decideAndRerender('accept_all', { functional: true, analytics: true, advertising: GPC ? false : true }); };
       if ($('HR')) $('HR').onclick = function () { decideAndRerender('reject_all', { functional: false, analytics: false, advertising: false }); };
