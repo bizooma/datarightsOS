@@ -211,7 +211,9 @@ export default function PrivacyCenterPreview({ site }) {
           </div>
         )}
 
-        {/* Launcher button — honors launcher position & bottom offset (collapsed state) */}
+        {/* Launcher button — honors launcher position & bottom offset (collapsed state).
+            In bar layout the launcher is bottom-anchored and rounded-square (persistent bar treatment);
+            in floating layout it's the pill. Hidden here only while the first-visit consent bar is showing. */}
         <div
           style={{
             position: 'absolute', bottom: 12 + launcherOffset,
@@ -222,7 +224,7 @@ export default function PrivacyCenterPreview({ site }) {
                 : { right: 12 }),
             background: launcherBg, color: launcherColor,
             border: launcherBorder,
-            borderRadius: 999, padding: '8px 12px',
+            borderRadius: showBar ? 12 : 999, padding: showBar ? '9px 13px' : '8px 12px',
             fontSize: 11, fontWeight: 600,
             boxShadow: '0 8px 24px -6px rgba(20,32,43,0.4)',
             display: showBar ? 'none' : 'flex', alignItems: 'center', gap: 6,
@@ -236,7 +238,7 @@ export default function PrivacyCenterPreview({ site }) {
       </div>
       {showBar && (
         <p className="text-[11px] text-muted-foreground">
-          Bar layout: this is the first-visit consent moment. After a choice, it collapses to the launcher pill (shown when you switch to the floating layout). On phones both layouts use this bar.
+          Bar layout is persistent: first visit shows this consent bar. After a choice it collapses to a bottom-anchored launcher, and clicking it expands a full-width panel from the bottom (a bottom sheet on phones) — never the floating card.
         </p>
       )}
     </div>

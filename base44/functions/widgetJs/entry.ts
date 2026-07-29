@@ -453,6 +453,18 @@ Deno.serve(async (req) => {
       : pos === 'top-left' ? 'left:22px;top:22px;bottom:auto;right:auto'
       : 'right:22px;bottom:22px;left:auto;top:auto';
 
+    // PERSISTENT bar mode: when widget_layout === 'bar', the bottom-anchored treatment
+    // applies to ALL states (launcher + expanded panel), not just the first-visit consent
+    // moment. floating behaves exactly as before. The panel is ONE component; barMode only
+    // swaps its container/positioning class — content, state, and handlers are identical.
+    var barMode = cfg.widget_layout === 'bar';
+    // Launcher in bar mode sits flush against the bottom edge (honoring offset + safe area),
+    // full-width-friendly rounded-square, not the floating pill.
+    var barLauncherPosCSS = lpos === 'bottom-left' ? 'left:22px;right:auto;transform:none'
+      : lpos === 'bottom-center' ? 'left:50%;right:auto;transform:translateX(-50%)'
+      : 'right:22px;left:auto;transform:none';
+    var barLauncherBottomCSS = 'calc(' + launcherOffset + 'px + env(safe-area-inset-bottom, 0px) + 12px)';
+
     var css = ''
       + ':host{all:initial}'
       + '*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}'
@@ -542,7 +554,22 @@ Deno.serve(async (req) => {
       + '.cbar .cbbtn.p{background:' + accent + ';color:#fff;border-color:' + accent + '}'
       + '.cbar .cblink{background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:' + accent + ';text-decoration:underline;padding:6px 2px;font-family:inherit}'
       + '.cbar:focus-visible,.cbar .cbbtn:focus-visible,.cbar .cblink:focus-visible,.launcher:focus-visible{outline:3px solid ' + accent + ';outline-offset:2px}'
-      + '@media (max-width:640px){.cbar{max-height:none;flex-direction:column;align-items:stretch}.cbar .cbactions{flex-direction:column;align-items:stretch}.cbar .cbbtn{width:100%}}';
+      + '@media (max-width:640px){.cbar{max-height:none;flex-direction:column;align-items:stretch}.cbar .cbactions{flex-direction:column;align-items:stretch}.cbar .cbbtn{width:100%}}'
+      // --- Persistent bar mode: launcher variant (bottom-anchored rounded-square) ---
+      + '.launcher.barlauncher{bottom:' + barLauncherBottomCSS + ';' + barLauncherPosCSS + ';border-radius:12px;padding:12px 16px}'
+      // --- Persistent bar mode: expanded panel as a full-width bottom bar (desktop/tablet) ---
+      + '.panel.barpanel{left:0;right:0;bottom:0;top:auto;width:100%;max-width:100%;max-height:45vh;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom, 0px)}'
+      + '.panel.barpanel .body{display:flex;flex-direction:row;flex-wrap:wrap;gap:0 24px;align-items:flex-start}'
+      + '.panel.barpanel #HOME{flex:1 1 100%}'
+      + '.panel.barpanel .cardgrid{grid-template-columns:repeat(3,1fr)}'
+      + '.panel.barpanel .cardgrid.threeup{grid-template-columns:repeat(3,1fr)}'
+      + '.panel.barpanel .cardgrid.threeup .ccard:first-child{grid-column:auto}'
+      + '.panel.barpanel #SECTIONS,.panel.barpanel #HOME{width:100%}'
+      // --- Persistent bar mode on mobile: expanded panel as a bottom sheet ---
+      + '@media (max-width:640px){.panel.barpanel{max-height:85vh}.panel.barpanel .body{flex-direction:column;flex-wrap:nowrap;gap:0}.panel.barpanel .cardgrid,.panel.barpanel .cardgrid.threeup{grid-template-columns:1fr 1fr}}'
+      // Backdrop behind the expanded bar/sheet so it reads as a modal surface.
+      + '.barbackdrop{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,0.35)}'
+      + '.barpanel:focus-visible{outline:3px solid ' + accent + ';outline-offset:-3px}';
 
     function ytEmbed(url) {
       var m = (url || '').match(/(?:youtu\\.be\\/|v=)([\\w-]{11})/); return m ? 'https://www.youtube.com/embed/' + m[1] + '?rel=0' : '';
@@ -592,9 +619,10 @@ Deno.serve(async (req) => {
 
     var html = ''
       + '<style>' + css + '</style>'
-      + '<button class="launcher' + (useBar ? ' hidden' : '') + '" id="L"><span class="dot"></span>' + esc(t.launcher) + '</button>'
+      + '<button class="launcher' + (barMode ? ' barlauncher' : '') + (useBar ? ' hidden' : '') + '" id="L" aria-label="' + esc(t.launcher) + '" title="' + esc(t.launcher) + '"><span class="dot"></span>' + esc(t.launcher) + '</button>'
       + barHtml
-      + '<div class="panel hidden" id="P">'
+      + (barMode ? '<div class="barbackdrop hidden" id="BD"></div>' : '')
+      + '<div class="panel' + (barMode ? ' barpanel' : '') + ' hidden" id="P"' + (barMode ? ' role="dialog" aria-modal="true" aria-label="' + esc(t.launcher) + '" tabindex="-1"' : '') + '>'
       + '<div class="phead"><div class="crest">' + (cfg.logo_url ? '<img src="' + esc(cfg.logo_url) + '">' : 'D') + '</div>'
       + '<div><h2>' + esc(cfg.product_name) + '</h2><div class="pill"><span class="pdot"></span>' + esc(t.statusCompliant) + '</div></div>'
       + '<div class="langpick"><button data-lang="en" class="' + (lang === 'en' ? 'on' : '') + '">EN</button><button data-lang="es" class="' + (lang === 'es' ? 'on' : '') + '">ES</button></div>'
@@ -669,19 +697,56 @@ Deno.serve(async (req) => {
     var $ = function (id) { return root.getElementById ? root.getElementById(id) : root.querySelector('#' + id); };
     var q = function (s) { return root.querySelectorAll(s); };
 
-    var L = $('L'), P = $('P'), T = $('T'), CBAR = $('CBAR'), tt;
+    var L = $('L'), P = $('P'), T = $('T'), CBAR = $('CBAR'), BD = $('BD'), tt;
     function toast(m) { T.textContent = m; T.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { T.classList.remove('show'); }, 2200); }
     // On mobile, never auto-open the panel — show only the launcher so it doesn't cover the page.
     // On desktop, only auto-open when the site is configured to open by default (default_open !== false).
     var isMobile = isMobileViewport;
-    // Auto-open only while no consent decision exists. After any decision, the launcher stays available
-    // but the panel no longer auto-opens on page load. (Language re-render passes keepOpen and should stay open.)
     var openByDefault = cfg.default_open !== false;
-    // When the bar is the first-visit consent moment, the floating panel does NOT auto-open;
-    // the bar owns that moment. forceOpen (e.g. after a language re-render that was open) still opens.
-    if (((keepOpen && openByDefault && !hasDecision && !useBar) || forceOpen) && !isMobile) { P.classList.remove('hidden'); L.classList.add('hidden'); }
-    L.onclick = function () { P.classList.remove('hidden'); L.classList.add('hidden'); };
-    $('X').onclick = function () { P.classList.add('hidden'); if (!useBar) L.classList.remove('hidden'); };
+
+    // Focus trap for the expanded panel (bar-mode modal): keep Tab within the panel while open.
+    var trapHandler = null;
+    function trapFocus(container) {
+      trapHandler = function (e) {
+        if (e.key !== 'Tab') return;
+        var f = container.querySelectorAll('button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])');
+        var vis = [];
+        f.forEach(function (el) { if (el.offsetParent !== null || el === container) vis.push(el); });
+        if (!vis.length) return;
+        var first = vis[0], last = vis[vis.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      };
+      container.addEventListener('keydown', trapHandler);
+    }
+
+    function openPanel() {
+      P.classList.remove('hidden');
+      L.classList.add('hidden');
+      if (barMode) {
+        if (BD) BD.classList.remove('hidden');
+        // Move focus into the panel, trap it, and support Escape-to-close.
+        setTimeout(function () { try { P.focus(); } catch (e) {} }, 30);
+        trapFocus(P);
+      }
+    }
+    function closePanel() {
+      P.classList.add('hidden');
+      if (barMode && BD) BD.classList.add('hidden');
+      if (trapHandler) { P.removeEventListener('keydown', trapHandler); trapHandler = null; }
+      if (!useBar) { L.classList.remove('hidden'); try { L.focus(); } catch (e) {} }
+    }
+
+    // Auto-open only while no consent decision exists. After any decision, the launcher stays available.
+    // When the bar is the first-visit consent moment, the floating/expanded panel does NOT auto-open.
+    if (((keepOpen && openByDefault && !hasDecision && !useBar) || forceOpen) && !isMobile) { openPanel(); }
+    L.onclick = openPanel;
+    $('X').onclick = closePanel;
+    if (BD) BD.onclick = closePanel;
+    // Escape closes the expanded panel and returns focus to the launcher.
+    if (barMode) {
+      P.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.preventDefault(); closePanel(); } });
+    }
 
     // Accessibility: announce the bar on appear (focus it) and keep it keyboard-operable.
     // Escape must NOT dismiss it without a choice — the consent moment stays until a decision.
@@ -772,9 +837,9 @@ Deno.serve(async (req) => {
       // Accept/Reject have equal prominence (same button size/weight; see .cbbtn CSS).
       if ($('BA2')) $('BA2').onclick = function () { decideAndRerender('accept_all', { functional: true, analytics: true, advertising: GPC ? false : true }); };
       if ($('BR2')) $('BR2').onclick = function () { decideAndRerender('reject_all', { functional: false, analytics: false, advertising: false }); };
-      // Manage settings / Privacy Center — open the existing panel (unchanged), one tap to statements & rights.
-      if ($('BM2')) $('BM2').onclick = function () { P.classList.remove('hidden'); showSection('cookies'); };
-      if ($('BPC')) $('BPC').onclick = function () { P.classList.remove('hidden'); showHome(); };
+      // Manage settings / Privacy Center — open the existing panel, one tap to statements & rights.
+      if ($('BM2')) $('BM2').onclick = function () { openPanel(); showSection('cookies'); };
+      if ($('BPC')) $('BPC').onclick = function () { openPanel(); showHome(); };
     }
 
     if (showRights) {
