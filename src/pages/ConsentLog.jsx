@@ -61,31 +61,40 @@ export default function ConsentLog() {
 
   const plan = org?.plan;
   const canExport = canExportOwn(plan);
-  // Notice tier: show only the most recent N days in the dashboard. Older records
-  // are retained in the database (never deleted) and reappear on upgrade.
+  // Notice tier: only the most recent N days are queryable in the dashboard. Older
+  // records are retained in the database (never deleted) and reappear on upgrade.
   const historyDays = getPlanLimits(plan).retentionDays;
   const limitHistory = !canExport && Number.isFinite(historyDays);
-  const historyCutoff = limitHistory ? Date.now() - historyDays * 24 * 60 * 60 * 1000 : null;
+  // ISO cutoff applied to the query itself (server-side), so the API never returns
+  // rows older than the window for a Notice org — the fence is not cosmetic.
+  const historyCutoffISO = limitHistory
+    ? new Date(Date.now() - historyDays * 24 * 60 * 60 * 1000).toISOString()
+    : null;
 
   const orgSiteIds = sites.map(s => s.id);
 
   const { data: records = [], isLoading } = useQuery({
-    queryKey: ['consent-records', orgId, orgSiteIds],
+    queryKey: ['consent-records', orgId, orgSiteIds, historyCutoffISO],
     queryFn: async () => {
       if (orgSiteIds.length === 0) return [];
-      // Fetch by each site belonging to org
+      // Fetch by each site belonging to org. For Notice orgs, the created_date
+      // window is applied in the query so older records are never sent to the client.
       const results = await Promise.all(
-        orgSiteIds.map(siteId => base44.entities.ConsentRecord.filter({ site: siteId }, '-created_date', 200))
+        orgSiteIds.map(siteId => {
+          const q = { site: siteId };
+          if (historyCutoffISO) q.created_date = { $gte: historyCutoffISO };
+          return base44.entities.ConsentRecord.filter(q, '-created_date', 200);
+        })
       );
       return results.flat().sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
     },
-    enabled: orgSiteIds.length > 0,
+    // Wait for org to load before querying, so we never fetch unfiltered rows first.
+    enabled: orgSiteIds.length > 0 && !!org,
   });
 
   const siteMap = Object.fromEntries(sites.map(s => [s.id, s]));
 
   const filtered = records.filter(r => {
-    if (historyCutoff && new Date(r.created_date).getTime() < historyCutoff) return false;
     if (actionFilter !== 'all' && r.action !== actionFilter) return false;
     if (siteFilter !== 'all' && r.site !== siteFilter) return false;
     if (search) {
