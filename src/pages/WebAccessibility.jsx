@@ -16,13 +16,13 @@ const supportingPoints = [
   },
   {
     icon: Activity,
-    title: 'Continuous monitoring, not a one-time scan',
-    body: 'Accessibility breaks every time your site changes — we watch for it.',
+    title: 'A visitor barrier-reporting channel',
+    body: 'Visitors report accessibility problems straight from the widget, and you track and respond to each one from your dashboard.',
   },
   {
     icon: ShieldOff,
     title: 'No overlay snake oil',
-    body: 'We help you remediate, avoiding the exact overstated claims the FTC penalized accessiBe $1 million for making.',
+    body: 'We give you a statement and a reporting channel — not the "fully compliant" overlay claims the FTC penalized accessiBe $1 million for making.',
   },
 ];
 
@@ -39,8 +39,8 @@ export default function WebAccessibility() {
               The fastest-growing lawsuit in America starts with your website.
             </h1>
             <p className="mt-6 text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Accessibility monitoring and remediation aligned to WCAG 2.1 AA — the standard courts
-              actually use.
+              An accessibility statement referencing WCAG 2.1 AA — the standard courts actually use —
+              plus a built-in way for visitors to report barriers.
             </p>
             <div className="mt-9 flex items-center justify-center gap-3">
               <Link
@@ -84,9 +84,10 @@ export default function WebAccessibility() {
             </p>
             <p className="text-foreground font-medium">
               DataRightsOS takes accessibility seriously instead of papering over it. Our widget
-              continuously monitors your site against WCAG 2.1 AA, surfaces the issues that actually
-              expose you, and guides real remediation — no false "fully compliant" promises that invite
-              the next lawsuit.
+              publishes your accessibility statement referencing WCAG 2.1 AA and gives visitors a clear
+              way to report the barriers they run into, which you track and respond to from your
+              dashboard — no false "fully compliant" promises that invite the next lawsuit. The work of
+              fixing your site, and compliance itself, remains yours.
             </p>
           </div>
         </section>

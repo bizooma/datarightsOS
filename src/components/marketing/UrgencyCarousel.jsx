@@ -92,7 +92,7 @@ export default function UrgencyCarousel() {
             <div className="border-t border-red-700/30 bg-red-950/30 px-5 py-3 flex items-center justify-center gap-1.5">
               <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
               <span className="text-[11px] font-bold uppercase tracking-wider text-red-300">
-                Stay Compliant
+                Stay Ahead
               </span>
             </div>
           </article>

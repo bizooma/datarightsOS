@@ -34,8 +34,8 @@ const features = [
     color: '#b58a2e',
     title: 'Web accessibility',
     description:
-      'Continuous monitoring and remediation guidance aligned to WCAG 2.1 Level AA — the standard courts and the DOJ actually use. No false "fully compliant" overlay promises that invite the next ADA lawsuit.',
-    details: ['WCAG 2.1 Level AA aligned', 'Continuous monitoring, not one-time scans', 'Barrier reporting built into the widget', 'Real remediation, no overlay snake oil'],
+      'Publish an accessibility statement referencing WCAG 2.1 Level AA — the standard courts and the DOJ actually use — and give visitors a built-in way to report barriers they hit. You track and respond to each report from your dashboard. No "fully compliant" overlay promises that invite the next ADA lawsuit.',
+    details: ['References WCAG 2.1 Level AA', 'Accessibility statement in the widget', 'Visitor barrier reporting built in', 'Reports tracked in your dashboard'],
     link: '/web-accessibility',
   },
 ];
@@ -45,7 +45,7 @@ const auditTrail = {
   color: '#b58a2e',
   title: 'Immutable audit trail',
   description:
-    'Every consent choice and every request event is written to a tamper-evident log. Export it as a timestamped CSV any time — your proof of compliance in a regulatory inquiry or litigation hold.',
+    'Every consent choice and every request event is written to a tamper-evident log. Export it as a timestamped CSV any time — your own record of what happened, for a regulatory inquiry or litigation hold.',
   details: ['Timestamped event log per request', 'Consent receipt archive', 'CSV and report export', 'Organization-level isolation'],
 };
 
@@ -55,7 +55,7 @@ export default function FeaturesSection() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-14">
           <h2 className="text-2xl md:text-3xl font-bold text-[#14202b] mb-3">
-            Everything a compliant site needs. Nothing it doesn't.
+            The tools your site needs. Nothing it doesn't.
           </h2>
           <p className="text-slate-500 max-w-xl mx-auto">
             Four focused modules, deployed with one embed snippet.
