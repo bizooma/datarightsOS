@@ -17,7 +17,7 @@ const plans = [
       'AI use statement (incl. Spanish)',
       'All four legal statements in-widget',
       'Both widget layouts (floating + bar)',
-      'Consent log (90-day retention)',
+      'Consent log (90 days of history)',
       'Privacy requests forwarded by email',
     ],
   },

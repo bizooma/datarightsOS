@@ -36,7 +36,8 @@ export const PLAN_LIMITS = {
     price: '$39/mo',
     priceMonthly: '$39/mo',
     priceAnnual: '$390/yr',
-    // Consent log is viewable in-dashboard with 90-day retention, no export.
+    // Consent log shows the last 90 days in-dashboard, no export. Older records are
+    // retained in the database (never deleted), just not displayed until upgrade.
     retentionDays: 90,
     canExportOwn: false,
     canBulkScheduledExport: false,
@@ -50,7 +51,7 @@ export const PLAN_LIMITS = {
       'Accessibility statement + barrier reports',
       'All four legal statements in-widget',
       'Both widget layouts (floating + bar)',
-      'Consent log (90-day retention, view only)',
+      'Consent log (90 days of history, view only)',
     ],
   },
   core: {

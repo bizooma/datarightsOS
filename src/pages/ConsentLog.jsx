@@ -3,6 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import { exportToCSV, formatStatus } from '@/lib/tenantUtils';
+import { canExportOwn, getPlanLimits } from '@/lib/planLimits';
+import { Link } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import GeoDeviceInsights from '@/components/consent-log/GeoDeviceInsights';
@@ -47,6 +49,24 @@ export default function ConsentLog() {
     enabled: !!orgId,
   });
 
+  const { data: org } = useQuery({
+    queryKey: ['org', orgId],
+    queryFn: async () => {
+      if (!orgId) return null;
+      const rows = await base44.entities.Organization.filter({ id: orgId });
+      return rows[0] || null;
+    },
+    enabled: !!orgId,
+  });
+
+  const plan = org?.plan;
+  const canExport = canExportOwn(plan);
+  // Notice tier: show only the most recent N days in the dashboard. Older records
+  // are retained in the database (never deleted) and reappear on upgrade.
+  const historyDays = getPlanLimits(plan).retentionDays;
+  const limitHistory = !canExport && Number.isFinite(historyDays);
+  const historyCutoff = limitHistory ? Date.now() - historyDays * 24 * 60 * 60 * 1000 : null;
+
   const orgSiteIds = sites.map(s => s.id);
 
   const { data: records = [], isLoading } = useQuery({
@@ -65,6 +85,7 @@ export default function ConsentLog() {
   const siteMap = Object.fromEntries(sites.map(s => [s.id, s]));
 
   const filtered = records.filter(r => {
+    if (historyCutoff && new Date(r.created_date).getTime() < historyCutoff) return false;
     if (actionFilter !== 'all' && r.action !== actionFilter) return false;
     if (siteFilter !== 'all' && r.site !== siteFilter) return false;
     if (search) {
@@ -79,6 +100,7 @@ export default function ConsentLog() {
   });
 
   const handleExport = () => {
+    if (!canExport) return;
     const exportData = filtered.map(r => ({
       consent_receipt_id: r.consent_receipt_id,
       site: siteMap[r.site]?.domain || r.site,
@@ -108,12 +130,23 @@ export default function ConsentLog() {
         title="Consent Log"
         description="Review visitor consent records across your sites"
         actions={
-          <Button variant="outline" size="sm" onClick={handleExport} className="h-9 text-sm">
-            <Download className="w-3.5 h-3.5 mr-1.5" />
-            Export CSV
-          </Button>
+          canExport ? (
+            <Button variant="outline" size="sm" onClick={handleExport} className="h-9 text-sm">
+              <Download className="w-3.5 h-3.5 mr-1.5" />
+              Export CSV
+            </Button>
+          ) : null
         }
       />
+
+      {limitHistory && (
+        <div className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span>Showing the last {historyDays} days.</span>
+          <Link to="/settings?tab=billing" className="font-medium text-primary hover:underline">
+            Upgrade to Core for full history.
+          </Link>
+        </div>
+      )}
 
       {/* Persistent warning for ungated trackers detected in the last 7 days */}
       {!isLoading && <UnmanagedTrackerAlert records={records} />}
