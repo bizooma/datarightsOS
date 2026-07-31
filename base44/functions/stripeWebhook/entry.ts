@@ -2,6 +2,9 @@ import Stripe from 'npm:stripe@17.3.1';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const PRICE_TO_PLAN = {
+  // Notice — monthly ($39) and annual ($390)
+  'price_1Tz4EXEV6sbsDlR8hXJDUbm0': 'notice',
+  'price_1Tz4EXEV6sbsDlR85bePAOse': 'notice',
   'price_1TlqlJEV6sbsDlR8DGP4QpH6': 'core',
   'price_1TlqnTEV6sbsDlR8JPOeWIEz': 'proof',
 };

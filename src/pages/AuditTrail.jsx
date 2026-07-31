@@ -10,9 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import { useOrg } from '@/lib/useOrg';
+import { canTrackRequests } from '@/lib/planLimits';
+import UpgradePanel from '@/components/billing/UpgradePanel';
 
 export default function AuditTrail() {
   const { orgId } = useCurrentUser();
+  const { plan, isLoading: orgLoading } = useOrg();
   const [search, setSearch] = useState('');
 
   const { data: events = [], isLoading } = useQuery({
@@ -45,6 +49,21 @@ export default function AuditTrail() {
     }));
     exportToCSV(exportData, 'audit_trail');
   };
+
+  // The audit trail belongs to the request engine — Core+. On Notice, show the
+  // upgrade path instead. (Downgraded orgs keep their records; they're just not
+  // accessible here per plan — see downgrade-safety note in planLimits.)
+  if (!orgLoading && !canTrackRequests(plan)) {
+    return (
+      <div>
+        <PageHeader title="Audit Trail" description="Immutable record of compliance activities" />
+        <UpgradePanel
+          title="Audit trail is a Core feature"
+          description="The audit trail records every action on a tracked privacy request. Your current plan forwards requests by email rather than tracking them. Upgrade to Core to get a full audit trail and CSV export."
+        />
+      </div>
+    );
+  }
 
   return (
     <div>

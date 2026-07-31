@@ -16,9 +16,14 @@ import OnboardingChecklist from '@/components/onboarding/OnboardingChecklist';
 import FulfillmentGuidePanel from '@/components/request-inbox/FulfillmentGuidePanel';
 import InlineStatusSelect from '@/components/request-inbox/InlineStatusSelect';
 import InlineAssignSelect from '@/components/request-inbox/InlineAssignSelect';
+import { useOrg } from '@/lib/useOrg';
+import { canTrackRequests, canExportOwn } from '@/lib/planLimits';
+import UpgradePanel from '@/components/billing/UpgradePanel';
+import RequestForwardBanner from '@/components/billing/RequestForwardBanner';
 
 export default function RequestInbox() {
   const { user, orgId } = useCurrentUser();
+  const { plan, isLoading: orgLoading } = useOrg();
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState('all');
   const [siteFilter, setSiteFilter] = useState('all');
@@ -105,22 +110,46 @@ export default function RequestInbox() {
     URL.revokeObjectURL(url);
   }
 
+  // Plan gate: the tracked request engine is Core+. On Notice, requests are
+  // forwarded by email — show the upgrade path (with the monthly forwarded-count
+  // banner) instead of a tracked inbox that would always be empty.
+  const tracksRequests = orgLoading ? true : canTrackRequests(plan);
+  const showExport = canExportOwn(plan);
+
+  if (!orgLoading && !tracksRequests) {
+    return (
+      <div>
+        <PageHeader
+          title="Privacy Requests"
+          description="How your plan handles incoming privacy requests"
+        />
+        <RequestForwardBanner orgId={orgId} canTrack={false} />
+        <UpgradePanel
+          title="Request tracking is a Core feature"
+          description="On your current plan, privacy requests submitted through your widget are forwarded to your privacy contact by email — the visitor sees a normal confirmation, but no request record, verification, or deadline clock is created. Upgrade to Core to track and manage them here."
+        />
+      </div>
+    );
+  }
+
   return (
     <div>
       <PageHeader
         title="Request Inbox"
         description="Manage incoming data rights requests"
         actions={
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 gap-1.5"
-            onClick={handleExportCsv}
-            disabled={sorted.length === 0}
-          >
-            <Download className="w-4 h-4" />
-            Export CSV
-          </Button>
+          showExport ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5"
+              onClick={handleExportCsv}
+              disabled={sorted.length === 0}
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </Button>
+          ) : null
         }
       />
 

@@ -5,6 +5,12 @@
 // canExportOwn: account can export its OWN request/audit records to CSV on demand.
 // canBulkScheduledExport: account can run bulk & scheduled CSV exports.
 // canHideBadge: account can remove the "Powered by DataRightsOS" widget badge.
+// canTrackRequests: account gets the full data-rights request ENGINE — a tracked
+//   Request record per submission, email verification, the 45-day statutory clock,
+//   fulfillment checklists, deadline alerts, and requester ack/completion emails.
+//   When FALSE (Notice tier), the widget still shows the "Submit a request" card,
+//   but a submission is FORWARDED by email to the subscriber and only a minimal,
+//   PII-light counter is stored — no tracked Request, no clock, no audit trail.
 export const PLAN_LIMITS = {
   trial: {
     sites: 1,
@@ -15,11 +21,36 @@ export const PLAN_LIMITS = {
     canExportOwn: true,
     canBulkScheduledExport: false,
     canHideBadge: false,
+    canTrackRequests: true,
     features: [
       '1 site',
       '2 team members',
       '100 consent records/mo',
       'Basic audit trail',
+    ],
+  },
+  notice: {
+    sites: 1,
+    teamMembers: 1,
+    label: 'Notice',
+    price: '$39/mo',
+    priceMonthly: '$39/mo',
+    priceAnnual: '$390/yr',
+    // Consent log is viewable in-dashboard with 90-day retention, no export.
+    retentionDays: 90,
+    canExportOwn: false,
+    canBulkScheduledExport: false,
+    canHideBadge: false,
+    // Entry tier: no tracked request engine — submissions are forwarded by email.
+    canTrackRequests: false,
+    features: [
+      '1 site / 1 domain',
+      '1 team member',
+      'Cookie consent with full GPC enforcement',
+      'Accessibility statement + barrier reports',
+      'All four legal statements in-widget',
+      'Both widget layouts (floating + bar)',
+      'Consent log (90-day retention, view only)',
     ],
   },
   core: {
@@ -31,6 +62,7 @@ export const PLAN_LIMITS = {
     canExportOwn: true,
     canBulkScheduledExport: false,
     canHideBadge: false,
+    canTrackRequests: true,
     features: [
       '1 site / 1 domain',
       '2 team members',
@@ -48,6 +80,7 @@ export const PLAN_LIMITS = {
     canExportOwn: true,
     canBulkScheduledExport: true,
     canHideBadge: false,
+    canTrackRequests: true,
     features: [
       'Up to 10 sites',
       '10 team members',
@@ -65,6 +98,7 @@ export const PLAN_LIMITS = {
     canExportOwn: true,
     canBulkScheduledExport: true,
     canHideBadge: true,
+    canTrackRequests: true,
     features: [
       'Unlimited sites',
       'Unlimited team members',
@@ -132,6 +166,25 @@ export function canBulkScheduledExport(plan) {
 // Only the Agency (white-label) plan can remove the "Powered by DataRightsOS" badge.
 export function canHideBadge(plan) {
   return !!getPlanLimits(plan).canHideBadge;
+}
+
+// Full data-rights request ENGINE: tracked Request record, email verification,
+// 45-day statutory clock, fulfillment checklists, deadline alerts, and requester
+// acknowledgment/completion emails. FALSE on Notice — submissions are forwarded by
+// email and only a minimal counter is stored. This is THE gate that separates the
+// entry (Notice) tier from Core+. Route every request-engine gate through here.
+export function canTrackRequests(plan) {
+  return !!getPlanLimits(plan).canTrackRequests;
+}
+
+// Team-member seat limit for the plan.
+export function getMemberLimit(plan) {
+  return getPlanLimits(plan).teamMembers;
+}
+
+// Site limit for the plan.
+export function getSiteLimit(plan) {
+  return getPlanLimits(plan).sites;
 }
 
 // Outbound webhook (Zapier / any endpoint). Available on all PAID plans for now.

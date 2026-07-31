@@ -3,10 +3,29 @@ import { Check, ArrowRight } from 'lucide-react';
 
 const plans = [
   {
+    name: 'Notice',
+    price: '$39',
+    period: '/mo',
+    description: 'Publish your statements, capture and enforce cookie choices, and give visitors a way to report barriers and submit requests.',
+    cta: 'Start Free Trial',
+    planKey: 'notice',
+    highlight: false,
+    features: [
+      '1 site / 1 domain',
+      'Cookie consent with full GPC enforcement',
+      'Accessibility statement + barrier reports',
+      'AI use statement (incl. Spanish)',
+      'All four legal statements in-widget',
+      'Both widget layouts (floating + bar)',
+      'Consent log (90-day retention)',
+      'Privacy requests forwarded by email',
+    ],
+  },
+  {
     name: 'Core',
     price: '$99',
     period: '/mo',
-    description: 'For a single site that needs solid privacy compliance.',
+    description: 'For a single site that needs to track privacy requests and deadlines.',
     cta: 'Start Free Trial',
     planKey: 'core',
     highlight: false,
@@ -95,7 +114,7 @@ export default function PricingSection() {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 items-start">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
           {plans.map((plan) => (
             <div
               key={plan.name}

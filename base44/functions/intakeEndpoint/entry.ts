@@ -19,10 +19,60 @@
  * and never pass through here. Consent events are not throttled (no email).
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { canTrackRequests } from '../../shared/planLimits.ts';
 
 const WINDOW_MINUTES = 60;
 const DEFAULT_SITE_MAX = 100;
 const EMAIL_MAX = 3;
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL');
+
+// Forward a privacy request by email to the subscriber (Notice tier). Uses Resend
+// so it reliably reaches an arbitrary subscriber inbox. Never throws — a failed
+// forward must not break the visitor's confirmation.
+async function forwardRequestByEmail(to: string, payload: any) {
+  if (!RESEND_API_KEY || !RESEND_FROM_EMAIL || !to) return false;
+  const { request_type, requester_name, requester_email, requester_state } = payload;
+  const typeLabels: Record<string, string> = {
+    access: 'Access my data', delete: 'Delete my data',
+    correct: 'Correct my data', opt_out: 'Opt out of sale/sharing',
+  };
+  const when = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }) + ' ET';
+  const subject = `New privacy request forwarded — ${typeLabels[request_type] || request_type}`;
+  const body = `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#14202b;max-width:560px">
+      <h2 style="font-size:18px;margin:0 0 12px">You've received a privacy request</h2>
+      <table style="font-size:14px;border-collapse:collapse;width:100%">
+        <tr><td style="padding:4px 12px 4px 0;color:#6b7a87">Type</td><td style="padding:4px 0;font-weight:600">${typeLabels[request_type] || request_type}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#6b7a87">Name</td><td style="padding:4px 0">${requester_name || '—'}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#6b7a87">Email</td><td style="padding:4px 0">${requester_email || '—'}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#6b7a87">State</td><td style="padding:4px 0">${requester_state || '—'}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#6b7a87">Received</td><td style="padding:4px 0">${when}</td></tr>
+      </table>
+      <p style="font-size:13px;line-height:1.55;color:#4a5a66;background:#f6f8f9;border:1px solid #e4e9ed;border-radius:8px;padding:12px;margin:16px 0">
+        This request was forwarded to you. Your current plan doesn't track privacy requests or response deadlines.
+        Most US state laws require a response within 45 days.
+      </p>
+      <div style="margin:16px 0">
+        <a href="https://datarightsos.com/settings" style="display:inline-block;background:#0d7d74;color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:10px 18px;border-radius:8px">
+          Upgrade to Core — track requests &amp; deadlines
+        </a>
+      </div>
+      <p style="font-size:12px;color:#8fa3b3">Core ($99/mo) tracks each request, verifies identity, runs the 45-day statutory clock, and sends acknowledgment &amp; completion emails automatically.</p>
+    </div>`;
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: RESEND_FROM_EMAIL, to, subject, html: body, reply_to: requester_email || undefined }),
+    });
+    if (!res.ok) { console.error('[intake] forward email failed:', res.status, await res.text()); return false; }
+    return true;
+  } catch (e) {
+    console.error('[intake] forward email error:', (e as Error).message);
+    return false;
+  }
+}
 
 Deno.serve(async (req) => {
   // CORS headers for widget cross-origin POSTs
@@ -88,6 +138,39 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'request_type, requester_name, requester_email are required' }, { status: 400, headers: corsHeaders });
       }
 
+      // Load the owning org once — needed for both the plan gate and the
+      // privacy-contact fallback used in throttle messages / forwarding.
+      let org: any = null;
+      if (site.organization) {
+        try { org = await base44.asServiceRole.entities.Organization.get(site.organization); } catch { /* ignore */ }
+      }
+
+      // Resolve the subscriber's privacy contact (site → org fallback).
+      const forwardEmail = (site.privacy_contact_email || org?.privacy_contact_email || '').trim();
+
+      // NOTICE TIER: the request-engine is not included. Do NOT create a tracked
+      // DataRightsRequest, do NOT verify the email, do NOT start the 45-day clock.
+      // Instead forward the submission by email to the subscriber and record a
+      // minimal, PII-light counter so the dashboard can prompt an upgrade. The
+      // visitor sees the SAME confirmation they'd get on Core — this is the
+      // subscriber's plan choice, not theirs.
+      if (!canTrackRequests(org?.plan)) {
+        const sent = await forwardRequestByEmail(forwardEmail, { request_type, requester_name, requester_email, requester_state });
+        try {
+          await base44.asServiceRole.entities.RequestForwardLog.create({
+            organization: site.organization,
+            site: site.id,
+            request_type,
+            forwarded_at: new Date().toISOString(),
+            forward_email_sent: sent,
+          });
+        } catch (e) {
+          console.error('[intake] RequestForwardLog create failed:', (e as Error).message);
+        }
+        // Same success shape as the tracked path (no statutory_deadline).
+        return Response.json({ success: true, forwarded: true }, { headers: corsHeaders });
+      }
+
       // Rate limit before creating anything: a rights_request sends an
       // acknowledgment email to requester_email, so an unthrottled form is an
       // open relay against our sending domain. Cap per site and per email over
@@ -101,13 +184,7 @@ Deno.serve(async (req) => {
         : DEFAULT_SITE_MAX;
 
       // Resolve the contact the consumer can reach directly (site → org fallback).
-      let contactEmail = (site.privacy_contact_email || '').trim();
-      if (!contactEmail && site.organization) {
-        try {
-          const org = await base44.asServiceRole.entities.Organization.get(site.organization);
-          contactEmail = (org?.privacy_contact_email || '').trim();
-        } catch { /* fall through to generic guidance */ }
-      }
+      const contactEmail = forwardEmail;
       const contactSentence = contactEmail
         ? `Please email ${contactEmail} to submit your request.`
         : `Please contact the business directly to submit your request.`;

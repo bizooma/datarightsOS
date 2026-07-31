@@ -1,9 +1,16 @@
 import Stripe from 'npm:stripe@17.3.1';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
+// Monthly price IDs by plan. Annual is a separate map — only Notice has an annual
+// price today (Core/Proof annual do not exist yet).
 const PRICE_IDS = {
+  notice: 'price_1Tz4EXEV6sbsDlR8hXJDUbm0',
   core: 'price_1TlqlJEV6sbsDlR8DGP4QpH6',
   proof: 'price_1TlqnTEV6sbsDlR8JPOeWIEz',
+};
+
+const PRICE_IDS_ANNUAL = {
+  notice: 'price_1Tz4EXEV6sbsDlR85bePAOse',
 };
 
 Deno.serve(async (req) => {
@@ -17,8 +24,10 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return Response.json({ error: 'Method Not Allowed' }, { status: 405, headers: CORS });
 
   try {
-    const { plan, success_url, cancel_url } = await req.json();
-    const priceId = PRICE_IDS[plan];
+    const { plan, billing_interval, success_url, cancel_url } = await req.json();
+    const wantsAnnual = billing_interval === 'annual' || billing_interval === 'year';
+    // Fall back to monthly when no annual price exists for the plan.
+    const priceId = (wantsAnnual && PRICE_IDS_ANNUAL[plan]) || PRICE_IDS[plan];
     if (!priceId) {
       return Response.json({ error: 'Invalid plan' }, { status: 400, headers: CORS });
     }

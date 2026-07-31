@@ -6,10 +6,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Check, AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
 
-const UPGRADE_ORDER = ['trial', 'core', 'proof', 'agency'];
+// Notice is the entry tier, below Core. Agency stays sales-assisted.
+const UPGRADE_ORDER = ['trial', 'notice', 'core', 'proof', 'agency'];
+// Plans that have a real annual Stripe price. Only Notice today — do not offer an
+// annual option for plans without a price (Core/Proof annual don't exist yet).
+const HAS_ANNUAL = { notice: true };
 
 export default function BillingTab({ org, siteCount, memberCount }) {
   const [loadingPlan, setLoadingPlan] = useState(null);
+  const [billingInterval, setBillingInterval] = useState('monthly');
 
   async function handleUpgrade(plan) {
     if (window.self !== window.top) {
@@ -18,8 +23,12 @@ export default function BillingTab({ org, siteCount, memberCount }) {
     }
     setLoadingPlan(plan);
     try {
+      // Only send annual when the chosen plan actually has an annual price; the
+      // backend falls back to monthly otherwise, but keep the request honest.
+      const interval = (billingInterval === 'annual' && HAS_ANNUAL[plan]) ? 'annual' : 'monthly';
       const { data } = await base44.functions.invoke('createCheckoutSession', {
         plan,
+        billing_interval: interval,
         success_url: `${window.location.origin}/dashboard?checkout=success`,
         cancel_url: `${window.location.origin}/dashboard?checkout=canceled`,
       });
@@ -116,18 +125,39 @@ export default function BillingTab({ org, siteCount, memberCount }) {
       {/* Upgrade options */}
       {org.plan !== 'agency' && (
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold">{org.plan === 'trial' ? 'Start a Paid Plan' : 'Upgrade Plan'}</CardTitle>
+          <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-semibold">{org.plan === 'trial' ? 'Choose a Plan' : 'Change Plan'}</CardTitle>
+            {/* Monthly / annual toggle. Annual applies only to plans that have an
+                annual price (Notice); others always check out monthly. */}
+            <div className="inline-flex rounded-lg border border-border p-0.5 bg-muted/40">
+              {['monthly', 'annual'].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => setBillingInterval(opt)}
+                  className={`text-[11px] font-medium px-3 py-1 rounded-md capitalize transition-colors ${
+                    billingInterval === opt ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {UPGRADE_ORDER.filter(p => UPGRADE_ORDER.indexOf(p) > UPGRADE_ORDER.indexOf(org.plan)).map(plan => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {UPGRADE_ORDER.filter(p => p !== 'trial' && UPGRADE_ORDER.indexOf(p) !== UPGRADE_ORDER.indexOf(org.plan)).map(plan => {
                 const pl = PLAN_LIMITS[plan];
+                const showAnnual = billingInterval === 'annual' && HAS_ANNUAL[plan];
+                const priceLabel = showAnnual ? (pl.priceAnnual || pl.price) : (pl.priceMonthly || pl.price);
+                const isDowngrade = UPGRADE_ORDER.indexOf(plan) < UPGRADE_ORDER.indexOf(org.plan);
                 return (
                   <div key={plan} className="border border-border rounded-lg p-4 flex flex-col gap-3">
                     <div>
                       <p className="text-sm font-semibold">{pl.label}</p>
-                      <p className="text-xs text-muted-foreground">{pl.price}</p>
+                      <p className="text-xs text-muted-foreground">{priceLabel}</p>
+                      {billingInterval === 'annual' && !HAS_ANNUAL[plan] && plan !== 'agency' && (
+                        <p className="text-[10px] text-muted-foreground mt-0.5">Billed monthly</p>
+                      )}
                     </div>
                     <ul className="space-y-1 flex-1">
                       {pl.features.slice(0, 3).map((f, i) => (
@@ -142,8 +172,8 @@ export default function BillingTab({ org, siteCount, memberCount }) {
                         <a href="mailto:sales@datarightsos.com?subject=Agency%20Plan%20Inquiry">Contact Sales</a>
                       </Button>
                     ) : (
-                      <Button size="sm" className="h-8 text-xs w-full" onClick={() => handleUpgrade(plan)} disabled={loadingPlan === plan}>
-                        {loadingPlan === plan ? <Loader2 className="w-3 h-3 animate-spin" /> : `Upgrade to ${pl.label}`}
+                      <Button size="sm" variant={isDowngrade ? 'outline' : 'default'} className="h-8 text-xs w-full" onClick={() => handleUpgrade(plan)} disabled={loadingPlan === plan}>
+                        {loadingPlan === plan ? <Loader2 className="w-3 h-3 animate-spin" /> : `${isDowngrade ? 'Switch to' : 'Upgrade to'} ${pl.label}`}
                       </Button>
                     )}
                   </div>
@@ -151,7 +181,7 @@ export default function BillingTab({ org, siteCount, memberCount }) {
               })}
             </div>
             <p className="text-[11px] text-muted-foreground mt-3">
-              Pick a plan to start your paid subscription instantly — you'll be redirected to secure checkout. The Agency plan is sales-assisted.
+              Changing plans redirects you to secure checkout; upgrades take effect immediately with prorated billing. The Agency plan is sales-assisted.
             </p>
           </CardContent>
         </Card>

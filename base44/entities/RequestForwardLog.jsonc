@@ -1,0 +1,76 @@
+{
+  "name": "RequestForwardLog",
+  "type": "object",
+  "properties": {
+    "organization": {
+      "type": "string",
+      "description": "Reference to Organization (denormalized from the site at intake, for tenant scoping)"
+    },
+    "site": {
+      "type": "string",
+      "description": "Reference to Site the request came in on"
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "access",
+        "delete",
+        "correct",
+        "opt_out"
+      ],
+      "description": "Type of privacy request that was forwarded"
+    },
+    "forwarded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the request was forwarded by email to the subscriber"
+    },
+    "forward_email_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the forwarding email to the subscriber's privacy contact was successfully sent"
+    }
+  },
+  "required": [
+    "site",
+    "request_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization": "{{user.data.organization}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization": "{{user.data.organization}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization": "{{user.data.organization}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

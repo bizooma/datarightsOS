@@ -1,0 +1,22 @@
+// Server-side mirror of the plan gating in src/lib/planLimits.js.
+// Backend functions (Deno) cannot import from src/, so the request-engine gate
+// that separates the Notice entry tier from Core+ lives here for functions to use.
+//
+// canTrackRequests: FALSE on Notice — the widget still shows the "Submit a request"
+// card, but a submission is FORWARDED by email to the subscriber and only a minimal,
+// PII-light counter (RequestForwardLog) is stored. No tracked DataRightsRequest,
+// no email verification, no 45-day clock, no fulfillment checklist, no audit trail.
+const PLAN_TRACKS_REQUESTS: Record<string, boolean> = {
+  trial: true,
+  notice: false,
+  core: true,
+  proof: true,
+  agency: true,
+};
+
+export function canTrackRequests(plan: string | undefined | null): boolean {
+  // Default to TRUE for any unknown plan — safer to track than to silently drop a
+  // real privacy request. Only the explicit Notice tier forwards instead of tracks.
+  if (!plan) return true;
+  return PLAN_TRACKS_REQUESTS[plan] !== false;
+}
