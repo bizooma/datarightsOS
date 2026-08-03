@@ -160,7 +160,7 @@ export default function BillingTab({ org, siteCount, memberCount }) {
                       )}
                     </div>
                     <ul className="space-y-1 flex-1">
-                      {pl.features.slice(0, 3).map((f, i) => (
+                      {pl.features.slice(0, 5).map((f, i) => (
                         <li key={i} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                           <Check className="w-3 h-3 text-primary shrink-0" />
                           {f}
