@@ -60,6 +60,8 @@ export const PLAN_LIMITS = {
     teamMembers: 2,
     label: 'Core',
     price: '$99/mo',
+    priceMonthly: '$99/mo',
+    priceAnnual: '$990/yr',
     retentionDays: 365,
     canExportOwn: true,
     canBulkScheduledExport: false,

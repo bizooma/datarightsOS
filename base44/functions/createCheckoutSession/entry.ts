@@ -11,6 +11,7 @@ const PRICE_IDS = {
 
 const PRICE_IDS_ANNUAL = {
   notice: 'price_1Tz4EXEV6sbsDlR85bePAOse',
+  core: 'price_1U0PB1EV6sbsDlR8UkUlb4hy',
 };
 
 Deno.serve(async (req) => {
