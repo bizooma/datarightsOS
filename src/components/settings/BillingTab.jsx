@@ -10,7 +10,7 @@ import { Check, AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
 const UPGRADE_ORDER = ['trial', 'notice', 'core', 'proof', 'agency'];
 // Plans that have a real annual Stripe price. Only Notice today — do not offer an
 // annual option for plans without a price (Core/Proof annual don't exist yet).
-const HAS_ANNUAL = { notice: true, core: true };
+const HAS_ANNUAL = { notice: true, core: true, proof: true };
 
 export default function BillingTab({ org, siteCount, memberCount }) {
   const [loadingPlan, setLoadingPlan] = useState(null);

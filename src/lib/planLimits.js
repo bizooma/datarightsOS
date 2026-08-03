@@ -82,6 +82,8 @@ export const PLAN_LIMITS = {
     teamMembers: 10,
     label: 'Proof',
     price: '$299/mo',
+    priceMonthly: '$299/mo',
+    priceAnnual: '$2,990/yr',
     retentionDays: null,
     canExportOwn: true,
     canBulkScheduledExport: true,
