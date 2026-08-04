@@ -1,5 +1,6 @@
 // Sends the welcome email to the owner of a newly created trial Organization.
 // Called by the "Trial Signup — Welcome Email" workflow on Organization create.
+// Body copy updated: adds the free-plan reassurance paragraph.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 Deno.serve(async (req) => {
@@ -72,9 +73,11 @@ Deno.serve(async (req) => {
 
 Your DataRightsOS account is live, and your 7-day free trial started the moment you signed up. No credit card needed until you decide it's worth paying for.
 
-[ Open your dashboard ] → https://datarightsos.com/dashboard
+[ Open your dashboard ] → datarightsos.com/dashboard
 
 One tip: people who get the most out of DataRightsOS do one thing in their first session, install the widget snippet on their site. It takes about five minutes, your site shows "Active" in the dashboard, and everything clicks after that.
+
+Install it without watching the clock. If your trial ends and you haven't upgraded, your widget doesn't come down, it keeps running on our free plan with cookie consent, and everything else you've set up stays saved for whenever you're ready.
 
 Questions? Just reply. This inbox goes to a real person.
 
