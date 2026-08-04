@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import { generateKey } from '@/lib/tenantUtils';
-import { canAddSite, canHideBadge } from '@/lib/planLimits';
+import { canAddSite, canHideBadge, canServeStatements } from '@/lib/planLimits';
+import UpgradePanel from '@/components/billing/UpgradePanel';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import { FileText, Plus, Globe, Check, Trash2, Upload, Loader2 } from 'lucide-react';
@@ -229,7 +230,21 @@ export default function WidgetStudio() {
                   </div>
                 </TabsContent>
                 <TabsContent value="legal">
-                  <LegalStatementsEditor site={selectedSite} />
+                  {canServeStatements(org?.plan) ? (
+                    <LegalStatementsEditor site={selectedSite} />
+                  ) : (
+                    <UpgradePanel
+                      feature="statements"
+                      title="Legal statements aren't included on the free plan"
+                      description="The free plan shows cookie consent only — published statements are hidden in the widget. Upgrade to Notice to write and publish your privacy, cookie, accessibility, and AI-use statements."
+                      adds={[
+                        'Privacy & cookie policies in the widget',
+                        'Accessibility statement + barrier reporting',
+                        'AI use statement (incl. Spanish)',
+                        'All four legal statements in-widget',
+                      ]}
+                    />
+                  )}
                 </TabsContent>
               </Tabs>
             </div>

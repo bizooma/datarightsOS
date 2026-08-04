@@ -117,17 +117,36 @@ export default function RequestInbox() {
   const showExport = canExportOwn(plan);
 
   if (!orgLoading && !tracksRequests) {
+    // Free plan: no request intake at all (the widget doesn't even show the card).
+    // Notice: requests are forwarded by email — show the forward-count banner.
+    const isFree = plan === 'free';
     return (
       <div>
         <PageHeader
           title="Privacy Requests"
           description="How your plan handles incoming privacy requests"
         />
-        <RequestForwardBanner orgId={orgId} canTrack={false} />
-        <UpgradePanel
-          title="Request tracking is a Core feature"
-          description="On your current plan, privacy requests submitted through your widget are forwarded to your privacy contact by email — the visitor sees a normal confirmation, but no request record, verification, or deadline clock is created. Upgrade to Core to track and manage them here."
-        />
+        {!isFree && <RequestForwardBanner orgId={orgId} canTrack={false} />}
+        {isFree ? (
+          <UpgradePanel
+            feature="request_forwarding"
+            title="Privacy request intake isn't included on the free plan"
+            description="The free plan shows cookie consent only — your widget doesn't display a privacy-request card. Upgrade to Notice to forward requests to your inbox by email, or to Core to track and manage them here with deadlines."
+            adds={[
+              'A "Submit a request" card in your widget',
+              'Requests forwarded to your privacy contact by email',
+              'Legal statements published in the widget',
+              'Accessibility statement + barrier reporting',
+              'Consent log history (90 days)',
+            ]}
+          />
+        ) : (
+          <UpgradePanel
+            feature="request_tracking"
+            title="Request tracking is a Core feature"
+            description="On your current plan, privacy requests submitted through your widget are forwarded to your privacy contact by email — the visitor sees a normal confirmation, but no request record, verification, or deadline clock is created. Upgrade to Core to track and manage them here."
+          />
+        )}
       </div>
     );
   }

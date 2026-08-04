@@ -2,6 +2,9 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '@/lib/useCurrentUser';
+import { useOrg } from '@/lib/useOrg';
+import { canUseAccessibility } from '@/lib/planLimits';
+import UpgradePanel from '@/components/billing/UpgradePanel';
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
@@ -11,6 +14,7 @@ import { format } from 'date-fns';
 
 export default function AccessibilityReports() {
   const { orgId } = useCurrentUser();
+  const { plan, isLoading: orgLoading } = useOrg();
   const navigate = useNavigate();
 
   const { data: sites = [] } = useQuery({
@@ -37,6 +41,28 @@ export default function AccessibilityReports() {
   });
 
   const siteMap = Object.fromEntries(sites.map(s => [s.id, s]));
+
+  if (!orgLoading && !canUseAccessibility(plan)) {
+    return (
+      <div>
+        <PageHeader
+          title="Accessibility Reports"
+          description="Barrier reports submitted through your widget"
+        />
+        <UpgradePanel
+          feature="accessibility"
+          title="Accessibility reporting isn't included on the free plan"
+          description="The free plan shows cookie consent only. Upgrade to Notice to publish an accessibility statement and collect barrier reports through your widget."
+          adds={[
+            'Accessibility statement published in your widget',
+            'A barrier-report form for visitors',
+            'Reports collected and tracked here',
+            'All four legal statements in-widget',
+          ]}
+        />
+      </div>
+    );
+  }
 
   return (
     <div>
