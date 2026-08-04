@@ -12,6 +12,37 @@
 //   but a submission is FORWARDED by email to the subscriber and only a minimal,
 //   PII-light counter is stored — no tracked Request, no clock, no audit trail.
 export const PLAN_LIMITS = {
+  free: {
+    sites: 1,
+    teamMembers: 1,
+    label: 'Free',
+    price: 'Free forever',
+    priceMonthly: 'Free forever',
+    priceAnnual: 'Free forever',
+    // Consent log shows the last 7 days in-dashboard, no export. Older records are
+    // retained in the database (never deleted), just not displayed until upgrade.
+    retentionDays: 7,
+    canExportOwn: false,
+    canBulkScheduledExport: false,
+    canHideBadge: false,
+    // No tracked request engine and, unlike Notice, no email forwarding either.
+    canTrackRequests: false,
+    // Free forwards nothing — the widget shows the cookie consent experience only.
+    canForwardRequests: false,
+    // Cap on recorded consent events per calendar month PER SITE. Over the cap the
+    // widget keeps displaying and enforcing consent; it just stops writing records
+    // until the next calendar month. null on all paid plans = uncapped.
+    visitorCapPerMonth: 10000,
+    features: [
+      '1 site / 1 domain',
+      'Cookie consent with full GPC enforcement',
+      'Both widget layouts',
+      'Up to 10,000 consent records/month',
+      '7 days of consent log history',
+      'Community docs support',
+      '"Powered by DataRightsOS" badge',
+    ],
+  },
   trial: {
     sites: 1,
     teamMembers: 2,
@@ -22,6 +53,8 @@ export const PLAN_LIMITS = {
     canBulkScheduledExport: false,
     canHideBadge: false,
     canTrackRequests: true,
+    canForwardRequests: true,
+    visitorCapPerMonth: null,
     features: [
       '1 site',
       '2 team members',
@@ -44,7 +77,10 @@ export const PLAN_LIMITS = {
     canHideBadge: false,
     // Entry tier: no tracked request engine — submissions are forwarded by email.
     canTrackRequests: false,
+    canForwardRequests: true,
+    visitorCapPerMonth: null,
     features: [
+      'Everything in Free, plus:',
       '1 site / 1 domain',
       '1 team member',
       'Cookie consent with full GPC enforcement',
@@ -67,6 +103,8 @@ export const PLAN_LIMITS = {
     canBulkScheduledExport: false,
     canHideBadge: false,
     canTrackRequests: true,
+    canForwardRequests: true,
+    visitorCapPerMonth: null,
     features: [
       'Everything in Notice, plus:',
       'Data-rights request intake with identity verification',
@@ -89,6 +127,8 @@ export const PLAN_LIMITS = {
     canBulkScheduledExport: true,
     canHideBadge: false,
     canTrackRequests: true,
+    canForwardRequests: true,
+    visitorCapPerMonth: null,
     features: [
       'Up to 10 sites',
       '10 team members',
@@ -107,6 +147,8 @@ export const PLAN_LIMITS = {
     canBulkScheduledExport: true,
     canHideBadge: true,
     canTrackRequests: true,
+    canForwardRequests: true,
+    visitorCapPerMonth: null,
     features: [
       'Unlimited sites',
       'Unlimited team members',
@@ -183,6 +225,54 @@ export function canHideBadge(plan) {
 // entry (Notice) tier from Core+. Route every request-engine gate through here.
 export function canTrackRequests(plan) {
   return !!getPlanLimits(plan).canTrackRequests;
+}
+
+// Whether privacy-request submissions are forwarded by email to the subscriber.
+// TRUE on Notice+ (Notice forwards; Core+ tracks). FALSE on Free — the widget does
+// not show the request card at all and nothing is forwarded.
+export function canForwardRequests(plan) {
+  return !!getPlanLimits(plan).canForwardRequests;
+}
+
+// Whether the widget shows the "Submit a request" card at all (tracked OR forwarded).
+export function canShowRequestCard(plan) {
+  return canTrackRequests(plan) || canForwardRequests(plan);
+}
+
+// Whether the plan can publish legal statements (privacy, cookie, accessibility, AI)
+// in the widget and use the statement editors. FALSE on Free.
+export function canServeStatements(plan) {
+  return plan !== 'free';
+}
+
+// Whether the plan includes accessibility statement + barrier reporting. FALSE on Free.
+export function canUseAccessibility(plan) {
+  return plan !== 'free';
+}
+
+// Monthly recorded-consent-event cap PER SITE. null = uncapped (all paid plans).
+export function getVisitorCap(plan) {
+  const cap = getPlanLimits(plan).visitorCapPerMonth;
+  return Number.isFinite(cap) ? cap : null;
+}
+
+// Cheapest paid plan that includes a given capability — used by upgrade panels so
+// they always name the right plan and never hard-code it in a component.
+const FEATURE_MIN_PLAN = {
+  statements: 'notice',
+  accessibility: 'notice',
+  ai_statement: 'notice',
+  request_forwarding: 'notice',
+  request_tracking: 'core',
+  export: 'core',
+  consent_history: 'notice',
+  webhook: 'core',
+  bulk_export: 'proof',
+};
+
+export function cheapestPlanFor(feature) {
+  const key = FEATURE_MIN_PLAN[feature] || 'notice';
+  return { key, label: getPlanLimits(key).label, price: getPlanLimits(key).priceMonthly || getPlanLimits(key).price };
 }
 
 // Team-member seat limit for the plan.

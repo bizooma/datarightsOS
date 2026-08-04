@@ -3,6 +3,25 @@ import { Check, ArrowRight } from 'lucide-react';
 
 const plans = [
   {
+    name: 'Free',
+    price: 'Free',
+    period: '',
+    description: 'Cookie consent for one site, free forever. No credit card.',
+    cta: 'Start free trial',
+    planKey: 'free',
+    highlight: false,
+    note: 'Trials that don\u2019t upgrade roll into the free plan automatically — your widget keeps working.',
+    features: [
+      '1 site / 1 domain',
+      'Cookie consent with full GPC enforcement',
+      'Both widget layouts',
+      'Up to 10,000 consent records/month',
+      '7 days of consent log history',
+      'Community docs support',
+      '"Powered by DataRightsOS" badge',
+    ],
+  },
+  {
     name: 'Notice',
     price: '$39',
     period: '/mo',
@@ -11,6 +30,7 @@ const plans = [
     planKey: 'notice',
     highlight: false,
     features: [
+      'Everything in Free, plus:',
       '1 site / 1 domain',
       '1 team member',
       'Cookie consent with full GPC enforcement',
@@ -114,7 +134,7 @@ export default function PricingSection() {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 items-start">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -177,6 +197,9 @@ export default function PricingSection() {
                 >
                   {plan.cta}
                 </button>
+              )}
+              {plan.note && (
+                <p className="text-[10px] leading-snug text-slate-400 mt-2 text-center">{plan.note}</p>
               )}
             </div>
           ))}

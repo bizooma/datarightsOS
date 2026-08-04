@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { canServeStatements, canShowRequestCard } from '../../shared/planLimits.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -43,7 +44,22 @@ Deno.serve(async (req) => {
   const canHideBadge = org.plan === 'agency';
   const showBadge = !(canHideBadge && site.hide_branding === true);
 
-  const getStatement = (type) => statements.find(s => s.statement_type === type);
+  // FREE plan: the widget shows the cookie consent experience ONLY. Force the
+  // enabled drawers down to cookies, and serve no legal statements. The consent
+  // engine (GPC enforcement, default-deny, script gating) is identical to paid
+  // plans — only the extra drawers/statements are withheld. This is enforced
+  // server-side so a stale/tampered client config can't re-enable gated drawers.
+  const servesStatements = canServeStatements(org.plan);
+  const showsRequestCard = canShowRequestCard(org.plan);
+
+  let enabledDrawers = site.enabled_drawers || ['cookies', 'privacy_rights'];
+  if (!servesStatements) {
+    enabledDrawers = ['cookies'];
+  } else if (!showsRequestCard) {
+    enabledDrawers = enabledDrawers.filter((d) => d !== 'privacy_rights');
+  }
+
+  const getStatement = (type) => (servesStatements ? statements.find(s => s.statement_type === type) : null);
   const privacyStmt = getStatement('privacy_policy');
   const cookieStmt = getStatement('cookie_policy');
   const a11yStmt = getStatement('accessibility_statement');
@@ -53,7 +69,7 @@ Deno.serve(async (req) => {
     product_name: site.brand_product_name || org.white_label_product_name || 'Privacy & Data Rights Center',
     logo_url: site.brand_logo_url || org.brand_logo_url || 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/b5c7df386_vault.png',
     primary_color: site.brand_primary_color || org.brand_primary_color || '#0d7d74',
-    enabled_drawers: site.enabled_drawers || ['cookies', 'privacy_rights'],
+    enabled_drawers: enabledDrawers,
     widget_position: site.widget_position || 'bottom-right',
     widget_layout: site.widget_layout === 'bar' ? 'bar' : 'floating',
     launcher_position: site.launcher_position || 'bottom-right',

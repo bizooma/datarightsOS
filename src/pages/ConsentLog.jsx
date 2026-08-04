@@ -9,6 +9,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import GeoDeviceInsights from '@/components/consent-log/GeoDeviceInsights';
 import UnmanagedTrackerAlert from '@/components/consent-log/UnmanagedTrackerAlert';
+import VisitorCapBanner from '@/components/consent-log/VisitorCapBanner';
 import ColumnHeader from '@/components/consent-log/ColumnHeader';
 import EnforcementStatus, { getEnforcementState } from '@/components/consent-log/EnforcementStatus';
 import EnforcementDetail from '@/components/consent-log/EnforcementDetail';
@@ -148,11 +149,13 @@ export default function ConsentLog() {
         }
       />
 
+      {plan === 'free' && <VisitorCapBanner plan={plan} siteIds={orgSiteIds} />}
+
       {limitHistory && (
         <div className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
           <span>Showing the last {historyDays} days.</span>
           <Link to="/settings?tab=billing" className="font-medium text-primary hover:underline">
-            Upgrade to Core for full history.
+            {plan === 'free' ? 'Upgrade to Notice for 90 days of history.' : 'Upgrade to Core for full history.'}
           </Link>
         </div>
       )}

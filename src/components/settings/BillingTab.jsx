@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Check, AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
 
-// Notice is the entry tier, below Core. Agency stays sales-assisted.
-const UPGRADE_ORDER = ['trial', 'notice', 'core', 'proof', 'agency'];
+// Free is the permanent floor, below Notice. Agency stays sales-assisted.
+const UPGRADE_ORDER = ['free', 'trial', 'notice', 'core', 'proof', 'agency'];
 // Plans that have a real annual Stripe price. Only Notice today — do not offer an
 // annual option for plans without a price (Core/Proof annual don't exist yet).
 const HAS_ANNUAL = { notice: true, core: true, proof: true };
@@ -144,12 +144,15 @@ export default function BillingTab({ org, siteCount, memberCount }) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
               {UPGRADE_ORDER.filter(p => p !== 'trial' && UPGRADE_ORDER.indexOf(p) !== UPGRADE_ORDER.indexOf(org.plan)).map(plan => {
                 const pl = PLAN_LIMITS[plan];
                 const showAnnual = billingInterval === 'annual' && HAS_ANNUAL[plan];
                 const priceLabel = showAnnual ? (pl.priceAnnual || pl.price) : (pl.priceMonthly || pl.price);
                 const isDowngrade = UPGRADE_ORDER.indexOf(plan) < UPGRADE_ORDER.indexOf(org.plan);
+                // Free has no Stripe price — it's the floor. Show it as informational,
+                // never as a purchasable checkout button.
+                const isFree = plan === 'free';
                 return (
                   <div key={plan} className="border border-border rounded-lg p-4 flex flex-col gap-3">
                     <div>
@@ -167,7 +170,11 @@ export default function BillingTab({ org, siteCount, memberCount }) {
                         </li>
                       ))}
                     </ul>
-                    {plan === 'agency' ? (
+                    {isFree ? (
+                      <div className="h-8 flex items-center justify-center text-[11px] text-muted-foreground border border-dashed border-border rounded-md w-full">
+                        Free forever
+                      </div>
+                    ) : plan === 'agency' ? (
                       <Button size="sm" variant="outline" className="h-8 text-xs w-full" asChild>
                         <a href="mailto:sales@datarightsos.com?subject=Agency%20Plan%20Inquiry">Contact Sales</a>
                       </Button>

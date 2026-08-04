@@ -19,7 +19,14 @@
  * and never pass through here. Consent events are not throttled (no email).
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { canTrackRequests } from '../../shared/planLimits.ts';
+import { canTrackRequests, canShowRequestCard, getVisitorCap } from '../../shared/planLimits.ts';
+
+// Start of the current calendar month (UTC) — the window the Free visitor cap
+// counts recorded consent events within. Resets automatically each month.
+function startOfCalendarMonthISO(): string {
+  const d = new Date();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).toISOString();
+}
 
 const WINDOW_MINUTES = 60;
 const DEFAULT_SITE_MAX = 100;
@@ -110,6 +117,27 @@ Deno.serve(async (req) => {
       const { action, functional, analytics, advertising, visitor_id, user_agent } = payload;
       if (!action) return Response.json({ error: 'action is required' }, { status: 400, headers: corsHeaders });
 
+      // FREE plan visitor cap: capped at getVisitorCap() recorded consent events per
+      // calendar month PER SITE. Over the cap we STOP writing records but ALWAYS
+      // return success so the widget keeps displaying and enforcing consent — never
+      // break a subscriber's site. Only Free is capped; paid plans return null.
+      let orgForCap: any = null;
+      if (site.organization) {
+        try { orgForCap = await base44.asServiceRole.entities.Organization.get(site.organization); } catch { /* ignore */ }
+      }
+      const cap = getVisitorCap(orgForCap?.plan);
+      if (cap != null) {
+        const monthStart = startOfCalendarMonthISO();
+        const monthRecords = await base44.asServiceRole.entities.ConsentRecord.filter({
+          site: site.id,
+          created_date: { $gte: monthStart },
+        }, '-created_date', cap + 1);
+        if ((monthRecords || []).length >= cap) {
+          // Cap reached — enforce and confirm, but do not persist a new record.
+          return Response.json({ success: true, capped: true }, { headers: corsHeaders });
+        }
+      }
+
       const receiptId = 'cr_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10);
 
       const record = await base44.asServiceRole.entities.ConsentRecord.create({
@@ -143,6 +171,14 @@ Deno.serve(async (req) => {
       let org: any = null;
       if (site.organization) {
         try { org = await base44.asServiceRole.entities.Organization.get(site.organization); } catch { /* ignore */ }
+      }
+
+      // FREE plan does not include privacy-request intake — the widget never shows
+      // the card, and nothing is forwarded or tracked. Defense-in-depth: if a
+      // request still arrives (stale client), accept it gracefully without storing
+      // or forwarding anything, so the visitor isn't left with an error.
+      if (!canShowRequestCard(org?.plan)) {
+        return Response.json({ success: true, unavailable: true }, { headers: corsHeaders });
       }
 
       // Resolve the subscriber's privacy contact (site → org fallback).

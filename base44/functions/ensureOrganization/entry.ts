@@ -1,5 +1,18 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
+const TRIAL_DAYS = 7;
+
+// An expired trial that never upgraded rolls into the permanent Free plan — the
+// widget stays live (cookie consent only) and NO data is ever deleted. This is the
+// server-side source of truth for that transition so it persists across sessions.
+function trialHasExpired(org: any): boolean {
+  if (!org || org.plan !== 'trial') return false;
+  const started = org.trial_started_at ? new Date(org.trial_started_at) : null;
+  if (!started) return false;
+  const days = (Date.now() - started.getTime()) / (1000 * 60 * 60 * 24);
+  return days > TRIAL_DAYS;
+}
+
 // Ensures the signed-in user has an Organization.
 // Order of resolution:
 //  1. Already linked to an org -> return it (idempotent).
@@ -24,11 +37,20 @@ Deno.serve(async (req) => {
       // No body / not JSON — fine, no referral to attribute.
     }
 
-    // 1. Already has an org — nothing to do.
+    // 1. Already has an org — nothing to do, except roll an expired, never-upgraded
+    //    trial into the permanent Free plan. No data is deleted; the widget stays live.
     if (user.organization) {
       const existing = await base44.asServiceRole.entities.Organization.filter({ id: user.organization });
       if (existing[0]) {
-        return Response.json({ created: false, organization: existing[0] });
+        let org = existing[0];
+        if (trialHasExpired(org)) {
+          try {
+            org = await base44.asServiceRole.entities.Organization.update(org.id, { plan: 'free' });
+          } catch (e) {
+            console.error('ensureOrganization: trial→free transition failed:', (e as Error).message);
+          }
+        }
+        return Response.json({ created: false, organization: org });
       }
     }
 

@@ -44,13 +44,14 @@
       "type": "string",
       "enum": [
         "trial",
+        "free",
         "notice",
         "core",
         "proof",
         "agency"
       ],
       "default": "trial",
-      "description": "Subscription plan"
+      "description": "Subscription plan. 'free' is the permanent free plan an expired trial rolls into (cookie consent only)."
     },
     "trial_started_at": {
       "type": "string",

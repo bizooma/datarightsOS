@@ -20,3 +20,22 @@ export function canTrackRequests(plan: string | undefined | null): boolean {
   if (!plan) return true;
   return PLAN_TRACKS_REQUESTS[plan] !== false;
 }
+
+// Free is the ONLY plan that neither tracks nor forwards privacy requests — the
+// widget shows the cookie consent experience only. Notice+ forwards or tracks.
+export function canShowRequestCard(plan: string | undefined | null): boolean {
+  return plan !== 'free';
+}
+
+// Free serves NO legal statements in the widget (privacy, cookie, accessibility,
+// AI) and has no accessibility/AI drawers. Cookie consent only. Paid plans serve
+// statements normally.
+export function canServeStatements(plan: string | undefined | null): boolean {
+  return plan !== 'free';
+}
+
+// Monthly recorded-consent-event cap PER SITE. Only Free is capped (10,000).
+// null = uncapped (all paid plans and trial).
+export function getVisitorCap(plan: string | undefined | null): number | null {
+  return plan === 'free' ? 10000 : null;
+}
