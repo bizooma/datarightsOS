@@ -26,11 +26,15 @@ export default function AdminUsers() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['all-users'],
     queryFn: () => base44.entities.User.list(),
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
   });
 
   const { data: orgs = [] } = useQuery({
     queryKey: ['all-orgs-admin'],
     queryFn: () => base44.entities.Organization.list(),
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
   });
 
   const orgMap = Object.fromEntries(orgs.map(o => [o.id, o]));
