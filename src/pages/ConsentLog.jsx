@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
@@ -40,6 +40,8 @@ export default function ConsentLog() {
   const [siteFilter, setSiteFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 25;
 
   const { data: sites = [] } = useQuery({
     queryKey: ['sites', orgId],
@@ -108,6 +110,14 @@ export default function ConsentLog() {
     }
     return true;
   });
+
+  // Reset to the first page whenever the filtered set changes (filters/search/data).
+  useEffect(() => { setPage(1); }, [actionFilter, siteFilter, search, records.length]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const paged = filtered.slice(pageStart, pageStart + PAGE_SIZE);
 
   const handleExport = () => {
     if (!canExport) return;
@@ -263,7 +273,7 @@ export default function ConsentLog() {
                 </td>
               </tr>
             ) : (
-              filtered.map(r => (
+              paged.map(r => (
                 <Fragment key={r.id}>
                 <tr className="hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => setExpanded(expanded === r.id ? null : r.id)}>
                   <td className="px-4 py-3">
@@ -307,6 +317,37 @@ export default function ConsentLog() {
           </tbody>
         </table>
       </div>
+
+      {!isLoading && filtered.length > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-4">
+          <span className="text-xs text-muted-foreground">
+            Showing {pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, filtered.length)} of {filtered.length}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-sm"
+              onClick={() => { setExpanded(null); setPage(p => Math.max(1, p - 1)); }}
+              disabled={currentPage <= 1}
+            >
+              Previous
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-sm"
+              onClick={() => { setExpanded(null); setPage(p => Math.min(totalPages, p + 1)); }}
+              disabled={currentPage >= totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
