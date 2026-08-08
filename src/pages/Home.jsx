@@ -1,5 +1,6 @@
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import HeroSection from '@/components/marketing/HeroSection';
 import ProblemSection from '@/components/marketing/ProblemSection';
@@ -14,6 +15,18 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 
 export default function Home() {
   const { isAuthenticated, isLoadingAuth } = useAuth();
+  const { hash } = useLocation();
+
+  // When arriving with a section hash (e.g. from another page's nav link),
+  // scroll to that section once the marketing page has rendered.
+  useEffect(() => {
+    if (isLoadingAuth || isAuthenticated || !hash) return;
+    const el = document.getElementById(hash.slice(1));
+    if (el) {
+      const t = setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
+      return () => clearTimeout(t);
+    }
+  }, [hash, isLoadingAuth, isAuthenticated]);
 
   // Wait for the auth check to finish before deciding — otherwise a logged-in
   // user is briefly treated as anonymous and sees the marketing page flash.
