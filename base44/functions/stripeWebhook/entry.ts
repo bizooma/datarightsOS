@@ -1,5 +1,8 @@
 import Stripe from 'npm:stripe@17.3.1';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { analytics } from 'npm:@heycatch/sdk';
+
+analytics.init({ projectKey: 'hck_pk_yyHEbzjZch9KOqIkpdjxpYfslt96gwzM' });
 
 const PRICE_TO_PLAN = {
   // Notice — monthly ($39) and annual ($390)
@@ -57,6 +60,21 @@ Deno.serve(async (req) => {
         stripe_subscription_id: session.subscription,
       });
       await reactivateSites(orgId);
+
+      // Report the paid conversion to HeyCatch, keyed on the org owner's stable
+      // user id — the SAME id the browser sends via setIdentity — so the two join.
+      try {
+        if (orgId) {
+          const org = await base44.asServiceRole.entities.Organization.get(orgId);
+          const userId = org?.created_by_id;
+          if (userId) {
+            await analytics.setIdentity(userId, { plan });
+            await analytics.trackEvent('subscription_started', { plan }, { userId });
+          }
+        }
+      } catch (e) {
+        console.error('HeyCatch subscription_started failed:', e.message);
+      }
     } else if (event.type === 'customer.subscription.updated') {
       const sub = event.data.object;
       const orgId = sub.metadata?.organization_id;
