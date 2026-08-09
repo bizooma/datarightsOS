@@ -25,6 +25,7 @@ const plans = [
     name: 'Notice',
     price: '$39',
     period: '/mo',
+    annualNote: 'or $390/year — save $78',
     description: 'Publish your statements, capture and enforce cookie choices, and give visitors a way to report barriers and submit requests.',
     cta: 'Start Free Trial',
     planKey: 'notice',
@@ -98,8 +99,9 @@ const plans = [
   },
 ];
 
-export default function PricingSection() {
+export default function PricingSection({ as = 'h2' }) {
   const navigate = useNavigate();
+  const Heading = as;
 
   // Everyone starts on the free 7-day trial. After creating an account they can
   // upgrade to a paid plan any time from Settings → Billing.
@@ -111,9 +113,9 @@ export default function PricingSection() {
     <section id="pricing" className="bg-slate-50 border-t border-slate-100 py-20 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#14202b] mb-3">
+          <Heading className="text-2xl md:text-3xl font-bold text-[#14202b] mb-3">
             Simple, transparent pricing.
-          </h2>
+          </Heading>
           <p className="text-slate-500 max-w-2xl mx-auto whitespace-nowrap">
             No per-request fees. No surprise overages. Cancel any time.
           </p>
@@ -165,6 +167,12 @@ export default function PricingSection() {
                   </span>
                 )}
               </div>
+
+              {plan.annualNote && (
+                <p className={`text-[11px] font-medium mb-2 ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>
+                  {plan.annualNote}
+                </p>
+              )}
 
               <p className={`text-xs mb-6 leading-relaxed ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>
                 {plan.description}
