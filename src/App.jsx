@@ -29,6 +29,7 @@ import Support from '@/pages/Support';
 import Organizations from '@/pages/Organizations';
 import PrivacyCenter from '@/pages/PrivacyCenter';
 import Home from '@/pages/Home';
+import Pricing from '@/pages/Pricing';
 import AdminUsers from '@/pages/AdminUsers';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/users" element={<AdminUsers />} />
         </Route>
       </Route>
+      <Route path="/pricing" element={<Pricing />} />
       <Route path="/privacy-center" element={<PrivacyCenter />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />

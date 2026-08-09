@@ -12,7 +12,7 @@ export default function MarketingNav({ isAuthenticated }) {
         <nav className="hidden md:flex items-center gap-7 text-sm text-slate-300">
           <Link to="/#features" className="hover:text-white transition-colors">Features</Link>
           <Link to="/#who" className="hover:text-white transition-colors">Who it's for</Link>
-          <Link to="/#pricing" className="hover:text-white transition-colors">Pricing</Link>
+          <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
           <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy</Link>
           <Link to="/support-request" className="hover:text-white transition-colors">Support</Link>
         </nav>

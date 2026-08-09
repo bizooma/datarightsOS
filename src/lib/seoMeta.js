@@ -13,6 +13,11 @@ export const ROUTE_META = {
     description:
       'One widget covering cookie consent, AI disclosure, accessibility, and data-rights requests — with a timestamped record of how every request was handled.',
   },
+  '/pricing': {
+    title: 'Pricing — DataRightsOS',
+    description:
+      'Five plans from a free-forever cookie consent tier to full white-label agency use. No per-request fees, no overages — cancel any time.',
+  },
   '/cookie-consent': {
     title: 'Cookie Consent with GPC Enforcement — DataRightsOS',
     description:
