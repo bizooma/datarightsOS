@@ -5,6 +5,8 @@
     <link rel="icon" href="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9bef9eef6_star.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="manifest" href="/manifest.json" />
+    <link rel="canonical" href="https://datarightsos.com/" />
+    <meta name="robots" content="index, follow" />
     <title>Privacy Compliance & Consent Management | Data Rights OS</title>
     <meta name="description" content="Data Rights OS helps law firms, agencies, and businesses comply with US state privacy laws. Cookie consent, data-rights request intake, deadline tracking, and audit trails in one white-label platform." />
     <meta name="keywords" content="data privacy compliance, CCPA compliance software, US state privacy laws, cookie consent management, data rights requests, GPC, consent management platform, white-label privacy widget" />
@@ -47,6 +49,20 @@
       "offers": [
         {
           "@type": "Offer",
+          "name": "Free",
+          "price": "0.00",
+          "priceCurrency": "USD",
+          "category": "subscription"
+        },
+        {
+          "@type": "Offer",
+          "name": "Notice",
+          "price": "39.00",
+          "priceCurrency": "USD",
+          "category": "subscription"
+        },
+        {
+          "@type": "Offer",
           "name": "Core",
           "price": "99.00",
           "priceCurrency": "USD",
@@ -59,6 +75,27 @@
           "priceCurrency": "USD",
           "category": "subscription"
         }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Is this just another cookie banner or accessibility widget?", "acceptedAnswer": { "@type": "Answer", "text": "No. The widget is the front door. The real system is behind it: a workflow that captures, verifies, tracks, and proves your response to every privacy and accessibility request, with a complete audit trail. Banners display text. DataRightsOS manages the legal obligation that starts the moment someone clicks." } },
+        { "@type": "Question", "name": "How do you stop someone from filing a deletion request for another person?", "acceptedAnswer": { "@type": "Answer", "text": "Every request requires email verification. When a request is submitted, we send the email address on file a one-time, single-use, expiring confirmation link. Nothing becomes actionable until that person clicks it and proves they control the inbox. That closes the most common abuse in privacy tooling: a stranger trying to access or delete data that isn't theirs. Your verified record then means something real." } },
+        { "@type": "Question", "name": "What happens the moment a request comes in?", "acceptedAnswer": { "@type": "Answer", "text": "The 45-day clock starts (that's the CCPA/CPRA response window). We immediately email the requester to confirm receipt and verify identity, create the request in your dashboard, and begin a live countdown. As the deadline approaches, your team gets reminders so nothing slips." } },
+        { "@type": "Question", "name": "How do I prove to a regulator or a court that I actually handled a request?", "acceptedAnswer": { "@type": "Answer", "text": "Every action is written to an immutable audit trail: when the request arrived, when identity was verified and how, each system the data was cleared from, who did it, and when you responded to the requester. A checkbox is not proof. A timestamped, itemized record is, and that record is your defense if you're ever audited or sued." } },
+        { "@type": "Question", "name": "Do you delete my customers' data for me automatically?", "acceptedAnswer": { "@type": "Answer", "text": "We don't reach into your systems, and you should be cautious of any tool that claims it can erase data everywhere automatically. Instead, DataRightsOS gives your team a guided, per-system checklist (your CRM, email platform, billing, backups) so each location is cleared and proven, and it connects to Zapier to help action removals in the tools you already use. You stay in control; we make sure nothing is missed and everything is documented." } },
+        { "@type": "Question", "name": "Does this make me ADA or WCAG compliant?", "acceptedAnswer": { "@type": "Answer", "text": "No tool can make you compliant, and any that promises it is a legal risk to you. DataRightsOS provides a proper accessibility statement and a report a barrier channel that routes complaints into the same tracked-and-proven workflow as your privacy requests. Real accessibility comes from an accessible site; we give you the statement, the intake, and the audit trail that show good-faith effort." } },
+        { "@type": "Question", "name": "Which laws does this help with?", "acceptedAnswer": { "@type": "Answer", "text": "US state privacy laws including CCPA/CPRA (California), VCDPA (Virginia), CTDPA (Connecticut) and the growing list of others, plus AI use disclosure and cookie consent. The widget shows the statement that applies to each visitor's state." } },
+        { "@type": "Question", "name": "What if a requester never confirms their identity?", "acceptedAnswer": { "@type": "Answer", "text": "If they never click the verification link, the request expires and you're not obligated to act on it. The attempt is still logged. We asked them to verify and they didn't is itself a defensible record, and it keeps unverified or abusive requests from clogging your team's queue." } },
+        { "@type": "Question", "name": "Do you tell the requester when their request is done?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. When you mark a request complete, the requester automatically receives a confirmation from your business's identity, not ours. Closing the loop in writing lowers the odds of a complaint and is part of a defensible response." } },
+        { "@type": "Question", "name": "How long do you keep my records?", "acceptedAnswer": { "@type": "Answer", "text": "Core keeps request and audit records for one year; Proof and Agency keep them indefinitely. For a compliance record, longer is safer, because audits and lawsuits can look back years after a request was handled." } },
+        { "@type": "Question", "name": "Can it look like my own brand?", "acceptedAnswer": { "@type": "Answer", "text": "Your logo appears at the top of the widget on every plan. On the Agency plan you can fully white-label it, including using your own product name and removing the Powered by DataRightsOS badge." } },
+        { "@type": "Question", "name": "Can it work with the tools I already use?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. An outbound webhook sends each new request to Zapier or your own systems, so you can automatically create a task, alert your team in Slack, or kick off removals in connected apps the moment a verified request arrives." } },
+        { "@type": "Question", "name": "Who is this for?", "acceptedAnswer": { "@type": "Answer", "text": "Any business that collects personal information through its website and faces multi-state privacy and accessibility obligations, especially those without a legal or privacy team on staff: law firms, agencies and their clients, local and regional service businesses. If you'd struggle to prove how you handled a deletion request from two years ago, this is for you." } }
       ]
     }
     </script>
@@ -76,6 +113,113 @@
     </script>
   </head>
   <body>
+    <noscript>
+      <main>
+        <h1>Compliance You Can Actually Prove</h1>
+        <p>Add it to any website with one line of code, auto generated in your dashboard. Every cookie choice and privacy request gets captured, enforced, and tracked to its legal deadline, then recorded in a court-ready audit trail.</p>
+        <p><a href="/register">Start free trial</a></p>
+
+        <h2>Simple, transparent pricing</h2>
+        <p>No per-request fees. No surprise overages. Cancel any time.</p>
+        <section>
+          <h3>Free — Free</h3>
+          <p>Cookie consent for one site, free forever. No credit card.</p>
+          <ul>
+            <li>1 site / 1 domain</li>
+            <li>Cookie consent with full GPC enforcement</li>
+            <li>Both widget layouts</li>
+            <li>Up to 10,000 consent records/month</li>
+            <li>7 days of consent log history</li>
+            <li>Community docs support</li>
+            <li>"Powered by DataRightsOS" badge</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Notice — $39/mo</h3>
+          <p>Publish your statements, capture and enforce cookie choices, and give visitors a way to report barriers and submit requests.</p>
+          <ul>
+            <li>Everything in Free, plus:</li>
+            <li>1 site / 1 domain</li>
+            <li>1 team member</li>
+            <li>Cookie consent with full GPC enforcement</li>
+            <li>Accessibility statement + barrier reports</li>
+            <li>AI use statement (incl. Spanish)</li>
+            <li>All four legal statements in-widget</li>
+            <li>Consent log (90 days of history)</li>
+            <li>Privacy requests forwarded by email</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Core — $99/mo</h3>
+          <p>For a single site that needs to track privacy requests and deadlines.</p>
+          <ul>
+            <li>Everything in Notice, plus:</li>
+            <li>Data-rights request intake with identity verification</li>
+            <li>45-day deadline tracking + alerts</li>
+            <li>Per-request fulfillment checklists</li>
+            <li>Audit trail (1-year retention)</li>
+            <li>CSV export of your own records</li>
+            <li>2 team members</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Proof — $299/mo (Most popular)</h3>
+          <p>For firms and agencies running multiple client sites.</p>
+          <ul>
+            <li>Up to 10 sites</li>
+            <li>Everything in Core</li>
+            <li>Unlimited audit trail retention</li>
+            <li>Bulk & scheduled CSV export</li>
+            <li>10 team members</li>
+            <li>Priority support</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Agency — Custom</h3>
+          <p>Resellers and large agencies with dozens of client organizations.</p>
+          <ul>
+            <li>Unlimited sites & organizations</li>
+            <li>Everything in Proof</li>
+            <li>Multi-tenant isolation</li>
+            <li>Your own product name</li>
+            <li>Full white-label — remove DataRightsOS branding</li>
+            <li>Dedicated onboarding</li>
+            <li>Unlimited team members</li>
+            <li>SLA & MSA available</li>
+          </ul>
+        </section>
+
+        <h2>Frequently asked questions</h2>
+        <section>
+          <h3>Is this just another cookie banner or accessibility widget?</h3>
+          <p>No. The widget is the front door. The real system is behind it: a workflow that captures, verifies, tracks, and proves your response to every privacy and accessibility request, with a complete audit trail. Banners display text. DataRightsOS manages the legal obligation that starts the moment someone clicks.</p>
+          <h3>How do you stop someone from filing a deletion request for another person?</h3>
+          <p>Every request requires email verification. When a request is submitted, we send the email address on file a one-time, single-use, expiring confirmation link. Nothing becomes actionable until that person clicks it and proves they control the inbox. That closes the most common abuse in privacy tooling: a stranger trying to access or delete data that isn't theirs. Your "verified" record then means something real.</p>
+          <h3>What happens the moment a request comes in?</h3>
+          <p>The 45-day clock starts (that's the CCPA/CPRA response window). We immediately email the requester to confirm receipt and verify identity, create the request in your dashboard, and begin a live countdown. As the deadline approaches, your team gets reminders so nothing slips.</p>
+          <h3>How do I prove to a regulator or a court that I actually handled a request?</h3>
+          <p>Every action is written to an immutable audit trail: when the request arrived, when identity was verified and how, each system the data was cleared from, who did it, and when you responded to the requester. A checkbox is not proof. A timestamped, itemized record is, and that record is your defense if you're ever audited or sued.</p>
+          <h3>Do you delete my customers' data for me automatically?</h3>
+          <p>We don't reach into your systems, and you should be cautious of any tool that claims it can erase data everywhere automatically. Instead, DataRightsOS gives your team a guided, per-system checklist (your CRM, email platform, billing, backups) so each location is cleared and proven, and it connects to Zapier to help action removals in the tools you already use. You stay in control; we make sure nothing is missed and everything is documented.</p>
+          <h3>Does this make me ADA or WCAG "compliant"?</h3>
+          <p>No tool can make you compliant, and any that promises it is a legal risk to you. DataRightsOS provides a proper accessibility statement and a "report a barrier" channel that routes complaints into the same tracked-and-proven workflow as your privacy requests. Real accessibility comes from an accessible site; we give you the statement, the intake, and the audit trail that show good-faith effort.</p>
+          <h3>Which laws does this help with?</h3>
+          <p>US state privacy laws including CCPA/CPRA (California), VCDPA (Virginia), CTDPA (Connecticut) and the growing list of others, plus AI use disclosure and cookie consent. The widget shows the statement that applies to each visitor's state.</p>
+          <h3>What if a requester never confirms their identity?</h3>
+          <p>If they never click the verification link, the request expires and you're not obligated to act on it. The attempt is still logged. "We asked them to verify and they didn't" is itself a defensible record, and it keeps unverified or abusive requests from clogging your team's queue.</p>
+          <h3>Do you tell the requester when their request is done?</h3>
+          <p>Yes. When you mark a request complete, the requester automatically receives a confirmation from your business's identity, not ours. Closing the loop in writing lowers the odds of a complaint and is part of a defensible response.</p>
+          <h3>How long do you keep my records?</h3>
+          <p>Core keeps request and audit records for one year; Proof and Agency keep them indefinitely. For a compliance record, longer is safer, because audits and lawsuits can look back years after a request was handled.</p>
+          <h3>Can it look like my own brand?</h3>
+          <p>Your logo appears at the top of the widget on every plan. On the Agency plan you can fully white-label it, including using your own product name and removing the "Powered by DataRightsOS" badge.</p>
+          <h3>Can it work with the tools I already use?</h3>
+          <p>Yes. An outbound webhook sends each new request to Zapier or your own systems, so you can automatically create a task, alert your team in Slack, or kick off removals in connected apps the moment a verified request arrives.</p>
+          <h3>Who is this for?</h3>
+          <p>Any business that collects personal information through its website and faces multi-state privacy and accessibility obligations, especially those without a legal or privacy team on staff: law firms, agencies and their clients, local and regional service businesses. If you'd struggle to prove how you handled a deletion request from two years ago, this is for you.</p>
+        </section>
+      </main>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
