@@ -1,6 +1,7 @@
 import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import BizoomaSection from '@/components/marketing/BizoomaSection';
+import FounderSection from '@/components/marketing/FounderSection';
 import { useDocumentMeta } from '@/lib/seoMeta';
 
 export default function About() {
@@ -42,6 +43,7 @@ export default function About() {
             most.
           </p>
         </div>
+        <FounderSection />
       </main>
       <BizoomaSection />
       <MarketingFooter />
