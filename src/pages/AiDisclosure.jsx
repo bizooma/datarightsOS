@@ -2,6 +2,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import { Link } from 'react-router-dom';
 import { Eye, MessageSquare, Map, FileClock, ArrowRight } from 'lucide-react';
+import { useDocumentMeta } from '@/lib/seoMeta';
 
 const supportingPoints = [
   {
@@ -27,6 +28,7 @@ const supportingPoints = [
 ];
 
 export default function AiDisclosure() {
+  useDocumentMeta('/ai-disclosure');
   return (
     <div className="min-h-screen bg-background">
       <MarketingNav />

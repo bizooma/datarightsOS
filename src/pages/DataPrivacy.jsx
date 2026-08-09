@@ -2,6 +2,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import { Link } from 'react-router-dom';
 import { Map, Clock, UserCheck, FileCheck, ArrowRight } from 'lucide-react';
+import { useDocumentMeta } from '@/lib/seoMeta';
 
 const supportingPoints = [
   {
@@ -27,6 +28,7 @@ const supportingPoints = [
 ];
 
 export default function DataPrivacy() {
+  useDocumentMeta('/data-privacy');
   return (
     <div className="min-h-screen bg-background">
       <MarketingNav />

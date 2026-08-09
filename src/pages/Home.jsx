@@ -2,6 +2,7 @@ import { Navigate, Link, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import { useDocumentMeta } from '@/lib/seoMeta';
 import HeroSection from '@/components/marketing/HeroSection';
 import ProblemSection from '@/components/marketing/ProblemSection';
 import FeaturesSection from '@/components/marketing/FeaturesSection';
@@ -16,6 +17,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 export default function Home() {
   const { isAuthenticated, isLoadingAuth } = useAuth();
   const { hash } = useLocation();
+  useDocumentMeta('/');
 
   // When arriving with a section hash (e.g. from another page's nav link),
   // scroll to that section once the marketing page has rendered.

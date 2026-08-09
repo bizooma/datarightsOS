@@ -1,8 +1,10 @@
 import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import BizoomaSection from '@/components/marketing/BizoomaSection';
+import { useDocumentMeta } from '@/lib/seoMeta';
 
 export default function About() {
+  useDocumentMeta('/about');
   return (
     <div className="min-h-screen bg-background">
       <MarketingNav />

@@ -2,8 +2,10 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import BizoomaSection from '@/components/marketing/BizoomaSection';
 import { LifeBuoy, Briefcase } from 'lucide-react';
+import { useDocumentMeta } from '@/lib/seoMeta';
 
 export default function Contact() {
+  useDocumentMeta('/contact');
   return (
     <div className="min-h-screen bg-background">
       <MarketingNav />
