@@ -3,15 +3,11 @@ export default function FounderSection() {
     <section className="mt-14 pt-10 border-t border-border">
       <h2 className="text-2xl font-bold text-foreground mb-6">The person behind it</h2>
       <div className="flex flex-col sm:flex-row gap-6 items-start">
-        {/* Headshot placeholder — replace src with Joseph Murphy's photo */}
-        <div
-          className="w-28 h-28 shrink-0 rounded-xl border-2 border-dashed border-border bg-muted flex items-center justify-center text-center text-xs text-muted-foreground px-2"
-          aria-label="Founder headshot placeholder"
-        >
-          Headshot
-          <br />
-          placeholder
-        </div>
+        <img
+          src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/e1ce64c77_joe.jpg"
+          alt="Joseph Murphy, Owner of Bizooma LLC"
+          className="w-28 h-28 shrink-0 rounded-xl object-cover"
+        />
         <div className="space-y-3 text-muted-foreground leading-relaxed">
           <div>
             <p className="text-foreground font-semibold">Joseph Murphy</p>
