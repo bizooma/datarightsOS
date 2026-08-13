@@ -11,7 +11,7 @@ export default function HeroSection() {
       <div className="relative max-w-4xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 bg-[#0d7d74]/8 border border-[#0d7d74]/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-[#0d7d74]" />
-          Built for US state privacy law compliance
+          One widget · cookie consent, AI disclosure, accessibility, privacy requests
         </div>
 
         <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-bold text-white leading-[1.1] tracking-tight mb-6 text-balance lg:whitespace-nowrap">
@@ -19,9 +19,9 @@ export default function HeroSection() {
         </h1>
 
         <p className="text-lg text-white max-w-2xl mx-auto leading-relaxed mb-10">
-          Add it to any website with one line of code, auto generated in your dashboard. Every cookie
-          choice and privacy request gets captured, enforced, and tracked to its legal deadline, then
-          recorded in a court-ready audit trail.
+          Paste one line of code. The widget handles cookie consent, AI disclosure, accessibility,
+          and privacy requests — and the dashboard behind it documents exactly how you answered
+          each one.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
