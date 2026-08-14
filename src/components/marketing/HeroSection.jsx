@@ -21,9 +21,9 @@ export default function HeroSection() {
           </h1>
 
           <p className="text-lg text-white max-w-xl mx-auto md:mx-0 leading-relaxed mb-8">
-            Paste one line of code. The widget handles cookie consent, AI disclosure, accessibility,
-            and privacy requests — and the dashboard behind it documents exactly how you answered
-            each one.
+            Paste one line of code. One widget covers cookie consent, AI disclosure, accessibility,
+            and privacy requests, and the dashboard behind it runs the response clock and records
+            exactly how you answered, and when.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center md:items-start md:justify-start justify-center gap-3">
