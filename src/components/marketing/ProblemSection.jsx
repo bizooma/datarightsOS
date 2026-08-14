@@ -4,7 +4,9 @@ export default function ProblemSection() {
   return (
     <section className="bg-[#14202b] py-20 px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
+        <UrgencyCarousel />
+
+        <div className="text-center mt-12">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
             Privacy enforcement is no longer theoretical.
           </h2>
@@ -14,8 +16,6 @@ export default function ProblemSection() {
             are rising fast. Most websites are dangerously exposed.
           </p>
         </div>
-
-        <UrgencyCarousel />
       </div>
     </section>
   );
