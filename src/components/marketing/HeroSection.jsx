@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 export default function HeroSection() {
   return (
     <section
-      className="relative pt-16 pb-20 px-6 bg-cover bg-center"
+      className="relative pt-10 pb-8 px-6 bg-cover bg-center"
       style={{ backgroundImage: "url('https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/3f65e2111_Depositphotos_182848134_S.jpg')" }}
     >
       <div className="absolute inset-0 bg-[#14202b]/85" />

@@ -2,7 +2,7 @@ import UrgencyCarousel from './UrgencyCarousel';
 
 export default function ProblemSection() {
   return (
-    <section className="bg-[#14202b] py-20 px-6">
+    <section className="bg-[#14202b] pt-6 pb-20 px-6">
       <div className="max-w-6xl mx-auto">
         <UrgencyCarousel />
 
