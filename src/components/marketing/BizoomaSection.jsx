@@ -9,7 +9,7 @@ export default function BizoomaSection() {
             <img
               src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/4fde077dd_bizoomalogo.png"
               alt="Bizooma Creative Agency"
-              className="w-64 h-auto"
+              className="w-full max-w-md h-auto"
             />
           </a>
         </div>
