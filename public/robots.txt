@@ -10,7 +10,7 @@ Disallow: /audit-trail
 Disallow: /accessibility
 Disallow: /settings
 Disallow: /knowledge-base
-Disallow: /support
+Disallow: /support$
 Disallow: /organizations
 Disallow: /admin/
 
