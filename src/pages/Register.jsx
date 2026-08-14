@@ -14,7 +14,6 @@ export default function Register() {
   const [step, setStep] = useState("form"); // "form" | "otp"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [error, setError] = useState("");
@@ -29,10 +28,6 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
     setLoading(true);
     try {
       await base44.auth.register({ email, password });
@@ -80,11 +75,11 @@ export default function Register() {
   return (
     <AuthLayout
       imageSrc="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/890c13e0e_vault.png"
-      title={step === "otp" ? "Check your email" : "Create your account"}
+      title={step === "otp" ? "Check your email" : "Start your free trial"}
       subtitle={
         step === "otp"
           ? `We sent a verification code to ${email}`
-          : "Sign up to get started"
+          : "7 days of the full product. No credit card required."
       }
       footer={
         <>
@@ -215,23 +210,6 @@ export default function Register() {
                 </button>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-                <Input
-                  id="confirm-password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10 h-12"
-                  minLength={8}
-                  required
-                />
-              </div>
-            </div>
             <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
               {loading ? (
                 <>
@@ -242,6 +220,10 @@ export default function Register() {
                 "Create account"
               )}
             </Button>
+            <p className="text-xs text-muted-foreground text-center leading-relaxed">
+              No credit card. Cancel anytime. If you don't upgrade, your account moves to our free
+              plan and your widget keeps working.
+            </p>
           </form>
 
           <p className="text-center text-xs text-muted-foreground mt-6">

@@ -555,7 +555,17 @@ Deno.serve(async (req) => {
       + '.cbar .cbbtn.p{background:' + accent + ';color:#fff;border-color:' + accent + '}'
       + '.cbar .cblink{background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;color:' + accent + ';text-decoration:underline;padding:6px 2px;font-family:inherit}'
       + '.cbar:focus-visible,.cbar .cbbtn:focus-visible,.cbar .cblink:focus-visible,.launcher:focus-visible{outline:3px solid ' + accent + ';outline-offset:2px}'
-      + '@media (max-width:640px){.cbar{max-height:none;flex-direction:column;align-items:stretch}.cbar .cbactions{flex-direction:column;align-items:stretch}.cbar .cbbtn{width:100%}}'
+      // Mobile first-visit consent bar: hard-capped at 30vh so it never covers page content.
+      // One short message line, Reject/Accept side by side with EQUAL width and weight,
+      // "Manage settings" and the Privacy Center as small text links beneath them.
+      + '@media (max-width:767px){'
+      + '.cbar{max-height:30vh;overflow:hidden;flex-direction:column;align-items:stretch;gap:8px;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px) + ' + launcherOffset + 'px)}'
+      + '.cbar .cbmsg{flex:0 0 auto;min-width:0;font-size:12.5px;line-height:1.3}'
+      + '.cbar .cbactions{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center}'
+      + '.cbar .cbbtn{width:100%;min-width:0;padding:9px 8px;font-size:12.5px}'
+      + '.cbar .cbbtn#BM2{grid-column:1 / -1;background:none;border:none;padding:2px 0;font-size:11.5px;font-weight:600;color:' + accent + ';text-decoration:underline;min-width:0}'
+      + '.cbar .cblink{grid-column:1 / -1;padding:0;font-size:11.5px}'
+      + '}'
       // --- Persistent bar mode: launcher variant (bottom-anchored rounded-square) ---
       + '.launcher.barlauncher{bottom:' + barLauncherBottomCSS + ';' + barLauncherPosCSS + ';border-radius:12px;padding:12px 16px}'
       // --- Persistent bar mode: expanded panel as a full-width bottom bar (desktop/tablet) ---
