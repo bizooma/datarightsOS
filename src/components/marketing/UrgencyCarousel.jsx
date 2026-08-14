@@ -33,24 +33,6 @@ export default function UrgencyCarousel() {
 
   return (
     <div className="relative">
-      {/* Arrow controls */}
-      <div className="flex items-center justify-end gap-2 mb-4">
-        <button
-          onClick={() => scroll(-1)}
-          aria-label="Scroll left"
-          className="w-9 h-9 rounded-full border border-red-800/50 bg-red-950/30 text-red-300 flex items-center justify-center hover:bg-red-900/40 transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => scroll(1)}
-          aria-label="Scroll right"
-          className="w-9 h-9 rounded-full border border-red-800/50 bg-red-950/30 text-red-300 flex items-center justify-center hover:bg-red-900/40 transition-colors"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
-
       <div
         ref={scrollRef}
         onMouseEnter={() => { pausedRef.current = true; }}
@@ -97,6 +79,24 @@ export default function UrgencyCarousel() {
             </div>
           </article>
         ))}
+      </div>
+
+      {/* Arrow controls */}
+      <div className="flex items-center justify-end gap-2 mt-4">
+        <button
+          onClick={() => scroll(-1)}
+          aria-label="Scroll left"
+          className="w-9 h-9 rounded-full border border-red-800/50 bg-red-950/30 text-red-300 flex items-center justify-center hover:bg-red-900/40 transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => scroll(1)}
+          aria-label="Scroll right"
+          className="w-9 h-9 rounded-full border border-red-800/50 bg-red-950/30 text-red-300 flex items-center justify-center hover:bg-red-900/40 transition-colors"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
