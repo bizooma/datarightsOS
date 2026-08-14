@@ -18,7 +18,7 @@ export default function DifferentiatorSection() {
             A cookie pop-up tells visitors about cookies. It does not prove you honored a deletion
             request within 45 days. It does not give you a timestamped record to hand a regulator.
             Data Rights OS writes every event to an immutable log the moment it happens —
-            so when you need to demonstrate compliance, the evidence is already there.
+            so when someone asks how you handled it, the evidence is already there.
           </p>
 
           <div className="space-y-4">
@@ -26,7 +26,7 @@ export default function DifferentiatorSection() {
               {
                 icon: FileCheck,
                 color: '#b58a2e',
-                label: 'Court-ready audit export',
+                label: 'Timestamped audit export',
                 sub: 'Timestamped CSV of every consent and request event.',
               },
               {
