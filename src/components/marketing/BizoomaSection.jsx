@@ -7,7 +7,7 @@ export default function BizoomaSection() {
         <div className="flex justify-center md:justify-start">
           <a href="https://bizooma.com" target="_blank" rel="noopener noreferrer">
             <img
-              src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/3d9950d7c_Bizlogofinal1.png"
+              src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/4fde077dd_bizoomalogo.png"
               alt="Bizooma Creative Agency"
               className="w-64 h-auto"
             />
