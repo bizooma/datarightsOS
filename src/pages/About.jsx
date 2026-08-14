@@ -28,17 +28,17 @@ export default function About() {
             The platform is built for law firms, digital agencies, and the client websites they protect.
             Agencies use it to offer privacy compliance as a managed service across many client sites, while
             in-house teams use it to handle consumer data-rights requests, document consent, and stay ahead
-            of statutory deadlines. Every consent record and request action is logged so organizations can
-            demonstrate compliance if a regulator ever comes knocking.
+            of statutory deadlines. Every consent record and request action is logged so you can show
+            exactly how each request was handled.
           </p>
           <p>
             Instead of stitching together separate tools for cookie banners, request handling, and
             record-keeping, Data Rights OS gives teams a single dashboard to configure widgets, respond to
-            requests, and export regulatory-ready reports. Plans scale from a single site on the Core plan up
-            to multi-site agency management.
+            requests, and export a timestamped record of every consent and request. Plans scale from a free
+            single-site plan up to multi-site agency management.
           </p>
           <p>
-            Data Rights OS is a Bizooma product, built and maintained by the Bizooma team. We focus on making
+            Data Rights OS is a Bizooma product. We focus on making
             privacy compliance approachable and affordable for the small and mid-sized businesses that need it
             most.
           </p>
