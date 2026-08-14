@@ -136,6 +136,10 @@ export default function Login() {
           )}
         </Button>
       </form>
+
+      <p className="mt-4 text-xs text-muted-foreground text-center leading-relaxed">
+        Been invited to a team? Log in with the email address your invitation was sent to.
+      </p>
     </AuthLayout>
   );
 }

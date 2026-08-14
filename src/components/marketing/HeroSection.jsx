@@ -37,8 +37,8 @@ export default function HeroSection() {
           </div>
 
           <p className="text-sm text-white/80 max-w-xl mx-auto md:mx-0 leading-relaxed mt-6">
-            See that widget in the lower-left corner? That's the product — live on this very
-            page. What you're experiencing right now is exactly what your visitors will get.
+            That panel on the right isn't a mockup — it's running on this page right now. Click the
+            pill in the lower-left corner and you'll get exactly what your visitors get.
           </p>
         </div>
 
