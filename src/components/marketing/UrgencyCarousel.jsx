@@ -6,10 +6,26 @@ export default function UrgencyCarousel() {
   const scrollRef = useRef(null);
   const pausedRef = useRef(false);
 
+  const resumeTimer = useRef(null);
+
+  // Pause the auto-scroll while the smooth scroll animates, otherwise the
+  // per-frame scrollLeft writes cancel it out immediately.
   const scroll = (dir) => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir * 340, behavior: 'smooth' });
+    pausedRef.current = true;
+    const half = el.scrollWidth / 2;
+    let target = el.scrollLeft + dir * 325;
+    if (target < 0) {
+      el.scrollLeft += half;
+      target += half;
+    } else if (target >= half) {
+      el.scrollLeft -= half;
+      target -= half;
+    }
+    el.scrollTo({ left: target, behavior: 'smooth' });
+    clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => { pausedRef.current = false; }, 700);
   };
 
   // Continuous auto-scroll. Loops back to start seamlessly using the duplicated track.
