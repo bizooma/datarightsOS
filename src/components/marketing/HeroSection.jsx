@@ -17,7 +17,7 @@ export default function HeroSection() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-bold text-white leading-[1.1] tracking-tight mb-5 text-balance">
-            Privacy Law Has Deadlines. Prove You Met Them
+            Privacy Laws Have Deadlines. Prove You Met Them
           </h1>
 
           <p className="text-lg text-white max-w-xl mx-auto md:mx-0 leading-relaxed mb-8">
