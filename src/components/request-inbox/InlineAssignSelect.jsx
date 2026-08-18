@@ -35,6 +35,9 @@ export default function InlineAssignSelect({ request, users, userEmail }) {
           {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <SelectValue placeholder="Unassigned" />}
         </SelectTrigger>
         <SelectContent>
+          {request.assigned_to && !users.some(u => u.id === request.assigned_to) && (
+            <SelectItem value={request.assigned_to} className="text-xs">{request.assigned_to}</SelectItem>
+          )}
           {users.map(u => (
             <SelectItem key={u.id} value={u.id} className="text-xs">{u.full_name || u.email}</SelectItem>
           ))}
