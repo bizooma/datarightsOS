@@ -445,10 +445,12 @@ Deno.serve(async (req) => {
       : 'right:22px;left:auto;transform:none';
 
     var posCSS = pos === 'bottom-left' ? 'left:22px;bottom:22px;right:auto;top:auto'
+      : pos === 'bottom-center' ? 'left:50%;bottom:22px;right:auto;top:auto;transform:translateX(-50%)'
       : pos === 'top-right' ? 'right:22px;top:22px;bottom:auto;left:auto'
       : pos === 'top-left' ? 'left:22px;top:22px;bottom:auto;right:auto'
       : 'right:22px;bottom:22px;left:auto;top:auto';
     var panelCSS = pos === 'bottom-left' ? 'left:22px;bottom:22px;right:auto;top:auto'
+      : pos === 'bottom-center' ? 'left:50%;bottom:22px;right:auto;top:auto;transform:translateX(-50%)'
       : pos === 'top-right' ? 'right:22px;top:22px;bottom:auto;left:auto'
       : pos === 'top-left' ? 'left:22px;top:22px;bottom:auto;right:auto'
       : 'right:22px;bottom:22px;left:auto;top:auto';
@@ -570,7 +572,7 @@ Deno.serve(async (req) => {
       + '.launcher.barlauncher{bottom:' + barLauncherBottomCSS + ';' + barLauncherPosCSS + ';border-radius:12px;padding:12px 16px}'
       // --- Persistent bar mode: expanded panel as a full-width bottom bar (desktop/tablet) ---
       // Target ~30vh; 45vh is a ceiling, not a target. Reads as a bar, not a takeover.
-      + '.panel.barpanel{left:0;right:0;bottom:0;top:auto;width:100%;max-width:100%;max-height:45vh;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom, 0px)}'
+      + '.panel.barpanel{left:0;right:0;bottom:0;top:auto;transform:none;width:100%;max-width:100%;max-height:45vh;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom, 0px)}'
       + '.panel.barpanel .body{padding:12px 20px}'
       + '.panel.barpanel #HOME,.panel.barpanel #SECTIONS{width:100%}'
       // Four action cards in ONE row (4 equal columns, no wrap to a second row).

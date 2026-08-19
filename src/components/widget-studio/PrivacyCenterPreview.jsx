@@ -66,14 +66,21 @@ export default function PrivacyCenterPreview({ site }) {
           <div className="h-2 bg-gray-300 rounded w-1/2" />
         </div>
 
-        {/* Command Center panel — positioned bottom-right; hidden when collapsed by default or in bar layout */}
+        {/* Command Center panel — honors widget_position; hidden when collapsed by default or in bar layout */}
         <div
           className="absolute flex flex-col overflow-hidden"
           style={{
             display: (openByDefault && !showBar) ? 'flex' : 'none',
-            bottom: 56,
-            right: 12,
+            ...(() => {
+              const wp = site.widget_position || 'bottom-right';
+              if (wp === 'bottom-left') return { bottom: 56, left: 12 };
+              if (wp === 'bottom-center') return { bottom: 56, left: '50%', transform: 'translateX(-50%)' };
+              if (wp === 'top-right') return { top: 12, right: 12 };
+              if (wp === 'top-left') return { top: 12, left: 12 };
+              return { bottom: 56, right: 12 };
+            })(),
             width: 290,
+            maxWidth: 'calc(100% - 24px)',
             maxHeight: 440,
             background: panelBg,
             borderRadius: 16,

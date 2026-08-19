@@ -91,20 +91,12 @@
       "enum": [
         "bottom-right",
         "bottom-left",
+        "bottom-center",
         "top-right",
         "top-left"
       ],
       "default": "bottom-right",
-      "description": "Corner position of the widget launcher button"
-    },
-    "widget_layout": {
-      "type": "string",
-      "enum": [
-        "floating",
-        "bar"
-      ],
-      "default": "floating",
-      "description": "How the first-visit consent moment appears on desktop/tablet: 'floating' (a card panel, current behavior) or 'bar' (a horizontal bar fixed across the bottom of the viewport). Presentation only \u2014 consent logic, GPC enforcement, and everything downstream are identical in both layouts. On mobile both layouts always render the consent moment as the bottom bar. After a choice is recorded, both layouts collapse to the same small pill launcher."
+      "description": "Position of the expanded floating panel. bottom-center centers it horizontally (left:50% + translateX(-50%)); in bar layout the expanded panel is always full-width so this only affects the floating layout."
     },
     "launcher_position": {
       "type": "string",
@@ -124,6 +116,15 @@
     "launcher_offset_bottom_mobile": {
       "type": "number",
       "description": "Optional mobile-only override for launcher_offset_bottom (px). Most sites only have a bottom nav on mobile. If unset (null), mobile inherits launcher_offset_bottom."
+    },
+    "widget_layout": {
+      "type": "string",
+      "enum": [
+        "floating",
+        "bar"
+      ],
+      "default": "floating",
+      "description": "How the first-visit consent moment appears on desktop/tablet: 'floating' (a card panel, current behavior) or 'bar' (a horizontal bar fixed across the bottom of the viewport). Presentation only \u2014 consent logic, GPC enforcement, and everything downstream are identical in both layouts. On mobile both layouts always render the consent moment as the bottom bar. After a choice is recorded, both layouts collapse to the same small pill launcher."
     },
     "widget_theme": {
       "type": "string",

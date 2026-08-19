@@ -350,6 +350,7 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
               <SelectContent>
                 <SelectItem value="bottom-right">Bottom Right</SelectItem>
                 <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                <SelectItem value="bottom-center">Bottom Center</SelectItem>
                 <SelectItem value="top-right">Top Right</SelectItem>
                 <SelectItem value="top-left">Top Left</SelectItem>
               </SelectContent>
