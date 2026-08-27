@@ -440,6 +440,12 @@ Deno.serve(async (req) => {
     // Always add the iOS home-indicator safe area so the launcher clears it in standalone PWA mode.
     var launcherBottomCSS = 'calc(' + launcherOffset + 'px + env(safe-area-inset-bottom, 0px) + 22px)';
     var lpos = cfg.launcher_position || 'bottom-right';
+
+    // Custom launcher branding (Core+, plan-gated server-side in widgetConfig).
+    // The text label is REQUIRED — the server guarantees a non-empty launcher_label,
+    // and the image is decorative (alt="") since the adjacent label carries meaning.
+    var isCustomLauncher = cfg.launcher_style === 'custom' && !!cfg.launcher_image_url;
+    var launcherLabel = isCustomLauncher ? (cfg.launcher_label || t.launcher) : t.launcher;
     var launcherPosCSS = lpos === 'bottom-left' ? 'left:22px;right:auto;transform:none'
       : lpos === 'bottom-center' ? 'left:50%;right:auto;transform:translateX(-50%)'
       : 'right:22px;left:auto;transform:none';
@@ -473,6 +479,9 @@ Deno.serve(async (req) => {
       + '.launcher{position:fixed;bottom:' + launcherBottomCSS + ';' + launcherPosCSS + ';z-index:2147483000;display:flex;align-items:center;gap:8px;background:' + launcherBg + ';color:' + launcherColor + ';border:' + launcherBorder + ';cursor:pointer;padding:11px 15px;border-radius:999px;box-shadow:0 14px 40px -10px rgba(20,32,43,.45);font-size:13px;font-weight:600}'
       + '.launcher .dot{width:7px;height:7px;border-radius:50%;background:#16a34a;animation:drosPulse 2.4s ease-in-out infinite}'
       + '@keyframes drosPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(22,163,74,.55)}50%{opacity:.35;box-shadow:0 0 0 4px rgba(22,163,74,0)}}'
+      // Custom launcher: fixed 44px-tall image, width auto capped at 120px, never distorted.
+      + '.launcher.custom{padding:8px 14px;gap:10px}'
+      + '.launcher.custom .limg{height:44px;width:auto;max-width:120px;object-fit:contain;display:block}'
       + '.panel{position:fixed;' + panelCSS + ';z-index:2147483001;width:380px;max-width:calc(100vw - 28px);max-height:86vh;background:' + panelBg + ';border-radius:16px;box-shadow:0 18px 50px -12px rgba(20,32,43,.4);display:flex;flex-direction:column;overflow:hidden;border:1px solid ' + panelBorder + '}'
       + '.hidden{display:none !important}'
       + '.phead{padding:15px 16px;border-bottom:1px solid ' + divider + ';display:flex;align-items:center;gap:10px;position:relative}'
@@ -639,7 +648,7 @@ Deno.serve(async (req) => {
 
     var html = ''
       + '<style>' + css + '</style>'
-      + '<button class="launcher' + (barMode ? ' barlauncher' : '') + (useBar ? ' hidden' : '') + '" id="L" aria-label="' + esc(t.launcher) + '" title="' + esc(t.launcher) + '"><span class="dot"></span>' + esc(t.launcher) + '</button>'
+      + '<button class="launcher' + (barMode ? ' barlauncher' : '') + (isCustomLauncher ? ' custom' : '') + (useBar ? ' hidden' : '') + '" id="L" aria-label="' + esc(launcherLabel) + '" title="' + esc(launcherLabel) + '">' + (isCustomLauncher ? '<img class="limg" src="' + esc(cfg.launcher_image_url) + '" alt="">' : '') + '<span class="dot"></span>' + esc(launcherLabel) + '</button>'
       + barHtml
       + (barMode ? '<div class="barbackdrop hidden" id="BD"></div>' : '')
       + '<div class="panel' + (barMode ? ' barpanel' : '') + ' hidden" id="P"' + (barMode ? ' role="dialog" aria-modal="true" aria-label="' + esc(t.launcher) + '" tabindex="-1"' : '') + '>'

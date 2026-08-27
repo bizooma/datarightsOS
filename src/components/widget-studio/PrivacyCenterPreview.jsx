@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Search, CheckCircle2 } from 'lucide-react';
+import { canCustomLauncher } from '@/lib/planLimits';
 
 export default function PrivacyCenterPreview({ site }) {
   const { data: org } = useQuery({
@@ -24,6 +25,9 @@ export default function PrivacyCenterPreview({ site }) {
   const showBar = layout === 'bar';
   // Only Agency can hide the badge; otherwise it's always shown.
   const showBadge = !(org?.plan === 'agency' && site.hide_branding === true);
+  // Custom launcher branding — Core+ only, mirroring the server-side gate.
+  const customLauncher = canCustomLauncher(org?.plan) && site.launcher_style === 'custom' && !!site.launcher_image_url;
+  const launcherLabel = customLauncher ? ((site.launcher_label || '').trim() || 'Privacy & Data Rights') : 'Privacy & Data Rights';
 
   // Theme tokens mirroring widgetJs
   const panelBg = isDark ? '#14202b' : '#ffffff';
@@ -231,7 +235,7 @@ export default function PrivacyCenterPreview({ site }) {
                 : { right: 12 }),
             background: launcherBg, color: launcherColor,
             border: launcherBorder,
-            borderRadius: showBar ? 12 : 999, padding: showBar ? '9px 13px' : '8px 12px',
+            borderRadius: showBar ? 12 : 999, padding: customLauncher ? '8px 14px' : showBar ? '9px 13px' : '8px 12px',
             fontSize: 11, fontWeight: 600,
             boxShadow: '0 8px 24px -6px rgba(20,32,43,0.4)',
             display: showBar ? 'none' : 'flex', alignItems: 'center', gap: 6,
@@ -239,8 +243,15 @@ export default function PrivacyCenterPreview({ site }) {
             cursor: 'default',
           }}
         >
+          {customLauncher && (
+            <img
+              src={site.launcher_image_url}
+              alt=""
+              style={{ height: 44, width: 'auto', maxWidth: 120, objectFit: 'contain', display: 'block' }}
+            />
+          )}
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: accent, display: 'inline-block' }} />
-          Privacy &amp; Data Rights
+          {launcherLabel}
         </div>
       </div>
       {showBar && (

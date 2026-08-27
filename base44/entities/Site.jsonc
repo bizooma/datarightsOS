@@ -108,6 +108,23 @@
       "default": "bottom-right",
       "description": "Corner/position of the MINIMIZED launcher pill. Independent of widget_position (which affects the floating panel). Lets subscribers place the launcher clear of host-site UI."
     },
+    "launcher_style": {
+      "type": "string",
+      "enum": [
+        "pill",
+        "custom"
+      ],
+      "default": "pill",
+      "description": "Launcher appearance: 'pill' (standard, default) or 'custom' (subscriber-uploaded image + REQUIRED text label). Custom is honored only on Core+ plans \u2014 enforced server-side in widgetConfig; Free/Notice always render the standard pill."
+    },
+    "launcher_image_url": {
+      "type": "string",
+      "description": "Uploaded launcher image URL (PNG/JPG/SVG/WebP, max 500KB, uploaded via the platform \u2014 never an external hotlink). Rendered at 44px tall, width auto, max 120px, aspect ratio preserved, alt='' (decorative \u2014 the adjacent text label carries meaning)."
+    },
+    "launcher_label": {
+      "type": "string",
+      "description": "REQUIRED text label rendered beside the custom launcher image. Editable wording but can never be blank \u2014 an unlabeled launcher makes the privacy path unfindable. Server falls back to 'Privacy & Data Rights' if empty."
+    },
     "launcher_offset_bottom": {
       "type": "number",
       "default": 0,

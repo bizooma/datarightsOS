@@ -239,6 +239,13 @@ export function canShowRequestCard(plan) {
   return canTrackRequests(plan) || canForwardRequests(plan);
 }
 
+// Custom launcher branding (subscriber image + REQUIRED text label) — Core and
+// above (trial included, since trial previews Core features). Free and Notice
+// always render the standard pill. Enforced server-side in widgetConfig too.
+export function canCustomLauncher(plan) {
+  return ['trial', 'core', 'proof', 'agency'].includes(plan);
+}
+
 // Whether the plan can publish legal statements (privacy, cookie, accessibility, AI)
 // in the widget and use the statement editors. FALSE on Free.
 export function canServeStatements(plan) {
@@ -268,6 +275,7 @@ const FEATURE_MIN_PLAN = {
   consent_history: 'notice',
   webhook: 'core',
   bulk_export: 'proof',
+  custom_launcher: 'core',
 };
 
 export function cheapestPlanFor(feature) {

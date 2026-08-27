@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { canServeStatements, canShowRequestCard } from '../../shared/planLimits.ts';
+import { canServeStatements, canShowRequestCard, canCustomLauncher } from '../../shared/planLimits.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -65,6 +65,11 @@ Deno.serve(async (req) => {
   const a11yStmt = getStatement('accessibility_statement');
   const aiStmt = getStatement('ai_use_statement');
 
+  // Custom launcher branding: Core+ only (plan-gated server-side). The label is
+  // REQUIRED — a blank/missing label falls back to the default so the launcher
+  // is NEVER unlabeled; an unlabeled image makes the privacy path unfindable.
+  const customLauncher = canCustomLauncher(org.plan) && site.launcher_style === 'custom' && !!site.launcher_image_url;
+
   const payload = {
     product_name: site.brand_product_name || org.white_label_product_name || 'Privacy & Data Rights Center',
     logo_url: site.brand_logo_url || org.brand_logo_url || 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/b5c7df386_vault.png',
@@ -75,6 +80,9 @@ Deno.serve(async (req) => {
     launcher_position: site.launcher_position || 'bottom-right',
     launcher_offset_bottom: Number(site.launcher_offset_bottom) || 0,
     launcher_offset_bottom_mobile: (site.launcher_offset_bottom_mobile === null || site.launcher_offset_bottom_mobile === undefined || site.launcher_offset_bottom_mobile === '') ? null : Number(site.launcher_offset_bottom_mobile),
+    launcher_style: customLauncher ? 'custom' : 'pill',
+    launcher_image_url: customLauncher ? site.launcher_image_url : '',
+    launcher_label: (typeof site.launcher_label === 'string' && site.launcher_label.trim()) ? site.launcher_label.trim() : 'Privacy & Data Rights',
     install_status: site.install_status || 'active',
     widget_theme: site.widget_theme || 'dark',
     default_open: site.default_open !== false,

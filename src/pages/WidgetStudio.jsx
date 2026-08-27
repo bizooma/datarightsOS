@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import { generateKey } from '@/lib/tenantUtils';
-import { canAddSite, canHideBadge, canServeStatements } from '@/lib/planLimits';
+import { canAddSite, canHideBadge, canServeStatements, canCustomLauncher } from '@/lib/planLimits';
 import UpgradePanel from '@/components/billing/UpgradePanel';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
@@ -22,6 +22,7 @@ import {
 import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
 import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
 import LayoutPicker from '@/components/widget-studio/LayoutPicker';
+import LauncherStyleSection from '@/components/widget-studio/LauncherStyleSection';
 import LegalStatementsEditor from '@/components/widget-studio/LegalStatementsEditor';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -393,6 +394,7 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
               <p className="text-[11px] text-muted-foreground mt-1">Many sites only have a bottom nav on mobile. Leave blank to reuse the value above on all screens.</p>
             </div>
           </div>
+          <LauncherStyleSection form={form} canCustomize={canCustomLauncher(plan)} onChange={handleChange} />
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block">Widget Theme</Label>
             <Select value={form.widget_theme || 'dark'} onValueChange={v => handleChange('widget_theme', v)}>

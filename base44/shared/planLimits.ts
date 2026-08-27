@@ -34,6 +34,14 @@ export function canServeStatements(plan: string | undefined | null): boolean {
   return plan !== 'free';
 }
 
+// Custom launcher branding (subscriber image + REQUIRED text label). Core and
+// above, trial included. Free and Notice always render the standard pill —
+// widgetConfig strips the custom launcher fields for gated plans so a stale or
+// tampered client config can't enable it.
+export function canCustomLauncher(plan: string | undefined | null): boolean {
+  return plan === 'trial' || plan === 'core' || plan === 'proof' || plan === 'agency';
+}
+
 // Monthly recorded-consent-event cap PER SITE. Only Free is capped (10,000).
 // null = uncapped (all paid plans and trial).
 export function getVisitorCap(plan: string | undefined | null): number | null {
