@@ -12,7 +12,9 @@ export default defineConfig({
       legacySDKImports: process.env.BASE44_LEGACY_SDK_IMPORTS === 'true',
       hmrNotifier: true,
       navigationNotifier: true,
-      analyticsTracker: true,
+      // heycatch analytics tracker (in.heycatch.ai) disabled — third-party audit
+      // tool we no longer use; it should not load on production.
+      analyticsTracker: false,
       visualEditAgent: true
     }),
     react(),
