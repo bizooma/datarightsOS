@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
 import CheckCard from '@/components/scan/CheckCard';
 import { CHECK_ORDER } from '@/components/scan/checkMeta';
+import ScanSummary from '@/components/scan/ScanSummary';
 
 export default function ScanReport({ scan }) {
   if (scan.status === 'failed') {
@@ -33,9 +34,18 @@ export default function ScanReport({ scan }) {
         </p>
       </div>
 
+      <ScanSummary scan={scan} />
+
       <div className="space-y-3">
         {CHECK_ORDER.map((key) => (
-          checks[key] ? <CheckCard key={key} checkKey={key} check={checks[key]} /> : null
+          checks[key] ? (
+            <CheckCard
+              key={key}
+              checkKey={key}
+              check={checks[key]}
+              prominent={key === 'pre_consent_tracking'}
+            />
+          ) : null
         ))}
       </div>
 
