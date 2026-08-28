@@ -5,7 +5,18 @@ export default function CheckCard({ checkKey, check, prominent = false }) {
   const meta = STATUS_META[check?.status] || STATUS_META.could_not_determine;
   const ctx = contextFor(checkKey, check);
   return (
-    <div className={`bg-card rounded-lg p-4 ${prominent ? 'border-2 border-primary shadow-sm' : 'border border-border'}`}>
+    <div
+      className={`rounded-lg p-4 ${
+        prominent
+          ? 'border-2 border-[#D89B2A] bg-[#FDF6E7] shadow-sm'
+          : 'bg-card border border-border'
+      }`}
+    >
+      {prominent && (
+        <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A5F12] mb-1.5">
+          Most significant
+        </p>
+      )}
       <div className="flex items-start justify-between gap-3 mb-1.5">
         <h3 className="text-sm font-semibold text-foreground">{CHECK_LABELS[checkKey] || checkKey}</h3>
         <span className={`shrink-0 text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded border ${meta.cls}`}>

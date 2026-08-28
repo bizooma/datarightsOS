@@ -111,9 +111,12 @@
     <!-- Data Rights OS widget -->
     <script src="https://api.base44.app/api/apps/6a3735f4f27dcb14405892ae/functions/widgetJs" data-tessera-site="sk_g9hhwdycerkzcjhddq3yy9yf"></script>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0434DES84J"></script>
-    <script>
+    <!-- Google tag (gtag.js) — gated through our own consent mechanism.
+         These stay inert (type="text/plain") until the widget records analytics
+         consent, then it activates them. GPC is handled by the widget, which
+         forces a denied baseline before any gated tag can run. -->
+    <script type="text/plain" data-dros-category="analytics" data-src="https://www.googletagmanager.com/gtag/js?id=G-0434DES84J" async></script>
+    <script type="text/plain" data-dros-category="analytics">
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
