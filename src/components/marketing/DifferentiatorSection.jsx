@@ -1,4 +1,5 @@
 import { FileCheck, Clock, Lock } from 'lucide-react';
+import LazyVideoEmbed from '@/components/marketing/LazyVideoEmbed';
 
 export default function DifferentiatorSection() {
   return (
@@ -57,14 +58,11 @@ export default function DifferentiatorSection() {
             ))}
           </div>
 
-          <div className="mt-8 relative w-full aspect-video rounded-xl overflow-hidden shadow-lg border border-slate-200">
-            <iframe
+          <div className="mt-8">
+            <LazyVideoEmbed
               src="https://app.heygen.com/embeds/4cd6db45b33847c990be5c2c9381b39d"
               title="DataRights OS"
-              frameBorder="0"
-              allow="encrypted-media; fullscreen;"
-              allowFullScreen
-              className="absolute inset-0 w-full h-full"
+              poster="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/6897c54ea_generated_image.png"
             />
           </div>
         </div>
