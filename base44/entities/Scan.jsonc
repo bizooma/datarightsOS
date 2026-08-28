@@ -1,0 +1,70 @@
+{
+  "name": "Scan",
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Normalized URL that was scanned"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Hostname of the scanned URL \u2014 used for the 1-scan-per-domain-per-hour cache"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "complete",
+        "failed"
+      ],
+      "default": "running",
+      "description": "Scan lifecycle. failed = Browserless errored/timed out and NO findings are reported."
+    },
+    "requester_ip_hash": {
+      "type": "string",
+      "description": "Salted SHA-256 of the requester IP, used only for rate limiting (3/hr, 10/day per IP). Raw IP is never stored."
+    },
+    "processing_started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Set when processScan claims the record \u2014 guards against double-processing (each scan is two paid browser sessions)."
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the scan reached a terminal status"
+    },
+    "error": {
+      "type": "string",
+      "description": "Failure reason when status=failed"
+    },
+    "gpc_pass_failed": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the second (Sec-GPC) load failed \u2014 the GPC comparison check is COULD NOT DETERMINE, other checks still report."
+    },
+    "findings": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Group A check results. findings.checks.<key> = {status: found|not_found|could_not_determine, observation, details[]}. Observations only, never verdicts."
+    },
+    "third_party_domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Unique third-party request hostnames observed on the first (no-consent) load"
+    }
+  },
+  "required": [
+    "url",
+    "domain"
+  ],
+  "rls": {
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
