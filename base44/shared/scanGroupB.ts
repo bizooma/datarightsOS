@@ -111,23 +111,38 @@ function linkDetails(rec: any) {
   return [`Link text: "${anchor}"`, `Resolved to: ${url}`];
 }
 
-function confirmPage(rec: any, apex: string, label: string, absent: any) {
+function confirmPage(rec: any, apex: string, label: string, absent: any, mainUrl?: string) {
   if (!rec) return { ok: false, check: absent };
   if (!rec.ok || rec.error) {
     return { ok: false, check: cnd(`A link to ${label} was found, but the page could not be loaded, so we could not confirm it.`, [`Link: ${rec.requested_url}`]) };
   }
-  if (rec.status && (rec.status < 200 || rec.status >= 400)) {
+  // No response object means the navigation itself never completed. The browser
+  // may still be sitting on the previous page, so anything we read now could
+  // describe the page we came from rather than the one we followed.
+  if (!rec.status) {
+    return { ok: false, check: cnd(`A link to ${label} was found, but we could not confirm the page finished loading, so we could not confirm it.`, [`Link: ${rec.requested_url}`]) };
+  }
+  if (rec.status < 200 || rec.status >= 400) {
     return { ok: false, check: cnd(`A link to ${label} was found, but the page returned HTTP ${rec.status}, so we could not confirm it.`, [`Link: ${rec.requested_url}`]) };
+  }
+  if (mainUrl && rec.final_url === mainUrl) {
+    return { ok: false, check: cnd(`A link to ${label} was found, but following it did not leave the page we scanned, so we could not confirm it.`, [`Link: ${rec.requested_url}`]) };
   }
   if (rec.final_url && !sameSite(rec.final_url, apex)) {
     return { ok: false, check: cnd(`A link to ${label} was found, but it led to another domain, so we could not confirm it.`, [`Link: ${rec.requested_url}`, `Led to: ${rec.final_url}`]) };
   }
-  if ((rec.text || '').length < MIN_POLICY_TEXT) {
-    return { ok: false, check: cnd(`A link to ${label} was found, but the page returned almost no readable text, so we could not confirm it.`, [`Link: ${rec.final_url || rec.requested_url}`]) };
+  // SUBSTANCE IS MEASURED ON MAIN CONTENT, NOT THE WHOLE PAGE. Header, nav, and
+  // footer travel with every page on a site and routinely mention privacy,
+  // cookies and rights — so whole-page text let boilerplate alone satisfy both
+  // tests below and credited a page whose body was empty. A 200 with no
+  // substantive content of its own is COULD NOT DETERMINE, never FOUND.
+  const content = rec.main_text || '';
+  if (content.length < MIN_POLICY_TEXT) {
+    return { ok: false, check: cnd(`A link to ${label} was found and the page loaded, but it had almost no content of its own, so we could not confirm it.`, [`Link: ${rec.final_url || rec.requested_url}`]) };
   }
   // Content check: does the page read like the document the link promised?
   const spec = CONTENT_TERMS[label];
-  if (spec && countTerms(rec.text || '', spec.terms) < spec.min) {
+  if (spec && countTerms(content, spec.terms) < spec.min) {
     const anchor = (rec.anchor_text || '').trim() || label;
     const url = rec.final_url || rec.requested_url;
     return {
@@ -211,6 +226,7 @@ export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
   const privacy_policy = confirmPage(
     privacyRec, apex, 'a privacy policy',
     looseAbsent(mainAnchors, mainText, ['privacy', 'polic', '/legal', 'your data', 'data protection'], 'a privacy policy'),
+    page.url,
   ).check;
 
   // ---- 3. "Do Not Sell or Share" mechanism ----
@@ -230,6 +246,7 @@ export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
   const a11yConfirmed = confirmPage(
     a11yRec, apex, 'an accessibility statement',
     looseAbsent(mainAnchors, mainText, ['accessib', 'ada compliance', 'wcag'], 'an accessibility statement'),
+    page.url,
   );
   const accessibility_statement = a11yConfirmed.check;
 

@@ -1,0 +1,44 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "privacy_policy_fallback_drift_check",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "check_drift": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "checkPrivacyFallbackDrift"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Compare published policy to bundled copy",
+            "description": "Emails on divergence"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Every morning, compares the published privacy policy against the copy bundled into /privacy-policy and emails when they diverge. The bundled copy cannot update itself, so this alarm is the only thing preventing silent drift on a legal document.",
+  "name": "Privacy Policy Fallback Drift Check",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 7 * * *",
+      "one_time_date": null,
+      "timezone": "America/Chicago",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

@@ -146,6 +146,23 @@ export default async function ({ page, context }) {
         }
         var textNoLinksAll = document.body ? textNoLinks(document.body).slice(0, 120000) : '';
 
+        // MAIN CONTENT ONLY — site chrome removed. This is what decides whether a
+        // followed page really is the document its link promised. Judging that on
+        // whole-page innerText is what produced a false FOUND: a nav bar and footer
+        // carrying "Privacy Policy", "Cookie Consent" and a legal disclaimer clear
+        // both the length floor and the keyword count on their own, so a page whose
+        // actual body said nothing still read as a privacy policy.
+        function mainContent() {
+          try {
+            var host = document.querySelector('main, [role="main"], article') || document.body;
+            var c = host.cloneNode(true);
+            var junk = c.querySelectorAll('nav,header,footer,aside,script,style,noscript,[role="navigation"],[role="banner"],[role="contentinfo"]');
+            for (var z = 0; z < junk.length; z++) { if (junk[z].parentNode) junk[z].parentNode.removeChild(junk[z]); }
+            return low(c.innerText || c.textContent || '');
+          } catch (me) { return ''; }
+        }
+        var mainOnly = mainContent().slice(0, 120000);
+
         // A consent banner is a VISIBLE banner-like element — fixed, sticky, or a
         // dialog — carrying consent language in its own body text (anchor text
         // stripped). Controls are looked for inside that same element only.
@@ -183,7 +200,7 @@ export default async function ({ page, context }) {
           var hay = low((g.getAttribute('alt') || '') + ' ' + (g.getAttribute('class') || '') + ' ' + (g.getAttribute('id') || '') + ' ' + (g.getAttribute('src') || ''));
           if (hay.indexOf('privacyoptions') !== -1 || hay.indexOf('privacy-options') !== -1 || hay.indexOf('ccpa-optout') !== -1 || hay.indexOf('optout-icon') !== -1) { cpraIcon = true; break; }
         }
-        return { url: location.href, anchors: anchors, script_hay: scriptHay.slice(0, 20000), form_hay: formHay, text: text, text_no_links: textNoLinksAll, banner_text: bannerText, banner_control: bannerControl, cpra_icon: cpraIcon };
+        return { url: location.href, anchors: anchors, script_hay: scriptHay.slice(0, 20000), form_hay: formHay, text: text, main_text: mainOnly, text_no_links: textNoLinksAll, banner_text: bannerText, banner_control: bannerControl, cpra_icon: cpraIcon };
       }, p);
     };
 
@@ -212,13 +229,29 @@ export default async function ({ page, context }) {
       if (aPick && (!pPick || aPick.url !== pPick.url)) targets.push({ kind: 'accessibility', url: aPick.url, text: aPick.text });
 
       for (var t = 0; t < targets.length && followed.length < 2; t++) {
-        var rec = { kind: targets[t].kind, requested_url: targets[t].url, anchor_text: targets[t].text, ok: false, status: null, final_url: null, text: '', anchors: [], form_hay: '', error: null };
+        var rec = { kind: targets[t].kind, requested_url: targets[t].url, anchor_text: targets[t].text, ok: false, status: null, final_url: null, text: '', main_text: '', anchors: [], form_hay: '', error: null, settle_note: null };
         try {
-          var resp = await page.goto(targets[t].url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-          rec.status = resp ? resp.status() : null;
+          // SETTLE BEFORE READING. This used to be domcontentloaded with an
+          // immediate snapshot, which reads a client-rendered legal page while it
+          // is still empty — and client-rendered legal pages are common enough that
+          // we cannot assume text is in the server response. So: wait for the
+          // network to go idle, then hold a further fixed settle period for text
+          // painted after the last request resolves.
+          var resp = null;
+          try {
+            resp = await page.goto(targets[t].url, { waitUntil: 'networkidle2', timeout: 25000 });
+          } catch (eSettle) {
+            // Idle may never arrive on a page with polling or streaming beacons.
+            // That is not evidence of a broken page, so we snapshot what did load
+            // and note it — the content thresholds still decide the outcome.
+            rec.settle_note = String((eSettle && eSettle.message) || eSettle);
+          }
+          if (resp) rec.status = resp.status();
+          await new Promise(function (r) { setTimeout(r, 3000); });
           var s2 = await snap();
           rec.final_url = s2.url;
           rec.text = s2.text.slice(0, 60000);
+          rec.main_text = (s2.main_text || '').slice(0, 60000);
           rec.anchors = s2.anchors;
           rec.form_hay = s2.form_hay;
           rec.ok = true;

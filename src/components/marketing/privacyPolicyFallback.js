@@ -10,6 +10,11 @@
 // the policy text changes, this constant has to be updated in the same change, or the
 // fallback silently starts serving an older policy. Keep VERSION/EFFECTIVE_DATE in
 // step too — they are what the notice and header show.
+//
+// THE DRIFT IS NOT SILENT: the "Privacy Policy Fallback Drift Check" workflow compares
+// the published statement to this copy daily and emails when they diverge. After
+// editing anything here, update the fingerprint in
+// base44/shared/privacyPolicyFallbackMeta.ts — otherwise the alarm keeps firing.
 export const FALLBACK_VERSION = '1.0';
 export const FALLBACK_EFFECTIVE_DATE = '2026-07-15';
 export const FALLBACK_HEADING = 'DataRightsOS — Privacy Policy';
