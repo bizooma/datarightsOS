@@ -27,6 +27,10 @@
       "type": "boolean",
       "description": "Whether the widget injects plain anchor links to this site's four statement URLs into the host page footer. NULL (unset) means 'use the plan default', which is ON for every plan EXCEPT Agency \u2014 Agency pays to remove our branding, and an injected datarightsos.com link in their client's footer would undo that. Resolved per-request in widgetConfig, never read raw by the widget. Injected links are visible to crawlers that execute JavaScript but not to those that don't, which is why Widget Studio also offers a static footer snippet."
     },
+    "inject_privacy_choices_link": {
+      "type": "boolean",
+      "description": "Whether the widget injects a plain 'Your Privacy Choices' anchor (pointing at /functions/privacyChoices?site=<slug>) into the host page footer. NULL (unset) means 'use the plan default', which is ON for EVERY plan INCLUDING Agency. That is a deliberate inconsistency with inject_footer_links, which defaults OFF for Agency: hosted statement content is optional, but a reachable opt-out mechanism is not, so the white-label concern is answered by the domain-rewrite instructions rather than by withholding the link. An explicit true/false from the subscriber always wins."
+    },
     "install_status": {
       "type": "string",
       "enum": [

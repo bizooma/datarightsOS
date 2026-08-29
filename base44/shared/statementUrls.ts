@@ -59,6 +59,15 @@ export function slugifyDomain(domain: string): string {
   return base || 'site';
 }
 
+// "Your Privacy Choices" — a MECHANISM page, not a statement. It carries no claim about
+// what a business does with data; it exists so a visitor has a working place to record an
+// opt-out. Same URL shape and same rewrite path as the statements above, deliberately: an
+// Agency subscriber proxies this from their own domain exactly the way they proxy the
+// statement pages, so the white-label problem is solved once.
+export function privacyChoicesUrl(siteSlug: string, lang?: string): string {
+  return PUBLIC_BASE + '/functions/privacyChoices?site=' + encodeURIComponent(siteSlug) + (lang === 'es' ? '&lang=es' : '');
+}
+
 export function statementUrl(siteSlug: string, type: string, lang?: string): string {
   const typeSlug = STATEMENT_SLUGS[type] || type;
   const q = 'site=' + encodeURIComponent(siteSlug) + '&type=' + encodeURIComponent(typeSlug);

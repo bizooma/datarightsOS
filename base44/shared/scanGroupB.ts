@@ -12,7 +12,10 @@ import { STATUS } from './scanChecks.ts';
 import { PATTERNS, CMP_MATCHERS } from './scanPatterns.ts';
 import { detectDsarPortal } from './scanTools.ts';
 
-const MIN_POLICY_TEXT = 500; // below this a "policy page" is a stub, not a policy
+// Default floor for a followed page's OWN content (site chrome already stripped).
+// Per-document overrides live in CONTENT_TERMS.min_chars — calibrated against real
+// small-business pages, not chosen for roundness.
+const MIN_POLICY_TEXT = 500;
 
 const found = (observation: string, details?: string[]) =>
   ({ status: STATUS.FOUND, observation, details: details || [] });
@@ -81,15 +84,34 @@ function looseAbsent(anchors: any[], text: string, loose: string[], label: strin
 // A link labeled "privacy policy" pointing at /disclaimer/ loaded fine and read as
 // FOUND — a false claim we made after checking only that a page existed. The
 // followed page must actually read like the thing before we credit it.
-const CONTENT_TERMS: Record<string, { terms: string[]; min: number; noun: string }> = {
+// CALIBRATED against real published pages on small-business sites (measured with this
+// exact extractor, chrome stripped):
+//
+//   Privacy policies (7 live pages): main-content lengths 844 / 3,030 / 4,347 / 15,996 /
+//   18,796 / 26,503 / 38,323 chars — the 500 floor rejected none. Term hits were
+//   2 / 3 / 4 / 5 / 6 / 6 / 7, so a threshold of 3 wrongly rejected a genuine 3,030-char
+//   law-firm policy that says "personal information" and "we collect" and simply doesn't
+//   use our other five phrases. Lowered to 2: both surviving phrases are specific to a
+//   privacy document, and a wrong COULD NOT DETERMINE on a real policy is the error we
+//   were trying to stop making.
+//
+//   Accessibility statements (4 live pages): 1,019 / 1,417 / 2,954 / 3,967 chars, term
+//   hits 3 / 3 / 3 / 5. Nothing in the sample came near the 500 floor — the prediction
+//   that real statements are three sentences did not appear here. The floor is still
+//   dropped to 300 because a genuinely three-sentence statement (~300 chars) is easy to
+//   write, none of this sample rules it out, and for this document the term test is doing
+//   the discriminating work anyway.
+const CONTENT_TERMS: Record<string, { terms: string[]; min: number; min_chars?: number; noun: string }> = {
   'a privacy policy': {
     terms: ['personal information', 'we collect', 'third part', 'your rights', 'opt out', 'data we', 'cookies'],
-    min: 3,
+    min: 2,
+    min_chars: 500,
     noun: 'privacy policy',
   },
   'an accessibility statement': {
     terms: ['accessibility', 'wcag', 'disability', 'assistive', 'barrier', 'screen reader'],
     min: 2,
+    min_chars: 300,
     noun: 'accessibility statement',
   },
 };
@@ -137,11 +159,11 @@ function confirmPage(rec: any, apex: string, label: string, absent: any, mainUrl
   // tests below and credited a page whose body was empty. A 200 with no
   // substantive content of its own is COULD NOT DETERMINE, never FOUND.
   const content = rec.main_text || '';
-  if (content.length < MIN_POLICY_TEXT) {
+  const spec = CONTENT_TERMS[label];
+  if (content.length < (spec?.min_chars ?? MIN_POLICY_TEXT)) {
     return { ok: false, check: cnd(`A link to ${label} was found and the page loaded, but it had almost no content of its own, so we could not confirm it.`, [`Link: ${rec.final_url || rec.requested_url}`]) };
   }
   // Content check: does the page read like the document the link promised?
-  const spec = CONTENT_TERMS[label];
   if (spec && countTerms(content, spec.terms) < spec.min) {
     const anchor = (rec.anchor_text || '').trim() || label;
     const url = rec.final_url || rec.requested_url;

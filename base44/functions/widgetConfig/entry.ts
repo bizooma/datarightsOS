@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { canServeStatements, canShowRequestCard, canCustomLauncher } from '../../shared/planLimits.ts';
-import { statementUrl } from '../../shared/statementUrls.ts';
+import { statementUrl, privacyChoicesUrl } from '../../shared/statementUrls.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -91,9 +91,22 @@ Deno.serve(async (req) => {
     ? site.inject_footer_links
     : injectDefault;
 
+  // "Your Privacy Choices" — an opt-out MECHANISM, not hosted content, so it defaults ON
+  // for EVERY plan, Agency included. That is deliberately inconsistent with the statement
+  // links above: statements are optional content whose link would put our name in an
+  // Agency client's footer, but a visitor's route to an opt-out is not optional, and
+  // Agency answers the branding concern by rewriting this path onto their own domain (the
+  // same rewrite they already use for statements). An explicit choice always wins.
+  const injectPrivacyChoices = (site.inject_privacy_choices_link === true || site.inject_privacy_choices_link === false)
+    ? site.inject_privacy_choices_link
+    : true;
+
   const payload = {
     statement_urls: statementUrls,
     inject_footer_links: injectFooterLinks && Object.keys(statementUrls).length > 0,
+    // Always published: the page works for any site, with or without statements.
+    privacy_choices_url: privacyChoicesUrl(slugForUrl),
+    inject_privacy_choices_link: injectPrivacyChoices,
     product_name: site.brand_product_name || org.white_label_product_name || 'Privacy & Data Rights Center',
     logo_url: site.brand_logo_url || org.brand_logo_url || 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/b5c7df386_vault.png',
     primary_color: site.brand_primary_color || org.brand_primary_color || '#0d7d74',

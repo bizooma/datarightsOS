@@ -27,6 +27,12 @@ export const STATEMENT_TYPES = [
   'ai_use_statement',
 ];
 
+// Mirror of privacyChoicesUrl in base44/shared/statementUrls.ts. A mechanism page, not a
+// statement — it makes no claim about whether the business sells or shares data.
+export function privacyChoicesUrl(siteSlug, lang) {
+  return PUBLIC_BASE + '/functions/privacyChoices?site=' + encodeURIComponent(siteSlug) + (lang === 'es' ? '&lang=es' : '');
+}
+
 export function statementUrl(siteSlug, type, lang) {
   const typeSlug = STATEMENT_SLUGS[type] || type;
   const q = 'site=' + encodeURIComponent(siteSlug) + '&type=' + encodeURIComponent(typeSlug);

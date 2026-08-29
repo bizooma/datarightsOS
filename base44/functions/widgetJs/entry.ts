@@ -970,6 +970,30 @@ Deno.serve(async (req) => {
       document.body.appendChild(nav);
     })();
 
+    // "Your Privacy Choices" — a real anchor to a real page, injected into the HOST
+    // document alongside the statement links. Separate from injectFooterLinks on purpose:
+    // this is the opt-out MECHANISM, so it ships whether or not the subscriber publishes
+    // statements, and it defaults on for every plan (resolved server-side).
+    //
+    // The label is the only wording a visitor sees, and it says nothing about whether the
+    // business sells or shares data — it names the visitor's choice, not the business's
+    // behavior.
+    (function injectPrivacyChoicesLink() {
+      if (!cfg.inject_privacy_choices_link || !cfg.privacy_choices_url) return;
+      if (document.getElementById('dros-privacy-choices')) return;
+      var label = lang === 'es' ? 'Sus Opciones de Privacidad' : 'Your Privacy Choices';
+      var nav = document.createElement('nav');
+      nav.id = 'dros-privacy-choices';
+      nav.setAttribute('aria-label', label);
+      nav.style.cssText = 'padding:10px 16px;text-align:center;font-size:12px;line-height:1.8;color:inherit;opacity:.85';
+      var a = document.createElement('a');
+      a.href = cfg.privacy_choices_url + (lang === 'es' ? '&lang=es' : '');
+      a.textContent = label;
+      a.style.cssText = 'color:inherit;text-decoration:underline';
+      nav.appendChild(a);
+      document.body.appendChild(nav);
+    })();
+
     // Statement modal
     var MO = $('MO'), MT = $('MT'), MM = $('MM'), MB = $('MB'), MF = $('MF'), MOPEN = $('MOPEN');
     if (MO) {

@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
 import StatementLinksPanel from '@/components/widget-studio/StatementLinksPanel';
+import PrivacyChoicesPanel from '@/components/widget-studio/PrivacyChoicesPanel';
 import BusinessNameWarning from '@/components/widget-studio/BusinessNameWarning';
 import DuplicateDocumentWarning from '@/components/widget-studio/DuplicateDocumentWarning';
 import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
@@ -260,6 +261,7 @@ export default function WidgetStudio() {
                   <div className="border-t border-border pt-6 mt-6 space-y-6">
                     <EmbedSnippet site={selectedSite} />
                     <StatementLinksPanel site={selectedSite} plan={org?.plan} />
+                    <PrivacyChoicesPanel site={selectedSite} plan={org?.plan} />
                     <PrivacyCenterPreview site={liveFormData || selectedSite} />
                   </div>
                 </TabsContent>
@@ -576,6 +578,25 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
                   : plan !== 'agency'
               }
               onCheckedChange={v => handleChange('inject_footer_links', v)}
+            />
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-border">
+            <div className="pr-4">
+              <p className="text-sm font-medium">Add a "Your Privacy Choices" link to my site's footer</p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                On by default for every plan, including Agency. This is the opt-out mechanism
+                visitors use, not hosted content about you — the page states nothing about
+                whether you sell or share data. Agency subscribers can serve it from their own
+                domain using the same rewrite instructions as the statement pages.
+              </p>
+            </div>
+            <Switch
+              checked={
+                form.inject_privacy_choices_link === true || form.inject_privacy_choices_link === false
+                  ? form.inject_privacy_choices_link
+                  : true
+              }
+              onCheckedChange={v => handleChange('inject_privacy_choices_link', v)}
             />
           </div>
           <FormField label="Privacy Policy URL" value={form.privacy_policy_url} onChange={v => handleChange('privacy_policy_url', v)} hint="Optional. Link to a privacy policy hosted on your own site. Leave blank if you write your policy in the Legal Statements tab." />
