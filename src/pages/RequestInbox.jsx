@@ -20,6 +20,7 @@ import { useOrg } from '@/lib/useOrg';
 import { canTrackRequests, canExportOwn } from '@/lib/planLimits';
 import UpgradePanel from '@/components/billing/UpgradePanel';
 import RequestForwardBanner from '@/components/billing/RequestForwardBanner';
+import StatementsBlockedBanner from '@/components/dashboard/StatementsBlockedBanner';
 
 export default function RequestInbox() {
   const { user, orgId } = useCurrentUser();
@@ -126,6 +127,9 @@ export default function RequestInbox() {
           title="Privacy Requests"
           description="How your plan handles incoming privacy requests"
         />
+        {/* Notice subscribers CAN publish statements, and they land on this page, not
+            the tracked inbox below — so the banner has to render in this branch too. */}
+        <StatementsBlockedBanner />
         {!isFree && <RequestForwardBanner orgId={orgId} canTrack={false} />}
         {isFree ? (
           <UpgradePanel
@@ -171,6 +175,8 @@ export default function RequestInbox() {
           ) : null
         }
       />
+
+      <StatementsBlockedBanner />
 
       <OnboardingChecklist sites={sites} />
 

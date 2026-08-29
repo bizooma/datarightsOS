@@ -22,7 +22,8 @@ import {
 import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
 import StatementLinksPanel from '@/components/widget-studio/StatementLinksPanel';
 import PrivacyChoicesPanel from '@/components/widget-studio/PrivacyChoicesPanel';
-import BusinessNameWarning from '@/components/widget-studio/BusinessNameWarning';
+import StatementsBlockedNotice from '@/components/statements/StatementsBlockedNotice';
+import { statementBlockReason } from '@/lib/statementBlockReasons';
 import DuplicateDocumentWarning from '@/components/widget-studio/DuplicateDocumentWarning';
 import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
 import LayoutPicker from '@/components/widget-studio/LayoutPicker';
@@ -247,7 +248,11 @@ export default function WidgetStudio() {
             <div className="col-span-3 space-y-6">
               {canServeStatements(org?.plan) && (
                 <>
-                  <BusinessNameWarning site={selectedSite} org={org} />
+                  <StatementsBlockedNotice
+                    reason={statementBlockReason({ site: selectedSite, org })}
+                    orgId={orgId}
+                    domain={selectedSite.domain}
+                  />
                   <DuplicateDocumentWarning site={selectedSite} />
                 </>
               )}
@@ -260,7 +265,7 @@ export default function WidgetStudio() {
                   <SiteConfigForm key={selectedSite.id} site={selectedSite} plan={org?.plan} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
                   <div className="border-t border-border pt-6 mt-6 space-y-6">
                     <EmbedSnippet site={selectedSite} />
-                    <StatementLinksPanel site={selectedSite} plan={org?.plan} />
+                    <StatementLinksPanel site={selectedSite} org={org} plan={org?.plan} />
                     <PrivacyChoicesPanel site={selectedSite} plan={org?.plan} />
                     <PrivacyCenterPreview site={liveFormData || selectedSite} />
                   </div>

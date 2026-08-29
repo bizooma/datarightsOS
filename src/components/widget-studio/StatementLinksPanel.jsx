@@ -4,13 +4,14 @@ import { base44 } from '@/api/base44Client';
 import { Copy, Check, ExternalLink } from 'lucide-react';
 import { statementUrl, STATEMENT_TYPES, STATEMENT_LABELS, STATEMENT_SLUGS } from '@/lib/statementUrls';
 import StatementRewriteGuide from '@/components/widget-studio/StatementRewriteGuide';
+import { statementBlockReason, blockCopyFor } from '@/lib/statementBlockReasons';
 
 // The public, crawlable address of each published statement — plus a static block of
 // plain anchors for the subscriber's own footer.
 //
 // Only PUBLISHED statements are listed. Linking to a statement that was never written
 // would hand a visitor (or a scanner) a 404, which is worse than no link at all.
-export default function StatementLinksPanel({ site, plan }) {
+export default function StatementLinksPanel({ site, org, plan }) {
   const [copied, setCopied] = useState(false);
 
   const { data: statements = [], isLoading } = useQuery({
@@ -41,6 +42,24 @@ export default function StatementLinksPanel({ site, plan }) {
   }
 
   if (isLoading) return null;
+
+  // A written statement is not a live page. This list used to be built from the
+  // statement records alone, which meant it happily printed addresses that return
+  // 404 — the same mistake the footer injection made. Ask the same rule the server
+  // enforces, and when it says blocked, say why instead of listing dead links.
+  const blockedReason = statementBlockReason({ site, org, plan });
+  if (blockedReason && statements.some((s) => s.body)) {
+    const copy = blockCopyFor(blockedReason);
+    return (
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground">Public Statement Pages</p>
+        <p className="text-[11px] text-amber-800 leading-relaxed">
+          <span className="font-semibold">{copy.headline}.</span> {copy.body} No addresses are
+          listed here yet, and no footer links are added, because they would return "not found".
+        </p>
+      </div>
+    );
+  }
 
   if (published.length === 0) {
     return (
