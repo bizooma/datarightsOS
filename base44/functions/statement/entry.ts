@@ -11,6 +11,7 @@
 // resolving even after slugs were introduced.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { canServeStatements } from '../../shared/planLimits.ts';
+import { publishedBusinessName } from '../../shared/statementAvailability.ts';
 import {
   SLUG_TO_TYPE,
   STATEMENT_LABELS,
@@ -180,7 +181,10 @@ export default async function (req) {
     // description, and the page header of an index,follow page carrying that business's
     // privacy policy. No fallback is acceptable here: withholding the page is recoverable,
     // an indexed page naming the wrong party is not.
-    const businessName = (site.business_name || org.business_name || '').trim();
+    // Shared with widgetConfig via statementAvailability, so the rule that decides
+    // whether this page publishes is the same rule that decides whether anything
+    // links to it. They must never drift again.
+    const businessName = publishedBusinessName(site, org);
     if (!businessName) {
       return notFound(
         'This statement is not published yet: the site owner has not set the business name it should be published under.',

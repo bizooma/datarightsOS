@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { canServeStatements, canShowRequestCard, canCustomLauncher } from '../../shared/planLimits.ts';
 import { statementUrl, privacyChoicesUrl } from '../../shared/statementUrls.ts';
+import { canServeStatementPage, canPublishStatementPages, publishedBusinessName } from '../../shared/statementAvailability.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -74,12 +75,27 @@ Deno.serve(async (req) => {
   // Public, crawlable URL per published statement. Built here (not in the widget)
   // so the widget never has to know the URL shape. site_key is the fallback for
   // sites that predate slugs, and is a valid lookup on the statement endpoint.
+  //
+  // NEVER PUBLISH A URL THE STATEMENT ENDPOINT WOULD REFUSE. A URL only appears
+  // here when canServeStatementPage says that exact page returns 200 — the same
+  // rule the endpoint itself applies, imported rather than restated. Having a
+  // LegalStatement record is NOT sufficient: the endpoint also requires a business
+  // name to publish under, and gating on the record alone is precisely what put
+  // four links to 404s in a live customer's footer. A URL absent from this map is
+  // a link the widget cannot render anywhere — footer, drawer, or elsewhere.
   const slugForUrl = site.slug || site.site_key;
   const statementUrls = {};
-  if (privacyStmt) statementUrls.privacy_policy = statementUrl(slugForUrl, 'privacy_policy');
-  if (cookieStmt) statementUrls.cookie_policy = statementUrl(slugForUrl, 'cookie_policy');
-  if (a11yStmt) statementUrls.accessibility_statement = statementUrl(slugForUrl, 'accessibility_statement');
-  if (aiStmt) statementUrls.ai_use_statement = statementUrl(slugForUrl, 'ai_use_statement');
+  const servable = (statement) => canServeStatementPage({ site, org, statement, servesStatements });
+  if (servable(privacyStmt)) statementUrls.privacy_policy = statementUrl(slugForUrl, 'privacy_policy');
+  if (servable(cookieStmt)) statementUrls.cookie_policy = statementUrl(slugForUrl, 'cookie_policy');
+  if (servable(a11yStmt)) statementUrls.accessibility_statement = statementUrl(slugForUrl, 'accessibility_statement');
+  if (servable(aiStmt)) statementUrls.ai_use_statement = statementUrl(slugForUrl, 'ai_use_statement');
+
+  // Surfaced so Widget Studio can tell the subscriber WHY their statement links
+  // aren't appearing. Without this the failure is silent: they wrote the
+  // statements, the pages exist, and nothing links to them.
+  const statementPagesBlocked = !canPublishStatementPages({ site, org, servesStatements })
+    && (!!privacyStmt || !!cookieStmt || !!a11yStmt || !!aiStmt);
 
   // Footer-link injection defaults ON everywhere EXCEPT Agency: an Agency subscriber
   // pays to remove our branding, and a datarightsos.com link in their client's footer
@@ -114,7 +130,11 @@ Deno.serve(async (req) => {
 
   const payload = {
     statement_urls: statementUrls,
+    // Injection can only ever put up links that are known-servable, because
+    // statementUrls now contains nothing else.
     inject_footer_links: injectFooterLinks && Object.keys(statementUrls).length > 0,
+    statement_pages_blocked: statementPagesBlocked,
+    statement_pages_blocked_reason: statementPagesBlocked ? 'business_name' : '',
     // Always published: the page works for any site, with or without statements.
     privacy_choices_url: privacyChoicesUrl(slugForUrl),
     inject_privacy_choices_link: injectPrivacyChoices,
