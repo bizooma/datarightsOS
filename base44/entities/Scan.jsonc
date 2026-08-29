@@ -54,6 +54,15 @@
         "type": "string"
       },
       "description": "Unique third-party request hostnames observed on the first (no-consent) load"
+    },
+    "pdf_url": {
+      "type": "string",
+      "description": "Cached PDF of this report, rendered once by Browserless on the first download and reused for every download after. A report's findings never change once complete, so the file is generated lazily and cached forever \u2014 we pay for one render per report, not one per download."
+    },
+    "pdf_generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the cached PDF was rendered."
     }
   },
   "required": [

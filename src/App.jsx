@@ -41,6 +41,7 @@ import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import PublicSupport from '@/pages/PublicSupport';
 import Scan from '@/pages/Scan';
+import ScanPrintReport from '@/pages/ScanPrintReport';
 
 const AuthenticatedApp = () => {
   const { authError } = useAuth();
@@ -88,6 +89,7 @@ const AuthenticatedApp = () => {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/support-request" element={<PublicSupport />} />
       <Route path="/scan" element={<Scan />} />
+      <Route path="/scan/report/:id" element={<ScanPrintReport />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

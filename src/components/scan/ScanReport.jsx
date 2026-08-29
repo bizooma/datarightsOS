@@ -3,6 +3,8 @@ import CheckCard from '@/components/scan/CheckCard';
 import NeutralCheckList from '@/components/scan/NeutralCheckList';
 import { CHECK_ORDER, needsAttention } from '@/components/scan/checkMeta';
 import ScanSummary from '@/components/scan/ScanSummary';
+import DownloadPdfButton from '@/components/scan/DownloadPdfButton';
+import { SCOPE_LINE } from '@/components/scan/reportText';
 
 export default function ScanReport({ scan }) {
   if (scan.status === 'failed') {
@@ -42,16 +44,15 @@ export default function ScanReport({ scan }) {
           Scanned {scan.completed_at ? new Date(scan.completed_at).toLocaleString() : ''} ·{' '}
           {(scan.third_party_domains || []).length} third-party domains observed on load
         </p>
+        <div className="mt-4">
+          <DownloadPdfButton scan={scan} />
+        </div>
       </div>
 
       <ScanSummary scan={scan} />
 
       <p className="text-xs text-muted-foreground leading-relaxed px-1">
-        {/* Scope line — tied to the single-page Group A scan. When Group B follows links to
-            policy pages this must be revisited; flag it rather than editing silently. */}
-        Findings marked in amber are the ones worth reviewing. The rest is what we observed on the
-        page we scanned — not a clean bill of health. We can't see other pages on your site, how it
-        behaves for logged-in visitors, or what happens after a form is submitted.
+        {SCOPE_LINE}
       </p>
 
       <div className="space-y-3">

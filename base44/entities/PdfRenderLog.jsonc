@@ -1,0 +1,29 @@
+{
+  "name": "PdfRenderLog",
+  "type": "object",
+  "properties": {
+    "scan": {
+      "type": "string",
+      "description": "Reference to the Scan whose report was rendered"
+    },
+    "requester_ip_hash": {
+      "type": "string",
+      "description": "Salted SHA-256 of the requester IP. Written only when a PDF render actually happens (cache hits are free and are not logged), and read only to enforce the same 3/hr and 10/day per-IP limits the scanner uses. Raw IP is never stored."
+    }
+  },
+  "required": [
+    "requester_ip_hash"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
