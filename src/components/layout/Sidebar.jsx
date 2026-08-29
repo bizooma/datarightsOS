@@ -14,6 +14,7 @@ import {
   Users,
   BookOpen,
   LifeBuoy,
+  Mail,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -36,6 +37,7 @@ const navItems = [
 const superAdminItems = [
   { path: '/organizations', label: 'Organizations', icon: Building2 },
   { path: '/admin/users', label: 'User Management', icon: Users },
+  { path: '/admin/scan-emails', label: 'Scan Report Emails', icon: Mail },
 ];
 
 export default function Sidebar() {

@@ -1,0 +1,60 @@
+{
+  "name": "ScanReportEmail",
+  "type": "object",
+  "properties": {
+    "scan": {
+      "type": "string",
+      "description": "Reference to the Scan whose report was emailed (or attempted)"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Domain that was scanned, denormalized so the admin list reads without a second lookup"
+    },
+    "email": {
+      "type": "string",
+      "description": "Lowercased address the report was sent to. Captured because the visitor asked for the report by email."
+    },
+    "opted_in": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the visitor checked the optional updates box. Stored only \u2014 nothing is synced to any marketing platform and no marketing email is sent on this signal."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "throttled"
+      ],
+      "default": "sent",
+      "description": "sent = the report email was delivered to Resend. throttled = the attempt was refused by a limit and NO mail was sent."
+    },
+    "throttle_reason": {
+      "type": "string",
+      "description": "Which limit refused a throttled attempt (per-IP hourly/daily, per-scan cap, or duplicate address)."
+    },
+    "requester_ip_hash": {
+      "type": "string",
+      "description": "Salted SHA-256 of the requester IP, used only for the 3/hour and 10/day send limits. Raw IP is never stored."
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the report email was handed to the mail provider"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

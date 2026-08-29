@@ -57,12 +57,33 @@
     },
     "pdf_url": {
       "type": "string",
-      "description": "Cached PDF of this report, rendered once by Browserless on the first download and reused for every download after. A report's findings never change once complete, so the file is generated lazily and cached forever \u2014 we pay for one render per report, not one per download."
+      "description": "Cached PDF of this report, rendered once by Browserless on the first download or email and reused afterwards. A report's findings never change once complete, so the file is generated lazily and cached forever \u2014 we pay for one render per report, not one per download."
     },
     "pdf_generated_at": {
       "type": "string",
       "format": "date-time",
       "description": "When the cached PDF was rendered."
+    },
+    "report_emails": {
+      "type": "array",
+      "description": "Addresses this report was emailed to, in order. Capped at 2 sends per report and never the same address twice. Nothing here is synced to a marketing platform.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "opted_in": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the visitor checked the optional updates box. Stored only."
+          }
+        }
+      }
     }
   },
   "required": [

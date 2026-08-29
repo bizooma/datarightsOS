@@ -31,6 +31,7 @@ import PrivacyCenter from '@/pages/PrivacyCenter';
 import Home from '@/pages/Home';
 import Pricing from '@/pages/Pricing';
 import AdminUsers from '@/pages/AdminUsers';
+import ScanEmails from '@/pages/ScanEmails';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import CookieConsent from '@/pages/CookieConsent';
@@ -75,6 +76,7 @@ const AuthenticatedApp = () => {
           <Route path="/support" element={<Support />} />
           <Route path="/organizations" element={<Organizations />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/scan-emails" element={<ScanEmails />} />
         </Route>
       </Route>
       <Route path="/pricing" element={<Pricing />} />

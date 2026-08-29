@@ -4,6 +4,7 @@ import NeutralCheckList from '@/components/scan/NeutralCheckList';
 import { CHECK_ORDER, needsAttention } from '@/components/scan/checkMeta';
 import ScanSummary from '@/components/scan/ScanSummary';
 import DownloadPdfButton from '@/components/scan/DownloadPdfButton';
+import EmailReportForm from '@/components/scan/EmailReportForm';
 import { SCOPE_LINE } from '@/components/scan/reportText';
 
 export default function ScanReport({ scan }) {
@@ -70,6 +71,8 @@ export default function ScanReport({ scan }) {
           </p>
         </div>
       )}
+
+      <EmailReportForm scan={scan} />
 
       <p className="text-[11px] text-muted-foreground text-center px-4">
         This report describes network behavior observed at scan time. It reports observations only —
