@@ -57,7 +57,14 @@ footer a{color:#5d6f7d}
 @media (max-width:600px){.wrap{padding:26px 16px 48px}h1{font-size:23px}main{padding:20px 18px}}
 `;
 
-function page({ lang, title, description, canonical, altUrl, altLabel, businessName, heading, version, effectiveDate, bodyHtml, showBadge }) {
+// A statement type that the site may ALSO publish as a page on its own website.
+// When it does, that page is the real document and this one defers to it.
+const OWN_PAGE_FIELD = {
+  privacy_policy: 'privacy_policy_url',
+  accessibility_statement: 'accessibility_statement_url',
+};
+
+function page({ lang, title, description, canonical, selfUrl, altUrl, altLabel, businessName, heading, version, effectiveDate, bodyHtml, showBadge }) {
   const metaBits = [];
   if (version) metaBits.push((lang === 'es' ? 'Versión ' : 'Version ') + esc(version));
   if (effectiveDate) metaBits.push((lang === 'es' ? 'Vigente desde ' : 'Effective ') + esc(effectiveDate));
@@ -71,11 +78,11 @@ function page({ lang, title, description, canonical, altUrl, altLabel, businessN
 <meta name="description" content="${esc(description)}">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="${esc(canonical)}">
-${altUrl ? `<link rel="alternate" hreflang="${lang === 'es' ? 'en' : 'es'}" href="${esc(altUrl)}">\n<link rel="alternate" hreflang="${lang === 'es' ? 'es' : 'en'}" href="${esc(canonical)}">` : ''}
+${altUrl ? `<link rel="alternate" hreflang="${lang === 'es' ? 'en' : 'es'}" href="${esc(altUrl)}">\n<link rel="alternate" hreflang="${lang === 'es' ? 'es' : 'en'}" href="${esc(selfUrl)}">` : ''}
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:type" content="article">
-<meta property="og:url" content="${esc(canonical)}">
+<meta property="og:url" content="${esc(selfUrl)}">
 <style>${PAGE_CSS}</style>
 </head>
 <body>
@@ -180,12 +187,43 @@ export default async function (req) {
       );
     }
 
-    // Canonical always points at the language actually being served, so the English
-    // and Spanish pages never compete for the same canonical URL.
+    // selfUrl always points at the language actually being served, so the English
+    // and Spanish pages never compete for the same URL.
     const slugForUrl = site.slug || site.site_key;
-    const canonical = statementUrl(slugForUrl, type, effLang === 'es' ? 'es' : undefined);
+    const selfUrl = statementUrl(slugForUrl, type, effLang === 'es' ? 'es' : undefined);
     const altUrl = hasEs ? statementUrl(slugForUrl, type, effLang === 'es' ? undefined : 'es') : '';
     const altLabel = effLang === 'es' ? 'View in English' : 'Ver en español';
+
+    // CANONICAL: whoever owns the real document gets it. A site with its own
+    // branded page for this statement type already has that URL known and linked,
+    // so this page defers to it and exists for availability — non-JS fetchers,
+    // scanners, and anything that needs the text in the response body. A site with
+    // no page of its own has nothing to defer to, so this page IS the document and
+    // is canonical to itself. Spanish never defers: an own-page URL is one page in
+    // one language, so pointing the Spanish version at it would be wrong.
+    const ownPageField = OWN_PAGE_FIELD[type];
+    const ownPage = ownPageField ? String(site[ownPageField] || '').trim() : '';
+    const canonical = (effLang === 'en' && /^https?:\/\//i.test(ownPage)) ? ownPage : selfUrl;
+
+    // JSON mode: lets our own branded page render this exact body, so one document
+    // is served at both URLs and neither can be edited independently.
+    if ((url.searchParams.get('format') || '').toLowerCase() === 'json') {
+      return Response.json(
+        {
+          ok: true,
+          type,
+          lang: effLang,
+          heading,
+          body: bodyHtml,
+          version: stmt.version || '',
+          effective_date: stmt.effective_date || '',
+          business_name: businessName,
+          canonical,
+          statement_url: selfUrl,
+        },
+        { headers: { 'Cache-Control': 'public, max-age=300' } },
+      );
+    }
 
     const showBadge = !(org.plan === 'agency' && site.hide_branding === true);
 
@@ -194,6 +232,7 @@ export default async function (req) {
       title: heading + ' · ' + businessName,
       description: metaDescription(bodyHtml, heading + ' for ' + businessName + '.'),
       canonical,
+      selfUrl,
       altUrl,
       altLabel,
       businessName,

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { FileWarning } from 'lucide-react';
+import { PUBLIC_BASE } from '@/lib/statementUrls';
 
 // A site can end up hosting the same legal document twice: once as a published
 // statement here, and once at a URL on its own site entered in the config. Two
@@ -18,11 +19,14 @@ export default function DuplicateDocumentWarning({ site }) {
     enabled: !!site?.id,
   });
 
-  const conflicts = PAIRS.filter(
-    (p) =>
-      String(site?.[p.urlField] || '').trim() &&
-      statements.some((s) => s.statement_type === p.type && String(s.body || '').trim()),
-  );
+  const conflicts = PAIRS.filter((p) => {
+    const own = String(site?.[p.urlField] || '').trim();
+    if (!own) return false;
+    // A URL on our own domain is a page that renders FROM the statement body, so it
+    // is the same document and cannot drift. Only an external page is hand-maintained.
+    if (own.startsWith(PUBLIC_BASE)) return false;
+    return statements.some((s) => s.statement_type === p.type && String(s.body || '').trim());
+  });
   if (!conflicts.length) return null;
 
   return (
@@ -39,8 +43,10 @@ export default function DuplicateDocumentWarning({ site }) {
           read whichever they find first.
         </p>
         <p className="mt-2">
-          Keep one as the real document: either clear the URL{conflicts.length > 1 ? 's' : ''} below
-          and publish here, or unpublish the statement and keep your own page.
+          Because you have your own page, search engines are pointed at it as the real
+          document and this statement page serves as a plain-HTML backup. That only holds up
+          if the two say the same thing — so either keep them in step deliberately, or clear
+          the URL{conflicts.length > 1 ? 's' : ''} below and publish here only.
         </p>
       </div>
     </div>
