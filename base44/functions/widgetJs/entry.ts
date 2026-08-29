@@ -351,7 +351,9 @@ Deno.serve(async (req) => {
       aiNote: 'This site discloses when and how artificial intelligence is used to interact with you.',
       tPrefsSaved: 'Preferences saved', tRejected: 'All optional cookies rejected',
       tEmailReq: 'Email is required', tReqLogged: 'Request logged. Confirmation sent.', tReportSent: 'Report sent. Thank you.',
-      effective: 'Effective'
+      effective: 'Effective',
+      openFullPage: 'Open full page \\u2197',
+      legalStatements: 'Legal statements'
     },
     es: {
       launcher: 'Privacidad y Derechos de Datos',
@@ -389,7 +391,9 @@ Deno.serve(async (req) => {
       aiNote: 'Este sitio divulga cuándo y cómo se utiliza la inteligencia artificial para interactuar con usted.',
       tPrefsSaved: 'Preferencias guardadas', tRejected: 'Todas las cookies opcionales rechazadas',
       tEmailReq: 'El correo electrónico es obligatorio', tReqLogged: 'Solicitud registrada. Confirmación enviada.', tReportSent: 'Reporte enviado. Gracias.',
-      effective: 'Vigente'
+      effective: 'Vigente',
+      openFullPage: 'Abrir p\\u00e1gina completa \\u2197',
+      legalStatements: 'Declaraciones legales'
     }
   };
 
@@ -558,6 +562,8 @@ Deno.serve(async (req) => {
       + '.modal-body h1,.modal-body h2,.modal-body h3{margin:12px 0 4px}'
       + '.modal-body p{margin:0 0 8px}.modal-body ul,.modal-body ol{padding-left:18px;margin:0 0 8px}'
       + '.modal-body a{text-decoration:underline}'
+      + '.modal-foot{flex-shrink:0;border-top:1px solid ' + divider + ';padding:10px 16px;background:' + footerBg + '}'
+      + '.modal-foot a{font-size:11.5px;font-weight:650;color:' + accent + ';text-decoration:underline}'
       // --- Bar layout (first-visit consent moment) — presentation only ---
       + '.cbar{position:fixed;left:0;right:0;bottom:0;z-index:2147483001;background:' + panelBg + ';color:' + panelText + ';border-top:1px solid ' + divider + ';box-shadow:0 -10px 40px -12px rgba(20,32,43,.35);padding:14px 18px;padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px) + ' + launcherOffset + 'px);display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-height:15vh;overflow:auto}'
       + '.cbar .cbmsg{flex:1 1 240px;min-width:200px;font-size:13px;font-weight:600;color:' + panelText + ';line-height:1.4}'
@@ -722,7 +728,7 @@ Deno.serve(async (req) => {
         })()
       + (cfg.show_badge === false ? '' : '<div class="foot">Powered by <a href="https://datarightsos.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">DataRightsOS</a></div>')
       + '</div>'
-      + '<div class="modal-overlay hidden" id="MO"><div class="modal"><div class="modal-head"><div><h3 id="MT"></h3><div class="modal-meta" id="MM"></div></div><button class="x" id="MX">&times;</button></div><div class="modal-body" id="MB"></div></div></div>'
+      + '<div class="modal-overlay hidden" id="MO"><div class="modal"><div class="modal-head"><div><h3 id="MT"></h3><div class="modal-meta" id="MM"></div></div><button class="x" id="MX">&times;</button></div><div class="modal-body" id="MB"></div><div class="modal-foot hidden" id="MF"><a id="MOPEN" target="_blank" rel="noopener"></a></div></div></div>'
       + '<div class="toast" id="T"></div>';
 
     root.innerHTML = html;
@@ -926,8 +932,46 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Plain anchor links to the public statement pages, injected into the HOST page
+    // (deliberately outside the shadow DOM — a link inside a shadow root is not a
+    // link any crawler or scanner will follow). Real <a href> elements, no click
+    // handler, so they behave like any other footer link.
+    //
+    // HONEST LIMIT: these are injected by JavaScript, so a crawler that executes JS
+    // sees them and one that doesn't never will. The static snippet in Widget Studio
+    // exists for that second case.
+    (function injectFooterLinks() {
+      if (!cfg.inject_footer_links) return;
+      var urls = cfg.statement_urls || {};
+      if (document.getElementById('dros-footer-links')) return;
+      var stmts = cfg.statements || {};
+      var order = [
+        ['privacy_policy', 'Privacy Policy'],
+        ['cookie_policy', 'Cookie Policy'],
+        ['accessibility_statement', 'Accessibility Statement'],
+        ['ai_use_statement', 'AI Use Statement']
+      ];
+      var parts = [];
+      order.forEach(function (pair) {
+        var key = pair[0];
+        var href = urls[key];
+        if (!href) return;
+        var s = stmts[key] || {};
+        var label = (lang === 'es' && s.title_es) ? s.title_es : (s.title || pair[1]);
+        if (lang === 'es' && s.body_es) href += '&lang=es';
+        parts.push('<a href="' + esc(href) + '" style="color:inherit;text-decoration:underline;margin:0 8px">' + esc(label) + '</a>');
+      });
+      if (!parts.length) return;
+      var nav = document.createElement('nav');
+      nav.id = 'dros-footer-links';
+      nav.setAttribute('aria-label', t.legalStatements);
+      nav.style.cssText = 'padding:14px 16px;text-align:center;font-size:12px;line-height:1.8;color:inherit;opacity:.85';
+      nav.innerHTML = parts.join('<span aria-hidden="true">&middot;</span>');
+      document.body.appendChild(nav);
+    })();
+
     // Statement modal
-    var MO = $('MO'), MT = $('MT'), MM = $('MM'), MB = $('MB');
+    var MO = $('MO'), MT = $('MT'), MM = $('MM'), MB = $('MB'), MF = $('MF'), MOPEN = $('MOPEN');
     if (MO) {
       $('MX').onclick = function () { MO.classList.add('hidden'); };
       MO.onclick = function (e) { if (e.target === MO) MO.classList.add('hidden'); };
@@ -940,6 +984,16 @@ Deno.serve(async (req) => {
           MT.textContent = (useEs && s.title_es ? s.title_es : s.title) || key;
           MM.textContent = (s.effective_date ? t.effective + ': ' + s.effective_date : '') + (s.version ? '  ·  v' + s.version : '');
           MB.innerHTML = (useEs && s.body_es ? s.body_es : s.body) || '';
+          // The modal stays the default reading experience; this makes the durable
+          // public URL reachable rather than replacing the in-widget view.
+          var pub = (cfg.statement_urls || {})[key];
+          if (pub && MF && MOPEN) {
+            MOPEN.href = pub + ((useEs && s.body_es) ? '&lang=es' : '');
+            MOPEN.textContent = t.openFullPage;
+            MF.classList.remove('hidden');
+          } else if (MF) {
+            MF.classList.add('hidden');
+          }
           MO.classList.remove('hidden');
         };
       });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
+import StatementLinksPanel from '@/components/widget-studio/StatementLinksPanel';
 import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
 import LayoutPicker from '@/components/widget-studio/LayoutPicker';
 import LauncherStyleSection from '@/components/widget-studio/LauncherStyleSection';
@@ -63,8 +64,31 @@ export default function WidgetStudio() {
   const selectedSite = sites.find(s => s.id === selectedSiteId) || sites[0];
   const atSiteLimit = org ? !canAddSite(org.plan, sites.length) : false;
 
+  // Backfill: sites created before statement URLs existed have no slug yet. Assigned
+  // once, then never again — ensureSiteSlug returns the existing slug unchanged.
+  useEffect(() => {
+    if (!selectedSite || selectedSite.slug) return;
+    let cancelled = false;
+    base44.functions
+      .invoke('ensureSiteSlug', { site_id: selectedSite.id })
+      .then(() => { if (!cancelled) queryClient.invalidateQueries({ queryKey: ['sites'] }); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [selectedSite?.id, selectedSite?.slug, queryClient]);
+
   const createSiteMutation = useMutation({
-    mutationFn: (data) => base44.entities.Site.create(data),
+    // The public slug is assigned server-side: uniqueness has to be checked against
+    // sites this tenant can't read. A failure here is not fatal — the effect below
+    // retries for any site still missing one.
+    mutationFn: async (data) => {
+      const created = await base44.entities.Site.create(data);
+      try {
+        await base44.functions.invoke('ensureSiteSlug', { site_id: created.id });
+      } catch (err) {
+        // Slug assignment is retried lazily; site creation itself succeeded.
+      }
+      return created;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       setShowAddForm(false);
@@ -227,6 +251,7 @@ export default function WidgetStudio() {
                   <SiteConfigForm key={selectedSite.id} site={selectedSite} plan={org?.plan} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
                   <div className="border-t border-border pt-6 mt-6 space-y-6">
                     <EmbedSnippet site={selectedSite} />
+                    <StatementLinksPanel site={selectedSite} plan={org?.plan} />
                     <PrivacyCenterPreview site={liveFormData || selectedSite} />
                   </div>
                 </TabsContent>
@@ -313,7 +338,9 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
   };
 
   const handleSave = () => {
-    const { id, created_date, updated_date, created_by_id, ...data } = form;
+    // slug is stripped deliberately: it is immutable once assigned, and every
+    // published statement link depends on it staying put.
+    const { id, created_date, updated_date, created_by_id, slug, ...data } = form;
     onUpdate({ id: site.id, data });
   };
 
@@ -328,6 +355,15 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block">Site Key</Label>
             <Input value={form.site_key || ''} readOnly className="h-9 text-sm bg-muted font-mono" />
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">Statement URL Slug</Label>
+            <Input value={form.slug || 'assigning…'} readOnly className="h-9 text-sm bg-muted font-mono" />
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Permanent — it appears in every published statement link, so it never changes,
+              even if you edit the domain above. Changing it would break links already in
+              footers and search results.
+            </p>
           </div>
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block">Install Status</Label>
@@ -515,6 +551,24 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
               <p className="text-[11px] text-muted-foreground">When on, the widget automatically respects visitors' Global Privacy Control browser signals (auto opt-out of data selling).</p>
             </div>
             <Switch checked={form.honor_gpc} onCheckedChange={v => handleChange('honor_gpc', v)} />
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-border">
+            <div className="pr-4">
+              <p className="text-sm font-medium">Add statement links to my site's footer</p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {plan === 'agency'
+                  ? "Off by default on your plan: these links point at datarightsos.com, which would show our name in your client's footer. Turn it on only if that's acceptable — otherwise use the rewrite instructions below the embed snippet to serve the statements from your own domain."
+                  : 'The widget adds plain links to your published statement pages at the bottom of your site. Search engines that run JavaScript will see them; crawlers that don\'t, won\'t — so for the strongest result also paste the static footer snippet shown below the embed snippet.'}
+              </p>
+            </div>
+            <Switch
+              checked={
+                form.inject_footer_links === true || form.inject_footer_links === false
+                  ? form.inject_footer_links
+                  : plan !== 'agency'
+              }
+              onCheckedChange={v => handleChange('inject_footer_links', v)}
+            />
           </div>
           <FormField label="Privacy Policy URL" value={form.privacy_policy_url} onChange={v => handleChange('privacy_policy_url', v)} hint="Optional. Link to a privacy policy hosted on your own site. Leave blank if you write your policy in the Legal Statements tab." />
           <FormField label="Policy Version" value={form.policy_version} onChange={v => handleChange('policy_version', v)} hint="A version stamp (e.g. 1.0) recorded on every consent record, so you have proof of which policy version a visitor agreed to." />

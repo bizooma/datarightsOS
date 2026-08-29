@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { canServeStatements, canShowRequestCard, canCustomLauncher } from '../../shared/planLimits.ts';
+import { statementUrl } from '../../shared/statementUrls.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -70,7 +71,29 @@ Deno.serve(async (req) => {
   // is NEVER unlabeled; an unlabeled image makes the privacy path unfindable.
   const customLauncher = canCustomLauncher(org.plan) && site.launcher_style === 'custom' && !!site.launcher_image_url;
 
+  // Public, crawlable URL per published statement. Built here (not in the widget)
+  // so the widget never has to know the URL shape. site_key is the fallback for
+  // sites that predate slugs, and is a valid lookup on the statement endpoint.
+  const slugForUrl = site.slug || site.site_key;
+  const statementUrls = {};
+  if (privacyStmt) statementUrls.privacy_policy = statementUrl(slugForUrl, 'privacy_policy');
+  if (cookieStmt) statementUrls.cookie_policy = statementUrl(slugForUrl, 'cookie_policy');
+  if (a11yStmt) statementUrls.accessibility_statement = statementUrl(slugForUrl, 'accessibility_statement');
+  if (aiStmt) statementUrls.ai_use_statement = statementUrl(slugForUrl, 'ai_use_statement');
+
+  // Footer-link injection defaults ON everywhere EXCEPT Agency: an Agency subscriber
+  // pays to remove our branding, and a datarightsos.com link in their client's footer
+  // would undo exactly that. Unset (null) means "use the plan default"; an explicit
+  // true/false from the subscriber always wins.
+  const isAgency = org.plan === 'agency';
+  const injectDefault = !isAgency;
+  const injectFooterLinks = (site.inject_footer_links === true || site.inject_footer_links === false)
+    ? site.inject_footer_links
+    : injectDefault;
+
   const payload = {
+    statement_urls: statementUrls,
+    inject_footer_links: injectFooterLinks && Object.keys(statementUrls).length > 0,
     product_name: site.brand_product_name || org.white_label_product_name || 'Privacy & Data Rights Center',
     logo_url: site.brand_logo_url || org.brand_logo_url || 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/b5c7df386_vault.png',
     primary_color: site.brand_primary_color || org.brand_primary_color || '#0d7d74',

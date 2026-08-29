@@ -19,6 +19,14 @@
       "type": "string",
       "description": "Public unique key the widget uses (auto-generated)"
     },
+    "slug": {
+      "type": "string",
+      "description": "IMMUTABLE public identifier used in this site's statement URLs (/functions/statement?site=<slug>). Derived once from the domain at creation (clientfirm.com -> clientfirm-com), with a numeric suffix on collision (clientfirm-com-2). NEVER regenerate or follow a domain edit: published statement links, footer snippets, search-engine indexes, and scanner records all point at this value, so changing it silently breaks every one of them. Assigned server-side by ensureSiteSlug, which needs a global uniqueness check no single tenant can perform. site_key remains a valid lookup for any statement URL already in the wild."
+    },
+    "inject_footer_links": {
+      "type": "boolean",
+      "description": "Whether the widget injects plain anchor links to this site's four statement URLs into the host page footer. NULL (unset) means 'use the plan default', which is ON for every plan EXCEPT Agency \u2014 Agency pays to remove our branding, and an injected datarightsos.com link in their client's footer would undo that. Resolved per-request in widgetConfig, never read raw by the widget. Injected links are visible to crawlers that execute JavaScript but not to those that don't, which is why Widget Studio also offers a static footer snippet."
+    },
     "install_status": {
       "type": "string",
       "enum": [
