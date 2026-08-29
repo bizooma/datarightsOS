@@ -13,8 +13,15 @@ export const ROUTE_META = {
     description:
       'One widget covering cookie consent, AI disclosure, accessibility, and data-rights requests — with a timestamped record of how every request was handled.',
   },
+  // Observations-only, in metadata as much as in the report: describes what the
+  // scanner LOOKS AT, never what it concludes. No "compliant", no "risk", no score.
+  '/scan': {
+    title: 'See what your website actually does | DataRightsOS',
+    description:
+      'Enter your URL. We load your site as a first-time visitor and show you what loads before anyone consents, what\u2019s disclosed, and what a visitor can and can\u2019t find. Free, no signup.',
+  },
   '/pricing': {
-    title: 'Pricing — DataRightsOS',
+    title: 'Pricing | DataRightsOS',
     description:
       'Five plans from a free-forever cookie consent tier to full white-label agency use. No per-request fees, no overages — cancel any time.',
   },

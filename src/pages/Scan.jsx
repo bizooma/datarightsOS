@@ -7,6 +7,7 @@ import ScanProgress from '@/components/scan/ScanProgress';
 import ScanReport from '@/components/scan/ScanReport';
 import CachedNotice from '@/components/scan/CachedNotice';
 import BlockedNotice from '@/components/scan/BlockedNotice';
+import { useDocumentMeta } from '@/lib/seoMeta';
 
 // Read once, at module-evaluation time for this mount, so the progress state can be
 // rendered on the FIRST paint when arriving from the homepage hero — a blank page
@@ -19,6 +20,7 @@ function initialHandoff() {
 }
 
 export default function Scan() {
+  useDocumentMeta('/scan');
   const handoff = useRef(initialHandoff()).current;
   const [scan, setScan] = useState(null);
   // Already "running" on first render when a domain was handed over, so ScanProgress
