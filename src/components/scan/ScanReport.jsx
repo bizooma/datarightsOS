@@ -35,7 +35,10 @@ export default function ScanReport({ scan }) {
     <div className="max-w-2xl mx-auto space-y-4">
       <div className="text-center">
         <h2 className="text-lg font-semibold text-foreground">Scan report for {scan.domain}</h2>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-1 break-all">
+          Page scanned: <span className="font-medium text-foreground/80">{scan.url}</span>
+        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">
           Scanned {scan.completed_at ? new Date(scan.completed_at).toLocaleString() : ''} ·{' '}
           {(scan.third_party_domains || []).length} third-party domains observed on load
         </p>
@@ -44,9 +47,11 @@ export default function ScanReport({ scan }) {
       <ScanSummary scan={scan} />
 
       <p className="text-xs text-muted-foreground leading-relaxed px-1">
-        Findings marked in amber are the ones worth reviewing. The rest is what we observed — not a
-        clean bill of health. We only checked the pages listed at the bottom of this report, and we
-        can't see how your site behaves for logged-in visitors or on pages we didn't visit.
+        {/* Scope line — tied to the single-page Group A scan. When Group B follows links to
+            policy pages this must be revisited; flag it rather than editing silently. */}
+        Findings marked in amber are the ones worth reviewing. The rest is what we observed on the
+        page we scanned — not a clean bill of health. We can't see other pages on your site, how it
+        behaves for logged-in visitors, or what happens after a form is submitted.
       </p>
 
       <div className="space-y-3">

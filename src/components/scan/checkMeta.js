@@ -51,7 +51,8 @@ const STATUS_LABELS = {
   },
   gpc_comparison: {
     found: () => 'Tracking reduced under GPC',
-    not_found: () => 'No change observed',
+    // zero_baseline = no trackers on either load, so no comparison happened.
+    not_found: (check) => (check?.zero_baseline ? 'No tracking to compare' : 'No change observed'),
   },
 };
 
@@ -79,6 +80,8 @@ export function statusLabelFor(checkKey, check) {
 //   - the GPC signal produced no change in behavior
 export function needsAttention(checkKey, check) {
   if (checkKey === 'pre_consent_tracking') return check?.status === 'found';
-  if (checkKey === 'gpc_comparison') return check?.status === 'not_found';
+  // Only the real case: trackers were observed and behavior didn't change.
+  // A zero-tracker baseline had nothing to measure, so it is never a finding.
+  if (checkKey === 'gpc_comparison') return check?.status === 'not_found' && !check?.zero_baseline;
   return false;
 }

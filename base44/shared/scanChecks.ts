@@ -200,10 +200,14 @@ export function analyzeScan({ url, pass1, pass2 }) {
     const dropped = Array.from(set1).filter((v) => !set2.has(v));
     const added = Array.from(set2).filter((v) => !set1.has(v));
     if (set1.size === 0 && set2.size === 0) {
+      // Nothing to measure is not a finding: no trackers on either load means
+      // there was no behavior to compare, which is distinct from "compared and
+      // saw no change". Reported as its own neutral state, never flagged.
       gpc_comparison = {
         status: STATUS.NOT_FOUND,
-        observation: 'Tracking behavior did not change when a Global Privacy Control signal was sent.',
-        details: ['No tracking requests were observed on either load.'],
+        zero_baseline: true,
+        observation: 'No tracking requests were observed on either load, so there was no behavior to compare.',
+        details: [],
       };
     } else if (dropped.length > 0 && added.length === 0) {
       gpc_comparison = found('Fewer trackers loaded when GPC was enabled.', ['Not observed on the GPC load: ' + dropped.join(', ')]);
