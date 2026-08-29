@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import { generateKey } from '@/lib/tenantUtils';
-import { canAddSite, canHideBadge, canServeStatements, canCustomLauncher } from '@/lib/planLimits';
+import { canAddSite, canHideBadge, canEditStatements, canServeStatementPages, canCustomLauncher } from '@/lib/planLimits';
+import ServiceStatusPanel from '@/components/widget-studio/ServiceStatusPanel';
 import UpgradePanel from '@/components/billing/UpgradePanel';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
@@ -41,7 +42,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 export default function WidgetStudio() {
-  const { orgId, user } = useCurrentUser();
+  const { orgId, user, isSuperAdmin } = useCurrentUser();
   const queryClient = useQueryClient();
 
   const { data: org } = useQuery({
@@ -150,7 +151,9 @@ export default function WidgetStudio() {
       organization: effectiveOrgId,
       domain: newDomain.trim(),
       site_key: generateKey('sk'),
-      install_status: 'pending',
+      // Installation is detected, not declared. service_status defaults to 'active'
+      // (entity default) — a new site is entitled to service immediately.
+      install_status: 'never_installed',
       enabled_drawers: ['cookies', 'privacy_rights'],
       honor_gpc: true,
       policy_version: '1.0',
@@ -223,12 +226,14 @@ export default function WidgetStudio() {
                 >
                   <p className="truncate">{s.domain}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                    {/* Installation, not entitlement — a site awaiting its first load is
+                        not a problem, so it is neutral, never red. */}
                     <span
                       className={`inline-block w-2 h-2 rounded-full ${
-                        s.install_status === 'active' ? 'bg-green-500' : 'bg-red-500'
+                        s.install_status === 'installed' ? 'bg-green-500' : 'bg-muted-foreground/40'
                       }`}
                     />
-                    {s.install_status === 'active' ? 'Active' : 'Pending'}
+                    {s.install_status === 'installed' ? 'Installed' : 'Not seen yet'}
                   </p>
                 </button>
                 <button
@@ -246,7 +251,7 @@ export default function WidgetStudio() {
           {/* Site config form + embed + preview */}
           {selectedSite && (
             <div className="col-span-3 space-y-6">
-              {canServeStatements(org?.plan) && (
+              {canServeStatementPages(org?.plan) && (
                 <>
                   <StatementsBlockedNotice
                     reason={statementBlockReason({ site: selectedSite, org })}
@@ -262,7 +267,7 @@ export default function WidgetStudio() {
                   <TabsTrigger value="legal" className="text-xs">Legal Statements</TabsTrigger>
                 </TabsList>
                 <TabsContent value="config">
-                  <SiteConfigForm key={selectedSite.id} site={selectedSite} plan={org?.plan} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
+                  <SiteConfigForm key={selectedSite.id} site={selectedSite} plan={org?.plan} isSuperAdmin={isSuperAdmin} onUpdate={updateSiteMutation.mutate} onFormChange={setLiveFormData} />
                   <div className="border-t border-border pt-6 mt-6 space-y-6">
                     <EmbedSnippet site={selectedSite} />
                     <StatementLinksPanel site={selectedSite} org={org} plan={org?.plan} />
@@ -271,18 +276,18 @@ export default function WidgetStudio() {
                   </div>
                 </TabsContent>
                 <TabsContent value="legal">
-                  {canServeStatements(org?.plan) ? (
+                  {canEditStatements(org?.plan) ? (
                     <LegalStatementsEditor site={selectedSite} />
                   ) : (
                     <UpgradePanel
                       feature="statements"
-                      title="Legal statements aren't included on the free plan"
-                      description="The free plan shows cookie consent only — published statements are hidden in the widget. Upgrade to Notice to write and publish your privacy, cookie, accessibility, and AI-use statements."
+                      title="Editing statements isn't included on the free plan"
+                      description="Any statement you already published stays online at its existing web address — we don't take a live legal page offline. What the free plan pauses is writing and editing them, and showing them inside the widget. Upgrade to Notice to edit again."
                       adds={[
-                        'Privacy & cookie policies in the widget',
+                        'Write and edit all four legal statements',
+                        'Statements shown inside the widget',
                         'Accessibility statement + barrier reporting',
                         'AI use statement (incl. Spanish)',
-                        'All four legal statements in-widget',
                       ]}
                     />
                   )}
@@ -316,7 +321,7 @@ export default function WidgetStudio() {
   );
 }
 
-function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
+function SiteConfigForm({ site, plan, isSuperAdmin, onUpdate, onFormChange }) {
   const [form, setForm] = useState(site);
   const [uploading, setUploading] = useState(false);
   const allowHideBadge = canHideBadge(plan);
@@ -355,7 +360,17 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
   const handleSave = () => {
     // slug is stripped deliberately: it is immutable once assigned, and every
     // published statement link depends on it staying put.
-    const { id, created_date, updated_date, created_by_id, slug, ...data } = form;
+    //
+    // install_status and service_status are stripped for a different reason: neither is
+    // a setting. install_status is set one-way by the widget endpoints, and
+    // service_status is entitlement — it may only change through the audited backend
+    // writers, so this form must never carry a value for it.
+    const {
+      id, created_date, updated_date, created_by_id, slug,
+      install_status, service_status,
+      consent_cap_notice_month, consent_cap_notice_level,
+      ...data
+    } = form;
     onUpdate({ id: site.id, data });
   };
 
@@ -380,16 +395,7 @@ function SiteConfigForm({ site, plan, onUpdate, onFormChange }) {
               footers and search results.
             </p>
           </div>
-          <div>
-            <Label className="text-xs text-muted-foreground mb-1.5 block">Install Status</Label>
-            <Select value={form.install_status} onValueChange={v => handleChange('install_status', v)}>
-              <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <ServiceStatusPanel site={site} isSuperAdmin={isSuperAdmin} />
           <LayoutPicker
             value={form.widget_layout || 'floating'}
             accent={form.brand_primary_color || '#0d7d74'}

@@ -28,6 +28,82 @@ function startOfCalendarMonthISO(): string {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).toISOString();
 }
 
+// YYYY-MM (UTC), used to send each cap notification at most once per month.
+function currentMonthKey(): string {
+  const d = new Date();
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+// THE CAP MUST NEVER DEGRADE SILENTLY.
+//
+// Over the Free cap the widget keeps displaying and enforcing consent, but stops
+// WRITING records. That produces a consent log with a hole in it, and the subscriber
+// would otherwise discover the hole at the worst possible moment — when they need the
+// evidence. A gap they were warned about is defensible; an unannounced one is not.
+// So we email at 80% and again at the cap, once each per calendar month.
+async function sendCapNotice(
+  svc: any,
+  { site, org, level, used, cap }: { site: any; org: any; level: 'approaching' | 'reached'; used: number; cap: number },
+) {
+  const month = currentMonthKey();
+  // Already told them about this level this month.
+  if (site.consent_cap_notice_month === month && site.consent_cap_notice_level === level) return;
+  // 'reached' supersedes 'approaching', but never the other way around.
+  if (site.consent_cap_notice_month === month && site.consent_cap_notice_level === 'reached' && level === 'approaching') return;
+
+  let to = (site.privacy_contact_email || org?.privacy_contact_email || '').trim();
+  if (!to && org?.created_by_id) {
+    try {
+      const owners = await svc.entities.User.filter({ id: org.created_by_id });
+      to = owners[0]?.email || '';
+    } catch { /* ignore */ }
+  }
+
+  // Record the attempt regardless, so a missing address doesn't cause a retry storm
+  // on every subsequent consent event.
+  await svc.entities.Site.update(site.id, {
+    consent_cap_notice_month: month,
+    consent_cap_notice_level: level,
+  });
+  if (!to) {
+    console.log(`[intake] cap ${level} for ${site.domain} but no contact address on file`);
+    return;
+  }
+
+  const subject = level === 'reached'
+    ? `Consent logging paused for ${site.domain} until next month`
+    : `${site.domain} has used ${Math.round((used / cap) * 100)}% of this month's free consent records`;
+
+  const body = level === 'reached'
+    ? `Your site ${site.domain} has reached the free plan's limit of ${cap.toLocaleString()} recorded consent events for this calendar month.
+
+WHAT IS STILL HAPPENING
+Your widget is unaffected. It keeps showing the consent choice, enforcing it, blocking tags, and honoring Global Privacy Control. Visitors see and get exactly what they did before.
+
+WHAT STOPPED
+We are no longer writing new consent records for this site until the counter resets on the 1st of next month. Records already logged are untouched.
+
+WHY WE ARE TELLING YOU
+Your consent log is evidence. From now until the reset there will be a gap in it for this site. If you may need a complete record for this period, upgrading now resumes logging immediately.
+
+Settings → Billing has the options.
+
+— DataRightsOS`
+    : `Your site ${site.domain} has recorded ${used.toLocaleString()} of the ${cap.toLocaleString()} consent events included on the free plan this calendar month.
+
+If you reach the limit, your widget keeps working exactly as it does now — showing the consent choice, enforcing it, and honoring Global Privacy Control. What stops is the WRITING of new consent records, until the counter resets on the 1st of next month. That would leave a gap in your consent log for the rest of this month.
+
+No action is needed if that is acceptable. If you may need a complete record for this period, Settings → Billing has the options.
+
+— DataRightsOS`;
+
+  try {
+    await svc.integrations.Core.SendEmail({ to, subject, body });
+  } catch (e) {
+    console.error('[intake] cap notice email failed:', (e as Error).message);
+  }
+}
+
 const WINDOW_MINUTES = 60;
 const DEFAULT_SITE_MAX = 100;
 const EMAIL_MAX = 3;
@@ -132,7 +208,17 @@ Deno.serve(async (req) => {
           site: site.id,
           created_date: { $gte: monthStart },
         }, '-created_date', cap + 1);
-        if ((monthRecords || []).length >= cap) {
+        const used = (monthRecords || []).length;
+
+        // Warn on the way up and again at the ceiling — never let the log develop a
+        // gap the subscriber doesn't know about. Awaited, but never allowed to throw.
+        if (used >= cap) {
+          await sendCapNotice(base44.asServiceRole, { site, org: orgForCap, level: 'reached', used, cap });
+        } else if (used >= Math.floor(cap * 0.8)) {
+          await sendCapNotice(base44.asServiceRole, { site, org: orgForCap, level: 'approaching', used, cap });
+        }
+
+        if (used >= cap) {
           // Cap reached — enforce and confirm, but do not persist a new record.
           return Response.json({ success: true, capped: true }, { headers: corsHeaders });
         }

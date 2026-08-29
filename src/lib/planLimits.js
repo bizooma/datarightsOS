@@ -246,9 +246,28 @@ export function canCustomLauncher(plan) {
   return ['trial', 'core', 'proof', 'agency'].includes(plan);
 }
 
-// Whether the plan can publish legal statements (privacy, cookie, accessibility, AI)
-// in the widget and use the statement editors. FALSE on Free.
+// Whether the plan serves legal statements INSIDE THE WIDGET (privacy, cookie,
+// accessibility, AI). FALSE on Free. This is NOT the gate for the public statement
+// pages — see canServeStatementPages.
 export function canServeStatements(plan) {
+  return plan !== 'free';
+}
+
+// Public statement PAGES stay served on EVERY plan, permanently, including Free.
+// Deliberately always true.
+//
+// WHY: these are the customer's live legal pages — indexed, linked from their
+// footer, cited as their privacy policy. Taking them down because a trial lapsed
+// would 404 a real business's privacy policy over billing. Downgrading removes the
+// ability to CREATE or EDIT statements (canEditStatements), never the ability to
+// keep serving what was already published.
+export function canServeStatementPages() {
+  return true;
+}
+
+// Creating/editing legal statements. Withheld on Free — this is what a downgraded
+// subscriber loses, instead of losing their published pages.
+export function canEditStatements(plan) {
   return plan !== 'free';
 }
 

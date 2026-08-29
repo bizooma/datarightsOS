@@ -7,6 +7,14 @@ const REQUEST_TYPE_LABELS = {
   opt_out: 'Opt-Out of Sale',
 };
 
+// PLAN AWARENESS: this job deliberately does NOT skip organizations on Free.
+// Requests that were already accepted stay fully actionable on every plan — we
+// started the statutory clock, so we don't get to block the remedy — and the
+// Request Inbox keeps rendering for any org that has existing requests. So the
+// reminder never points anyone at a page they cannot use. The link below is a
+// direct deep link to the request, which works on every plan.
+//
+// If that guarantee ever changes, this job must gate on it in the same edit.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -72,7 +80,9 @@ Requester: ${request.requester_name || 'Unknown'} (${request.requester_email || 
 Current Status: ${request.request_status}
 Statutory Deadline: ${deadlineStr}
 
-Please log in and complete this request before the deadline to remain in compliance.`,
+Open it here: https://datarightsos.com/request/${request.id}
+
+Please complete this request before the deadline to remain in compliance.`,
         });
       }
 

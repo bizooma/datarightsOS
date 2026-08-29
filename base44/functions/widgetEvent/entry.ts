@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { markInstalled } from '../../shared/serviceStatus.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -54,6 +55,11 @@ Deno.serve(async (req) => {
   const sites = await base44.asServiceRole.entities.Site.filter({ site_key: siteKey });
   if (!sites || sites.length === 0) return Response.json({ error: 'not found' }, { status: 404, headers: CORS });
   const site = sites[0];
+
+  // Stronger install evidence than a config fetch: this endpoint only receives a
+  // POST when the widget actually ran on a page. One-way and informational, exactly
+  // like the widgetConfig call — it can never touch service_status.
+  await markInstalled(base44.asServiceRole, site);
 
   const userAgent = sanitize(req.headers.get('user-agent') || '', 500);
   // Infer US state from edge geo headers (Cloudflare / common proxies). Best-effort, no widget change needed.

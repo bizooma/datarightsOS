@@ -51,7 +51,7 @@
         "agency"
       ],
       "default": "trial",
-      "description": "Subscription plan. 'free' is the permanent free plan an expired trial rolls into (cookie consent only)."
+      "description": "Subscription plan. 'free' is the permanent free plan an expired trial rolls into (cookie consent only). IMPORTANT: an expired trial MUST be moved to 'free' explicitly \u2014 leaving it on 'trial' keeps canTrackRequests true and hands over the paid product for nothing, independently of any site-level status gate."
     },
     "trial_started_at": {
       "type": "string",
@@ -62,6 +62,16 @@
       "type": "string",
       "format": "date-time",
       "description": "Timestamp when the 2-days-left trial reminder email was sent. Guards against duplicate sends."
+    },
+    "trial_expired_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the trial expired and the organization was moved to the Free plan by checkSubscriptionStatus. Kept because the plan field alone cannot tell you whether 'free' was reached by expiry or chosen, and support needs that distinction."
+    },
+    "trial_expiry_email_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the 'your trial has ended' email was sent. Guards against a duplicate send if the expiry job is ever re-run against the same org."
     },
     "white_label_product_name": {
       "type": "string",

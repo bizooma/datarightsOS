@@ -28,10 +28,12 @@ export default function FreePlanBanner({ org }) {
             You're on the free plan — your cookie consent widget is still live.
           </p>
           <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-            Your widget keeps capturing and enforcing cookie consent on your site. Everything from your trial —
-            requests, audit trail, statements, and consent history — is <strong>kept and safe</strong>, and becomes
-            visible again the moment you upgrade. The free plan pauses privacy-request intake, legal statements,
-            accessibility reporting, exports, and consent history beyond the last 7 days.
+            Your widget keeps capturing and enforcing cookie consent on your site, and your published legal
+            pages stay online at the same addresses. Privacy requests you already received stay fully
+            manageable, with their deadlines and reminders, until you finish them. Everything else from your
+            trial is <strong>kept and safe</strong>. The free plan pauses new privacy-request intake, editing
+            your legal statements, showing them inside the widget, accessibility reporting, exports, and
+            consent history beyond the last 7 days.
           </p>
           <div className="flex items-center gap-4 mt-3">
             <Link

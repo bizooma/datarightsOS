@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { canServeStatements, canShowRequestCard, canCustomLauncher } from '../../shared/planLimits.ts';
+import { canServeStatements, canServeStatementPages, canShowRequestCard, canCustomLauncher } from '../../shared/planLimits.ts';
+import { markInstalled } from '../../shared/serviceStatus.ts';
 import { statementUrl, privacyChoicesUrl } from '../../shared/statementUrls.ts';
 import { canServeStatementPage, canPublishStatementPages, publishedBusinessName } from '../../shared/statementAvailability.ts';
 
@@ -30,16 +31,16 @@ Deno.serve(async (req) => {
   ]);
   const org = orgs[0] || {};
 
-  // Auto-activate: the first time the widget successfully loads on a site,
-  // flip its install status from pending to active.
-  if (site.install_status !== 'active') {
-    try {
-      await base44.asServiceRole.entities.Site.update(site.id, { install_status: 'active' });
-      site.install_status = 'active';
-    } catch (err) {
-      console.error('Failed to auto-activate site', site.id, err);
-    }
-  }
+  // Install detection ONLY — one-way never_installed -> installed, informational.
+  //
+  // THIS IS A PUBLIC GET and site_key is visible in the page source of every site
+  // running the widget, so anything this endpoint can write, anyone can trigger.
+  // That is acceptable for install_status (worst case: "somebody fetched the
+  // config") and unacceptable for entitlement. This endpoint previously wrote the
+  // single combined status column, which meant a crawler — or the customer's own
+  // next page view — silently restored service to an expired trial and made the
+  // suspension gate unfireable. service_status is NOT written here, ever.
+  await markInstalled(base44.asServiceRole, site);
 
   // Only the Agency (white-label) plan can remove the "Powered by DataRightsOS" badge.
   // Core and Proof always show it, regardless of the site's hide_branding flag.
@@ -83,9 +84,14 @@ Deno.serve(async (req) => {
   // name to publish under, and gating on the record alone is precisely what put
   // four links to 404s in a live customer's footer. A URL absent from this map is
   // a link the widget cannot render anywhere — footer, drawer, or elsewhere.
+  // NOTE: statement PAGES are gated on canServeStatementPages (always true), not on
+  // canServeStatements (false for Free). A downgraded customer keeps their published
+  // legal pages and the footer links to them; what they lose is the ability to edit
+  // them, plus the in-widget statement modal below.
   const slugForUrl = site.slug || site.site_key;
+  const pagesServable = canServeStatementPages(org.plan);
   const statementUrls = {};
-  const servable = (statement) => canServeStatementPage({ site, org, statement, servesStatements });
+  const servable = (statement) => canServeStatementPage({ site, org, statement, servesStatements: pagesServable });
   if (servable(privacyStmt)) statementUrls.privacy_policy = statementUrl(slugForUrl, 'privacy_policy');
   if (servable(cookieStmt)) statementUrls.cookie_policy = statementUrl(slugForUrl, 'cookie_policy');
   if (servable(a11yStmt)) statementUrls.accessibility_statement = statementUrl(slugForUrl, 'accessibility_statement');
@@ -94,7 +100,7 @@ Deno.serve(async (req) => {
   // Surfaced so Widget Studio can tell the subscriber WHY their statement links
   // aren't appearing. Without this the failure is silent: they wrote the
   // statements, the pages exist, and nothing links to them.
-  const statementPagesBlocked = !canPublishStatementPages({ site, org, servesStatements })
+  const statementPagesBlocked = !canPublishStatementPages({ site, org, servesStatements: pagesServable })
     && (!!privacyStmt || !!cookieStmt || !!a11yStmt || !!aiStmt);
 
   // Footer-link injection defaults ON everywhere EXCEPT Agency: an Agency subscriber
@@ -150,7 +156,11 @@ Deno.serve(async (req) => {
     launcher_style: customLauncher ? 'custom' : 'pill',
     launcher_image_url: customLauncher ? site.launcher_image_url : '',
     launcher_label: (typeof site.launcher_label === 'string' && site.launcher_label.trim()) ? site.launcher_label.trim() : 'Privacy & Data Rights',
-    install_status: site.install_status || 'active',
+    // THE RENDER GATE. widgetJs refuses to render when this is not 'active'.
+    // Read-only here — see the markInstalled comment above.
+    service_status: site.service_status || 'active',
+    // Informational, echoed for the dashboard/debugging. Never gate on it.
+    install_status: site.install_status || 'never_installed',
     widget_theme: site.widget_theme || 'dark',
     default_open: site.default_open !== false,
     honor_gpc: site.honor_gpc !== false,

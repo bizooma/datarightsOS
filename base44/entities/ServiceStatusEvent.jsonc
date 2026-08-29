@@ -1,0 +1,53 @@
+{
+  "name": "ServiceStatusEvent",
+  "type": "object",
+  "description": "Append-only trail of every change to Site.service_status \u2014 the field that decides whether we serve a customer's widget. A field that controls whether a paying customer gets service must never change without a trace: before this existed, nobody could answer 'who suspended this site, and when?' after the fact. Deliberately NOT stored in AuditEvent: that entity is the subscriber's privacy-compliance record, the thing they would hand a regulator, and billing suspensions do not belong in it. Written only by the three legitimate writers (checkSubscriptionStatus, stripeWebhook, the super-admin control) in the same code path as the update itself.",
+  "properties": {
+    "site": {
+      "type": "string",
+      "description": "Reference to the Site whose service_status changed"
+    },
+    "organization": {
+      "type": "string",
+      "description": "Reference to Organization, denormalized so an admin can scan by tenant without a second lookup"
+    },
+    "old_value": {
+      "type": "string",
+      "description": "service_status before the change ('active' | 'suspended'). Recorded so a transition can be read without diffing history."
+    },
+    "new_value": {
+      "type": "string",
+      "description": "service_status after the change ('active' | 'suspended')"
+    },
+    "actor": {
+      "type": "string",
+      "description": "Who made the change: 'cron:checkSubscriptionStatus', 'stripe:<event.type>', or the email of the super-admin who used the manual control. Never a public endpoint \u2014 widgetConfig cannot write service_status at all."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why, in plain language (e.g. 'subscription payment succeeded \u2014 service restored', 'suspended manually by support')"
+    },
+    "changed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the transition was applied"
+    }
+  },
+  "required": [
+    "site",
+    "new_value",
+    "actor"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

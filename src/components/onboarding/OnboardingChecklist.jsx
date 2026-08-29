@@ -1,41 +1,58 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Circle, X, Rocket, ArrowRight } from 'lucide-react';
 
 const STORAGE_KEY = 'tessera_onboarding_dismissed';
 
-export default function OnboardingChecklist({ sites = [] }) {
+// WHY THIS NO LONGER READS install_status: it used to mark "Paste the snippet on
+// your site" complete as soon as install_status flipped to active — but that flag is
+// set by a public config fetch, which any crawler, uptime monitor, or curious person
+// reading the embed snippet can trigger. So the checklist would report setup finished
+// when nothing had been installed, then hide itself once all steps read done.
+//
+// The only trustworthy evidence that the snippet is live on a real page is a consent
+// record: the widget has to have actually rendered, to a real visitor, for one to
+// exist. That is what step 2 keys off now.
+//
+// "Make it active" was also removed. Under the field split that is entitlement
+// (service_status), set by billing and support — never a step a subscriber performs.
+export default function OnboardingChecklist({ sites = [], orgId }) {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     setDismissed(localStorage.getItem(STORAGE_KEY) === 'true');
   }, []);
 
+  // One record is all we need — proof the widget ran on a real page.
+  const { data: liveEvidence = false } = useQuery({
+    queryKey: ['onboarding-consent-evidence', orgId],
+    queryFn: async () => {
+      if (!orgId) return false;
+      const rows = await base44.entities.ConsentRecord.filter({ organization: orgId }, '-created_date', 1);
+      return (rows?.length || 0) > 0;
+    },
+    enabled: !!orgId,
+    staleTime: 60_000,
+  });
+
   const hasSite = sites.length > 0;
-  const hasActiveSite = sites.some((s) => s.install_status === 'active');
 
   const steps = [
     {
-      label: 'Open Widget Studio',
-      description: 'Head to Widget Studio to configure your privacy widget.',
+      label: 'Add your website',
+      description: 'Open Widget Studio and enter your domain.',
       done: hasSite,
-    },
-    {
-      label: 'Add a website',
-      description: 'Click “Add a website” and enter your domain.',
-      done: hasSite,
-    },
-    {
-      label: 'Make it active',
-      description: 'Mark your site as active once you’re ready to go live.',
-      done: hasActiveSite,
     },
     {
       label: 'Paste the snippet on your site',
-      description: 'Copy the embed snippet and paste it into your site’s <head>.',
-      done: hasActiveSite,
+      description: liveEvidence
+        ? 'Confirmed — we have seen your widget running on a real visit.'
+        : 'Copy the embed snippet into your site\'s <head>. This ticks once a real visitor loads it.',
+      done: liveEvidence,
     },
   ];
 
@@ -87,7 +104,7 @@ export default function OnboardingChecklist({ sites = [] }) {
                 <Circle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               )}
               <div>
-                <p className={`text-[13px] font-medium ${step.done ? 'text-foreground' : 'text-foreground'}`}>
+                <p className="text-[13px] font-medium text-foreground">
                   {i + 1}. {step.label}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">{step.description}</p>

@@ -27,10 +27,31 @@ export function canShowRequestCard(plan: string | undefined | null): boolean {
   return plan !== 'free';
 }
 
-// Free serves NO legal statements in the widget (privacy, cookie, accessibility,
-// AI) and has no accessibility/AI drawers. Cookie consent only. Paid plans serve
-// statements normally.
+// Free serves NO legal statements INSIDE THE WIDGET (privacy, cookie,
+// accessibility, AI) and has no accessibility/AI drawers. Cookie consent only.
+// Paid plans serve statements normally.
+//
+// This is NOT the gate for the public statement PAGES — see canServeStatementPages.
 export function canServeStatements(plan: string | undefined | null): boolean {
+  return plan !== 'free';
+}
+
+// Public statement PAGES stay served on EVERY plan, permanently, including Free.
+// Deliberately always true.
+//
+// WHY: these are the customer's live legal pages. They are indexed, linked from
+// their footer, and cited as their privacy policy. Taking them down because a
+// trial lapsed would 404 a real business's privacy policy over billing and leave
+// them less compliant than before they met us. Downgrading removes the ability to
+// CREATE or EDIT statements (that is the upgrade reason) — never the ability to
+// keep serving what they already published.
+export function canServeStatementPages(_plan: string | undefined | null): boolean {
+  return true;
+}
+
+// Creating/editing legal statements. Withheld on Free — this is what a downgraded
+// subscriber loses, instead of losing their published pages.
+export function canEditStatements(plan: string | undefined | null): boolean {
   return plan !== 'free';
 }
 

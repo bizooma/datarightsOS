@@ -34,11 +34,32 @@
     "install_status": {
       "type": "string",
       "enum": [
-        "pending",
-        "active"
+        "never_installed",
+        "installed"
       ],
-      "default": "pending",
-      "description": "Widget installation status"
+      "default": "never_installed",
+      "description": "INFORMATIONAL ONLY \u2014 has the widget ever actually loaded on this site. Drives the Widget Studio status dot and nothing else. ONE-WAY: never_installed -> installed, never the reverse. May be written by the PUBLIC widgetConfig and widgetEvent endpoints precisely because nothing gates on it: being wrong here means 'somebody fetched the config', which is harmless. NOTHING about money or entitlement may ever be decided from this field \u2014 that is service_status. This column previously did both jobs, which is how a public GET ended up able to restore service to an expired trial. The onboarding checklist deliberately does NOT trust this field either (a config fetch is not an install); it keys off real visitor evidence (ConsentRecord)."
+    },
+    "service_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended"
+      ],
+      "default": "active",
+      "description": "ENTITLEMENT \u2014 are we entitled to serve this site. The ONLY field widgetJs gates rendering on. Writable by EXACTLY three callers, all of which route through shared/serviceStatus.ts so the change is audited into ServiceStatusEvent: checkSubscriptionStatus, stripeWebhook, and the super-admin setSiteServiceStatus function. A public endpoint must NEVER write this under any circumstance. Note what it is NOT for: an expired trial is NOT suspended \u2014 it moves to plan 'free' and keeps serving, because the promise is that the widget never dies and cookie consent stays free. Suspension is for hard entitlement loss (abuse, or a manual support decision)."
+    },
+    "consent_cap_notice_month": {
+      "type": "string",
+      "description": "Calendar month (YYYY-MM, UTC) the most recent Free-plan consent-cap notification was sent for. Paired with consent_cap_notice_level so each level is emailed at most once per month and the counter resets naturally when the month rolls over."
+    },
+    "consent_cap_notice_level": {
+      "type": "string",
+      "enum": [
+        "approaching",
+        "reached"
+      ],
+      "description": "Which Free-plan cap notification has already gone out this month. 'approaching' = 80% of the monthly recorded-consent cap, 'reached' = at the cap and no longer recording. Exists so the cap can never degrade SILENTLY: a consent record with an unannounced hole in it is worse than one the subscriber was told about, because they would only discover the gap when they needed the evidence."
     },
     "brand_product_name": {
       "type": "string",
@@ -54,7 +75,7 @@
     },
     "business_name": {
       "type": "string",
-      "description": "Site-specific from-name on requester emails. Falls back to the organization's business name, then organization name."
+      "description": "Site-specific from-name on requester emails, and the legal name public statement pages are published under. Falls back to the organization's business name. NO fallback to organization name \u2014 that value is auto-generated at signup."
     },
     "privacy_contact_email": {
       "type": "string",

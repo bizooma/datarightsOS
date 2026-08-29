@@ -21,6 +21,8 @@ import { canTrackRequests, canExportOwn } from '@/lib/planLimits';
 import UpgradePanel from '@/components/billing/UpgradePanel';
 import RequestForwardBanner from '@/components/billing/RequestForwardBanner';
 import StatementsBlockedBanner from '@/components/dashboard/StatementsBlockedBanner';
+import LegacyRequestsNotice from '@/components/request-inbox/LegacyRequestsNotice';
+import VisitorCapBanner from '@/components/consent-log/VisitorCapBanner';
 
 export default function RequestInbox() {
   const { user, orgId } = useCurrentUser();
@@ -117,7 +119,14 @@ export default function RequestInbox() {
   const tracksRequests = orgLoading ? true : canTrackRequests(plan);
   const showExport = canExportOwn(plan);
 
-  if (!orgLoading && !tracksRequests) {
+  // Requests accepted while the plan DID track them stay fully actionable forever —
+  // verification, the 45-day clock, checklists, reminders, audit trail. We started
+  // that clock, so we don't get to block the remedy when a trial lapses. Only NEW
+  // intake stops (the widget drops the request card, enforced in intakeEndpoint).
+  // So the upgrade wall only replaces the inbox when there is nothing in it.
+  const hasExistingRequests = !isLoading && requests.length > 0;
+
+  if (!orgLoading && !tracksRequests && !isLoading && !hasExistingRequests) {
     // Free plan: no request intake at all (the widget doesn't even show the card).
     // Notice: requests are forwarded by email — show the forward-count banner.
     const isFree = plan === 'free';
@@ -177,8 +186,10 @@ export default function RequestInbox() {
       />
 
       <StatementsBlockedBanner />
+      <VisitorCapBanner plan={plan} siteIds={sites.map(s => s.id)} />
+      {!tracksRequests && hasExistingRequests && <LegacyRequestsNotice count={requests.length} />}
 
-      <OnboardingChecklist sites={sites} />
+      <OnboardingChecklist sites={sites} orgId={orgId} />
 
       {!isLoading && (
         <FulfillmentGuidePanel

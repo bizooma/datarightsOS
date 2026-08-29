@@ -10,7 +10,7 @@
 // site_key is accepted as a fallback lookup so any URL already published keeps
 // resolving even after slugs were introduced.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { canServeStatements } from '../../shared/planLimits.ts';
+import { canServeStatementPages } from '../../shared/planLimits.ts';
 import { publishedBusinessName } from '../../shared/statementAvailability.ts';
 import {
   SLUG_TO_TYPE,
@@ -151,9 +151,16 @@ export default async function (req) {
     const orgs = await svc.entities.Organization.filter({ id: site.organization });
     const org = orgs[0] || {};
 
-    // Free serves no statements anywhere — the widget withholds them, so a public
-    // page must not become a side door around that.
-    if (!canServeStatements(org.plan)) {
+    // EVERY plan serves published statement pages, permanently — including Free,
+    // including an expired trial. This gate is intentionally always-true and is kept
+    // as a named call rather than deleted, so the decision is visible here.
+    //
+    // These are the customer's live legal pages: indexed, linked from their footer,
+    // cited as their privacy policy. 404ing them because a subscription lapsed would
+    // damage a real business over billing and leave them less compliant than before
+    // they met us. What Free loses is CREATING and EDITING statements, plus the
+    // in-widget statement modal — never the pages already published.
+    if (!canServeStatementPages(org.plan)) {
       return notFound('This site does not publish statements.');
     }
 

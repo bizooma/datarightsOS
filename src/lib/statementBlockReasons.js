@@ -1,4 +1,4 @@
-import { canServeStatements } from '@/lib/planLimits';
+import { canServeStatementPages } from '@/lib/planLimits';
 
 // ============================================================================
 // KNOWN DEBT — READ BEFORE EDITING (logged 2026-08-29, accepted deliberately)
@@ -34,7 +34,9 @@ import { canServeStatements } from '@/lib/planLimits';
 // Returns: null (publishable) | 'plan' | 'business_name'
 export function statementBlockReason({ site, org, plan } = {}) {
   const effectivePlan = plan ?? org?.plan;
-  if (!canServeStatements(effectivePlan)) return 'plan';
+  // Pages serve on every plan now, so this never fires — kept because the server
+  // rule it mirrors still has the branch, and the two must stay identical.
+  if (!canServeStatementPages(effectivePlan)) return 'plan';
   const businessName = String(site?.business_name || org?.business_name || '').trim();
   if (!businessName) return 'business_name';
   return null;

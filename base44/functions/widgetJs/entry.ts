@@ -398,7 +398,12 @@ Deno.serve(async (req) => {
   };
 
   function render(cfg, keepOpen, forceOpen) {
-    if (cfg.install_status && cfg.install_status !== 'active') { return; }
+    // ENTITLEMENT GATE — service_status, never install_status.
+    // Gating on install_status would deadlock a genuine first install: rendering
+    // would require "installed", and becoming "installed" would require rendering.
+    // Entitlement is set by billing, install detection is one-way and gates nothing,
+    // so the cycle cannot form. Absent value = render (fail open on availability).
+    if (cfg.service_status && cfg.service_status !== 'active') { return; }
     var lang = localStorage.getItem('dros_lang') === 'es' ? 'es' : 'en';
     var t = I18N[lang];
     var accent = cfg.primary_color || '#0d7d74';

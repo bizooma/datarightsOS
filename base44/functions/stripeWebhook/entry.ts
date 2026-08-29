@@ -1,6 +1,7 @@
 import Stripe from 'npm:stripe@17.3.1';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { analytics } from 'npm:@heycatch/sdk';
+import { applyServiceStatus } from '../../shared/serviceStatus.ts';
 
 analytics.init({ projectKey: 'hck_pk_yyHEbzjZch9KOqIkpdjxpYfslt96gwzM' });
 
@@ -37,16 +38,26 @@ Deno.serve(async (req) => {
       console.log('Updated org', orgId, JSON.stringify(data));
     }
 
-    // When an org moves onto a paid plan, instantly re-activate every site it
-    // owns so the widget starts rendering again (reverses trial deactivation).
-    async function reactivateSites(orgId) {
+    // Restore service for every site the org owns. One of exactly three writers of
+    // service_status, and it goes through applyServiceStatus so the transition is
+    // audited into ServiceStatusEvent with this event type as the actor.
+    //
+    // Note it no longer touches install_status: whether the widget was ever
+    // installed is not something a payment tells us.
+    async function restoreService(orgId, eventType) {
       if (!orgId) return;
       const sites = await base44.asServiceRole.entities.Site.filter({ organization: orgId });
-      const pendingSites = (sites || []).filter((s) => s.install_status !== 'active');
-      for (const site of pendingSites) {
-        await base44.asServiceRole.entities.Site.update(site.id, { install_status: 'active' });
+      let restored = 0;
+      for (const site of sites || []) {
+        const changed = await applyServiceStatus(base44.asServiceRole, {
+          site,
+          next: 'active',
+          actor: `stripe:${eventType}`,
+          reason: 'payment succeeded — service restored',
+        });
+        if (changed) restored += 1;
       }
-      console.log('Reactivated', pendingSites.length, 'site(s) for org', orgId);
+      console.log('Restored service on', restored, 'site(s) for org', orgId);
     }
 
     if (event.type === 'checkout.session.completed') {
@@ -59,7 +70,7 @@ Deno.serve(async (req) => {
         stripe_customer_id: session.customer,
         stripe_subscription_id: session.subscription,
       });
-      await reactivateSites(orgId);
+      await restoreService(orgId, event.type);
 
       // Report the paid conversion to HeyCatch, keyed on the org owner's stable
       // user id — the SAME id the browser sends via setIdentity — so the two join.
@@ -84,11 +95,15 @@ Deno.serve(async (req) => {
       const data = { billing_status: status };
       if (plan) data.plan = plan;
       await updateOrg(orgId, data);
-      if (plan && status === 'active') await reactivateSites(orgId);
+      if (plan && status === 'active') await restoreService(orgId, event.type);
     } else if (event.type === 'customer.subscription.deleted') {
       const sub = event.data.object;
       const orgId = sub.metadata?.organization_id;
-      await updateOrg(orgId, { plan: 'trial', billing_status: 'canceled' });
+      // 'free', NOT 'trial'. Sending a cancelled subscriber back to 'trial' handed
+      // them the full paid request engine (canTrackRequests is true on trial) for
+      // nothing — a second route to the paid product, independent of the cron.
+      // Cancelling drops you to the permanent free plan; the widget keeps running.
+      await updateOrg(orgId, { plan: 'free', billing_status: 'canceled' });
     }
 
     return Response.json({ received: true }, { status: 200 });
