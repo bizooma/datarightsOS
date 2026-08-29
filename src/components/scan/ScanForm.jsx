@@ -3,8 +3,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, Search } from 'lucide-react';
 
-export default function ScanForm({ onScan, busy }) {
-  const [url, setUrl] = useState('');
+export default function ScanForm({ onScan, busy, defaultUrl = '' }) {
+  const [url, setUrl] = useState(defaultUrl);
 
   const submit = (e) => {
     e.preventDefault();

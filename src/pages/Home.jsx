@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useDocumentMeta } from '@/lib/seoMeta';
 import HeroSection from '@/components/marketing/HeroSection';
+import WidgetShowcaseSection from '@/components/marketing/WidgetShowcaseSection';
 import ProblemSection from '@/components/marketing/ProblemSection';
 import FeaturesSection from '@/components/marketing/FeaturesSection';
 import AudienceSection from '@/components/marketing/AudienceSection';
@@ -45,6 +46,7 @@ export default function Home() {
     <div className="min-h-screen bg-white text-[#14202b] overflow-x-hidden">
       <MarketingNav isAuthenticated={isAuthenticated} />
       <HeroSection />
+      <WidgetShowcaseSection />
       <ProblemSection />
       <FeaturesSection />
       <AudienceSection />

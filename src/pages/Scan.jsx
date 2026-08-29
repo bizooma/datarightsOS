@@ -2,17 +2,34 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import ScanForm from '@/components/scan/ScanForm';
+import { parseSiteInput } from '@/lib/domainInput';
 import ScanProgress from '@/components/scan/ScanProgress';
 import ScanReport from '@/components/scan/ScanReport';
 import CachedNotice from '@/components/scan/CachedNotice';
 import BlockedNotice from '@/components/scan/BlockedNotice';
 
+// Read once, at module-evaluation time for this mount, so the progress state can be
+// rendered on the FIRST paint when arriving from the homepage hero — a blank page
+// while the scan spins up is the worst possible first impression.
+function initialHandoff() {
+  const raw = new URLSearchParams(window.location.search).get('url');
+  if (!raw) return null;
+  const parsed = parseSiteInput(raw);
+  return parsed.ok ? parsed : { invalid: true };
+}
+
 export default function Scan() {
+  const handoff = useRef(initialHandoff()).current;
   const [scan, setScan] = useState(null);
-  const [running, setRunning] = useState(false);
-  const [error, setError] = useState('');
+  // Already "running" on first render when a domain was handed over, so ScanProgress
+  // shows immediately instead of after the first effect.
+  const [running, setRunning] = useState(!!handoff && !handoff.invalid);
+  const [error, setError] = useState(
+    handoff?.invalid ? "That doesn't look like a website address. Enter it again below." : '',
+  );
   const [cached, setCached] = useState(false);
   const pollRef = useRef(null);
+  const startedRef = useRef(false);
 
   const stopPolling = () => {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
@@ -96,6 +113,15 @@ export default function Scan() {
     }
   };
 
+  // Arriving from the homepage hero: start the scan straight away. The visitor
+  // already typed the domain there, so they never re-enter it or press a second button.
+  useEffect(() => {
+    if (!handoff || handoff.invalid || startedRef.current) return;
+    startedRef.current = true;
+    handleScan(handoff.url);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const showProgress = running || scan?.status === 'running';
   const showReport = scan && scan.status !== 'running' && !running;
 
@@ -131,13 +157,13 @@ export default function Scan() {
         </div>
 
         <div className="max-w-5xl mx-auto space-y-8 mt-8">
-        <ScanForm onScan={handleScan} busy={showProgress} />
+        <ScanForm onScan={handleScan} busy={showProgress} defaultUrl={handoff?.domain || ''} />
 
         {error && (
           <p className="text-sm text-destructive text-center max-w-xl mx-auto" role="alert">{error}</p>
         )}
 
-        {showProgress && <ScanProgress domain={scan?.domain || ''} />}
+        {showProgress && <ScanProgress domain={scan?.domain || handoff?.domain || ''} />}
 
         {showReport && scan.status === 'blocked' && (
           <BlockedNotice
