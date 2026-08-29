@@ -103,7 +103,15 @@ export default function Scan() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="text-sm font-semibold text-foreground">DataRightsOS</Link>
+          <Link to="/" className="flex items-center" aria-label="DataRightsOS — home">
+            <img
+              src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/15a770132_logo-horizontal.svg"
+              alt="DataRightsOS"
+              width="320"
+              height="72"
+              className="h-8 w-auto"
+            />
+          </Link>
           <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">← Back to home</Link>
         </div>
       </header>

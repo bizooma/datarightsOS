@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
   const APP_ID = 'VITE_BASE44_APP_ID' in Deno.env ? Deno.env.get('VITE_BASE44_APP_ID') : (Deno.env.get('BASE44_APP_ID') || '6a3735f4f27dcb14405892ae');
   const API = `https://api.base44.app/api/apps/${APP_ID}/functions`;
 
-  const widgetCode = `/* ===== Data Rights OS widget.js ===== */
+  const widgetCode = `/* ===== DataRightsOS widget.js ===== */
 (function () {
   var script = document.currentScript || (function () {
     var s = document.getElementsByTagName('script'); return s[s.length - 1];
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
 
   if (!SITE) { console.warn('[DataRightsOS] missing data-tessera-site'); return; }
 
-  // Don't render the live widget inside the Data Rights OS dashboard app itself
+  // Don't render the live widget inside the DataRightsOS dashboard app itself
   // (the base44 preview/app host) — the Widget Studio already shows its own preview.
   // The public marketing site (datarightsos.com) SHOULD show the live widget.
   var h = location.hostname;
