@@ -1,26 +1,34 @@
-import { CHECK_LABELS, STATUS_META } from '@/components/scan/checkMeta';
+import { CHECK_LABELS, statusLabelFor } from '@/components/scan/checkMeta';
 import { contextFor } from '@/components/scan/checkContext';
 
-export default function CheckCard({ checkKey, check, prominent = false }) {
-  const meta = STATUS_META[check?.status] || STATUS_META.could_not_determine;
+// Full, expanded card. Used for attention-flagged findings, and for a neutral
+// check the reader has expanded from the list.
+export default function CheckCard({ checkKey, check, attention = false }) {
   const ctx = contextFor(checkKey, check);
+  const statusLabel = statusLabelFor(checkKey, check);
   return (
     <div
       className={`rounded-lg p-4 ${
-        prominent
+        attention
           ? 'border-2 border-[#D89B2A] bg-[#FDF6E7] shadow-sm'
           : 'bg-card border border-border'
       }`}
     >
-      {prominent && (
+      {attention && (
         <p className="text-[10px] font-bold tracking-widest uppercase text-[#8A5F12] mb-1.5">
-          Most significant
+          Worth reviewing
         </p>
       )}
       <div className="flex items-start justify-between gap-3 mb-1.5">
         <h3 className="text-sm font-semibold text-foreground">{CHECK_LABELS[checkKey] || checkKey}</h3>
-        <span className={`shrink-0 text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded border ${meta.cls}`}>
-          {meta.label}
+        <span
+          className={`shrink-0 text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded border ${
+            attention
+              ? 'bg-[#F7E4B8] text-[#8A5F12] border-[#D89B2A]'
+              : 'bg-slate-100 text-slate-600 border-slate-200'
+          }`}
+        >
+          {statusLabel}
         </span>
       </div>
       <p className="text-sm text-foreground/90">{check?.observation}</p>

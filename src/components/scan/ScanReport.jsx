@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
 import CheckCard from '@/components/scan/CheckCard';
-import { CHECK_ORDER } from '@/components/scan/checkMeta';
+import NeutralCheckList from '@/components/scan/NeutralCheckList';
+import { CHECK_ORDER, needsAttention } from '@/components/scan/checkMeta';
 import ScanSummary from '@/components/scan/ScanSummary';
 
 export default function ScanReport({ scan }) {
@@ -24,6 +25,12 @@ export default function ScanReport({ scan }) {
 
   const checks = scan.findings?.checks || {};
 
+  // Attention-flagged findings first and expanded; everything else collapses
+  // into the neutral list so the reader sees what matters without scrolling.
+  const present = CHECK_ORDER.filter((key) => checks[key]).map((key) => ({ key, check: checks[key] }));
+  const flagged = present.filter(({ key, check }) => needsAttention(key, check));
+  const neutral = present.filter(({ key, check }) => !needsAttention(key, check));
+
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       <div className="text-center">
@@ -36,17 +43,17 @@ export default function ScanReport({ scan }) {
 
       <ScanSummary scan={scan} />
 
+      <p className="text-xs text-muted-foreground leading-relaxed px-1">
+        Findings marked in amber are the ones worth reviewing. The rest is what we observed — not a
+        clean bill of health. We only checked the pages listed at the bottom of this report, and we
+        can't see how your site behaves for logged-in visitors or on pages we didn't visit.
+      </p>
+
       <div className="space-y-3">
-        {CHECK_ORDER.map((key) => (
-          checks[key] ? (
-            <CheckCard
-              key={key}
-              checkKey={key}
-              check={checks[key]}
-              prominent={key === 'pre_consent_tracking'}
-            />
-          ) : null
+        {flagged.map(({ key, check }) => (
+          <CheckCard key={key} checkKey={key} check={check} attention />
         ))}
+        <NeutralCheckList items={neutral} />
       </div>
 
       {(scan.third_party_domains || []).length > 0 && (
