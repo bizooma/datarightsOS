@@ -622,11 +622,14 @@ Deno.serve(async (req) => {
     }
 
     // Professional photographic header images for the action cards.
+    // Self-hosted on our own media (identical images, previously served from
+    // images.unsplash.com). The widget must never cause a subscriber's site to
+    // make an undisclosed third-party request — our own scanner would flag it.
     var IMG = {
-      rights: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=400&q=70',
-      cookies: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=400&q=70',
-      a11y: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=400&q=70',
-      ai: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=400&q=70'
+      rights: 'https://base44.app/api/apps/6a3735f4f27dcb14405892ae/files/mp/public/6a3735f4f27dcb14405892ae/70fb96ed6_dros-card-rights.jpg',
+      cookies: 'https://base44.app/api/apps/6a3735f4f27dcb14405892ae/files/mp/public/6a3735f4f27dcb14405892ae/316a93d0c_dros-card-cookies.jpg',
+      a11y: 'https://base44.app/api/apps/6a3735f4f27dcb14405892ae/files/mp/public/6a3735f4f27dcb14405892ae/95975ed1c_dros-card-a11y.jpg',
+      ai: 'https://base44.app/api/apps/6a3735f4f27dcb14405892ae/files/mp/public/6a3735f4f27dcb14405892ae/1daa8bea2_dros-card-ai.jpg'
     };
 
     // Layout decision for the FIRST-VISIT consent moment (presentation only).
