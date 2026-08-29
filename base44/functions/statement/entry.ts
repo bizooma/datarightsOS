@@ -167,7 +167,18 @@ export default async function (req) {
     const labels = effLang === 'es' ? STATEMENT_LABELS_ES : STATEMENT_LABELS;
     const heading = (serveEs && stmt.title_es) ? stmt.title_es : (stmt.title || labels[type]);
     const bodyHtml = serveEs ? stmt.body_es : stmt.body;
-    const businessName = site.business_name || org.business_name || org.name || site.domain;
+    // A business name is REQUIRED to publish. There used to be a fallback chain down
+    // to org.name, and org.name is auto-generated at signup as "<Person>'s Organization"
+    // — so the fallback quietly published a named individual in the <title>, the meta
+    // description, and the page header of an index,follow page carrying that business's
+    // privacy policy. No fallback is acceptable here: withholding the page is recoverable,
+    // an indexed page naming the wrong party is not.
+    const businessName = (site.business_name || org.business_name || '').trim();
+    if (!businessName) {
+      return notFound(
+        'This statement is not published yet: the site owner has not set the business name it should be published under.',
+      );
+    }
 
     // Canonical always points at the language actually being served, so the English
     // and Spanish pages never compete for the same canonical URL.

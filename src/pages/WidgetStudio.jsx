@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
 import StatementLinksPanel from '@/components/widget-studio/StatementLinksPanel';
+import BusinessNameWarning from '@/components/widget-studio/BusinessNameWarning';
 import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
 import LayoutPicker from '@/components/widget-studio/LayoutPicker';
 import LauncherStyleSection from '@/components/widget-studio/LauncherStyleSection';
@@ -242,6 +243,9 @@ export default function WidgetStudio() {
           {/* Site config form + embed + preview */}
           {selectedSite && (
             <div className="col-span-3 space-y-6">
+              {canServeStatements(org?.plan) && (
+                <BusinessNameWarning site={selectedSite} org={org} />
+              )}
               <Tabs defaultValue="config">
                 <TabsList className="h-9 mb-4">
                   <TabsTrigger value="config" className="text-xs">Widget Config</TabsTrigger>
