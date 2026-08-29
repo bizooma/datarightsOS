@@ -20,7 +20,13 @@ export const PATTERNS = {
     'limit the use of my sensitive personal information',
     '/do-not-sell', '/donotsell', '/privacy-choices',
   ],
-  // Language that indicates a consent moment
+  // Language that indicates a consent moment.
+  //
+  // WHERE this matches is the whole point. It is only ever tested against body
+  // text with anchor text removed, and (for banner detection) only inside a
+  // fixed/sticky/overlay element or a dialog. A footer link reading "Cookie
+  // Policy" is a link to a document, not a consent mechanism, so it must not
+  // reach this list — otherwise a policy link quietly suppresses a real flag.
   consentText: [
     'we use cookies', 'this site uses cookies', 'this website uses cookies',
     'uses cookies', 'cookie preferences', 'cookie settings',

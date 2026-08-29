@@ -13,7 +13,41 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { secrets } from 'base44:runtime';
 import { analyzeScan } from '../../shared/scanChecks.ts';
 import { analyzeGroupB } from '../../shared/scanGroupB.ts';
-import { PATTERNS } from '../../shared/scanPatterns.ts';
+import { PATTERNS, CMP_MATCHERS } from '../../shared/scanPatterns.ts';
+import { datarightsosProvides } from '../../shared/scanTools.ts';
+
+// When OUR widget is on the page, what it serves is read from the site's saved
+// configuration rather than guessed from the DOM — so a drawer the subscriber
+// turned off, or a statement they never wrote, is never credited.
+async function resolveOwnWidget(svc, pass1, domain) {
+  // Script sources and network requests only — never page text. A page that
+  // merely mentions us by name has not installed the widget.
+  const hay = [
+    pass1.page?.script_hay || '',
+    (pass1.requests || []).join(' ').toLowerCase(),
+  ].join(' ');
+  const ours = CMP_MATCHERS.filter((m) => m.vendor === 'DataRightsOS').some((m) => hay.includes(m.match));
+  if (!ours) return null;
+
+  const apex = String(domain || '').toLowerCase().replace(/^www\./, '');
+  let sites = [];
+  try {
+    sites = await svc.entities.Site.filter({ domain: apex });
+    if (!sites.length) sites = await svc.entities.Site.filter({ domain: 'www.' + apex });
+  } catch { sites = []; }
+  const site = sites[0];
+  if (!site) return { vendor: 'DataRightsOS', provides: {} };
+
+  let statements = [];
+  try {
+    statements = await svc.entities.LegalStatement.filter({ site: site.id, is_active: true });
+  } catch { statements = []; }
+
+  return datarightsosProvides(
+    site.enabled_drawers,
+    statements.map((s) => s.statement_type),
+  );
+}
 
 // Runs inside Browserless. Captures request URLs and (pass 1 only) form field
 // TYPES — field values are never read, captured, or stored.
@@ -96,8 +130,22 @@ export default async function ({ page, context }) {
         for (var f = 0; f < fs.length && formHay.length < 8000; f++) { formHay += ' | ' + low(fs[f].innerText).slice(0, 800); }
         var text = low(document.body ? document.body.innerText : '').slice(0, 120000);
 
-        // A consent banner is a VISIBLE fixed/sticky element carrying consent
-        // language. Controls are looked for inside that same element only.
+        // Consent language is only meaningful as BODY text. Anchor text is
+        // stripped before any consent match so a "Cookie Policy" link in a
+        // footer can never read as a consent mechanism.
+        function textNoLinks(el) {
+          try {
+            var c = el.cloneNode(true);
+            var la = c.querySelectorAll('a');
+            for (var z = 0; z < la.length; z++) { if (la[z].parentNode) la[z].parentNode.removeChild(la[z]); }
+            return low(c.innerText || c.textContent || '');
+          } catch (xe) { return low(el.innerText || ''); }
+        }
+        var textNoLinksAll = document.body ? textNoLinks(document.body).slice(0, 120000) : '';
+
+        // A consent banner is a VISIBLE banner-like element — fixed, sticky, or a
+        // dialog — carrying consent language in its own body text (anchor text
+        // stripped). Controls are looked for inside that same element only.
         var bannerText = null, bannerControl = false;
         var els = document.querySelectorAll('div,section,aside,dialog,form');
         for (var e = 0; e < els.length && e < 4000; e++) {
@@ -105,9 +153,15 @@ export default async function ({ page, context }) {
           try { st = window.getComputedStyle(el); } catch (x1) { continue; }
           if (!st) continue;
           if (st.display === 'none' || st.visibility === 'hidden' || parseFloat(st.opacity || '1') < 0.05) continue;
-          if (st.position !== 'fixed' && st.position !== 'sticky') continue;
-          var t = low(el.innerText);
-          if (!t || t.length > 3000) continue;
+          var role = low(el.getAttribute('role'));
+          var isDialog = role === 'dialog' || role === 'alertdialog'
+            || el.getAttribute('aria-modal') === 'true' || el.tagName === 'DIALOG';
+          if (st.position !== 'fixed' && st.position !== 'sticky' && !isDialog) continue;
+          var raw = low(el.innerText);
+          if (!raw || raw.length > 3000) continue;
+          if (!hitAny(raw, p.consentText)) continue;
+          // Confirm the language is body text, not just a link inside the element.
+          var t = textNoLinks(el);
           if (!hitAny(t, p.consentText)) continue;
           bannerText = t.slice(0, 300);
           var ctrls = el.querySelectorAll('button,a,[role="button"],input[type="button"],input[type="submit"]');
@@ -126,7 +180,7 @@ export default async function ({ page, context }) {
           var hay = low((g.getAttribute('alt') || '') + ' ' + (g.getAttribute('class') || '') + ' ' + (g.getAttribute('id') || '') + ' ' + (g.getAttribute('src') || ''));
           if (hay.indexOf('privacyoptions') !== -1 || hay.indexOf('privacy-options') !== -1 || hay.indexOf('ccpa-optout') !== -1 || hay.indexOf('optout-icon') !== -1) { cpraIcon = true; break; }
         }
-        return { url: location.href, anchors: anchors, script_hay: scriptHay.slice(0, 20000), form_hay: formHay, text: text, banner_text: bannerText, banner_control: bannerControl, cpra_icon: cpraIcon };
+        return { url: location.href, anchors: anchors, script_hay: scriptHay.slice(0, 20000), form_hay: formHay, text: text, text_no_links: textNoLinksAll, banner_text: bannerText, banner_control: bannerControl, cpra_icon: cpraIcon };
       }, p);
     };
 
@@ -278,9 +332,11 @@ export default async function (req) {
     const findings = analyzeScan({ url: scan.url, pass1, pass2 });
 
     // Group B needs two Group A outcomes for its combination flags.
+    const tool = await resolveOwnWidget(svc, pass1, scan.domain);
     const groupB = analyzeGroupB({
       url: scan.url,
       pass1,
+      tool,
       groupA: {
         trackersPresent: findings.checks.tracking_scripts?.status === 'found',
         chatbotPresent: findings.checks.ai_chatbot?.status === 'found',

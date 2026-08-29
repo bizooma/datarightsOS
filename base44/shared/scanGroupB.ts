@@ -10,6 +10,7 @@
 // Never a verdict: no compliant/required/violation language, here or in the copy.
 import { STATUS } from './scanChecks.ts';
 import { PATTERNS, CMP_MATCHERS } from './scanPatterns.ts';
+import { detectDsarPortal } from './scanTools.ts';
 
 const MIN_POLICY_TEXT = 500; // below this a "policy page" is a stub, not a policy
 
@@ -94,7 +95,9 @@ function confirmPage(rec: any, apex: string, label: string, absent: any) {
 }
 
 // groupA: { trackersPresent, chatbotPresent } — needed for the two combination flags.
-export function analyzeGroupB({ url, pass1, groupA }: any) {
+// tool:   { vendor, provides: { <check_key>: observation } } — mechanisms a detected
+//         privacy tool is known to supply, resolved by the caller.
+export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
   const apex = apexOf(url) || '';
   const page = pass1?.page || null;
   const followed = pass1?.followed || [];
@@ -123,6 +126,9 @@ export function analyzeGroupB({ url, pass1, groupA }: any) {
   }
 
   const mainText = page.text || '';
+  // Consent language is only tested against body text with anchor text removed —
+  // a link to a cookie policy is a document, not a consent mechanism.
+  const consentHay = page.text_no_links ?? page.text ?? '';
   const mainAnchors = page.anchors || [];
   const privacyText = privacyRec?.ok ? (privacyRec.text || '') : '';
   const privacyAnchors = privacyRec?.ok ? (privacyRec.anchors || []) : [];
@@ -139,7 +145,7 @@ export function analyzeGroupB({ url, pass1, groupA }: any) {
     cookie_consent = found('A consent mechanism was detected (custom banner).');
   } else if (page.banner_text) {
     cookie_consent = cnd('Consent language appeared in a banner-style element, but no clear accept or decline control could be identified, so this could not be determined.');
-  } else if (hasAny(mainText, PATTERNS.consentText)) {
+  } else if (hasAny(consentHay, PATTERNS.consentText)) {
     cookie_consent = cnd('Cookie or consent language appears on the page, but no consent banner or controls could be identified, so this could not be determined.');
   } else {
     cookie_consent = notFound('No known consent management vendor and no cookie or consent language were found on the page we scanned.');
@@ -187,7 +193,21 @@ export function analyzeGroupB({ url, pass1, groupA }: any) {
   const reqAnchor = anchorMatch(mainAnchors, PATTERNS.request) || anchorMatch(privacyAnchors, PATTERNS.request);
   const reqMail = mailtoIn(privacyAnchors, ['privacy', 'dpo', 'data', 'legal', 'compliance'])
     || mailtoIn(mainAnchors, ['privacy', 'dpo', 'data rights']);
-  if (reqForm) {
+  // A hosted rights-request portal on the page is direct evidence of a mechanism,
+  // whoever supplies it.
+  const portalHay = [
+    page.script_hay || '',
+    [...mainAnchors, ...privacyAnchors].map((a: any) => a.href_l || '').join(' '),
+    (pass1.requests || []).join(' ').toLowerCase(),
+  ].join(' ');
+  const portal = detectDsarPortal(portalHay);
+  if (portal) {
+    request_mechanism = found(
+      portal.vendor
+        ? `Found: a privacy request portal provided by ${portal.vendor}.`
+        : 'Found: a hosted privacy request portal.',
+    );
+  } else if (reqForm) {
     request_mechanism = found('Found: a request form.');
   } else if (reqAnchor) {
     request_mechanism = found('Found: a link to a request page.', [`Link text: ${reqAnchor.text || '(no text)'}`]);
@@ -243,16 +263,24 @@ export function analyzeGroupB({ url, pass1, groupA }: any) {
     };
   }
 
-  return {
-    checks: {
-      cookie_consent,
-      privacy_policy,
-      do_not_sell,
-      accessibility_statement,
-      request_mechanism,
-      accessibility_reporting,
-      ai_disclosure,
-    },
-    pages_visited,
+  const checks: Record<string, any> = {
+    cookie_consent,
+    privacy_policy,
+    do_not_sell,
+    accessibility_statement,
+    request_mechanism,
+    accessibility_reporting,
+    ai_disclosure,
   };
+
+  // A detected privacy tool supplies mechanisms of its own. Where the caller
+  // resolved what it serves, that is evidence — so it upgrades an undetermined or
+  // absent result and clears any combination flag that was raised for it. It never
+  // downgrades something we confirmed on the page ourselves.
+  for (const [key, observation] of Object.entries(tool?.provides || {})) {
+    if (!checks[key] || checks[key].status === STATUS.FOUND) continue;
+    checks[key] = found(observation as string);
+  }
+
+  return { checks, pages_visited };
 }
