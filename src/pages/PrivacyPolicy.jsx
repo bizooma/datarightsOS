@@ -1,6 +1,12 @@
 import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import StatementBody from '@/components/marketing/StatementBody';
+import {
+  PRIVACY_POLICY_FALLBACK_HTML,
+  FALLBACK_VERSION,
+  FALLBACK_EFFECTIVE_DATE,
+  FALLBACK_HEADING,
+} from '@/components/marketing/privacyPolicyFallback';
 
 // This route stays at its current URL — it is the human-facing, branded policy page
 // and is the URL registered with third parties (including the Google OAuth consent
@@ -14,7 +20,13 @@ export default function PrivacyPolicy() {
         <StatementBody
           slug="datarightsos-com"
           type="privacy_policy"
-          fallbackHeading="DataRightsOS — Privacy Policy"
+          fallbackHeading={FALLBACK_HEADING}
+          fallback={{
+            html: PRIVACY_POLICY_FALLBACK_HTML,
+            heading: FALLBACK_HEADING,
+            version: FALLBACK_VERSION,
+            effective_date: FALLBACK_EFFECTIVE_DATE,
+          }}
         />
       </main>
       <MarketingFooter />
