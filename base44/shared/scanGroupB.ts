@@ -101,17 +101,46 @@ function looseAbsent(anchors: any[], text: string, loose: string[], label: strin
 //   dropped to 300 because a genuinely three-sentence statement (~300 chars) is easy to
 //   write, none of this sample rules it out, and for this document the term test is doing
 //   the discriminating work anyway.
-const CONTENT_TERMS: Record<string, { terms: string[]; min: number; min_chars?: number; noun: string }> = {
+//
+// SAMPLE-SIZE HONESTY: n=7 and n=4 are thin. These numbers are good enough to move the
+// thresholds off round guesses, not enough to call them settled — re-run the harness
+// against a larger sample when there is a natural reason to touch this file.
+//
+// THE COMMITMENT RULE: terms and length establish that a page is ABOUT the topic, and
+// that is not enough. A followed page qualifies only if it makes a commitment ABOUT THIS
+// SITE; a page that merely DISCUSSES the topic does not. The calibration run surfaced the
+// failure concretely: four accessibility links landed on pages SELLING accessibility work
+// ("our audit process", "we help clients achieve conformance") — identical vocabulary to a
+// statement, wholly different speech act. Same trap exists for privacy: a law firm's
+// "Privacy Law" practice page discusses personal information and your rights without
+// committing to anything. So each document also requires at least one COMMIT phrase —
+// first-person language a business uses when speaking about its own practices ("we are
+// committed to", "this privacy policy", "if you encounter a barrier"), which a page about
+// helping OTHER sites has little reason to use verbatim. The failure direction is chosen
+// deliberately: an unusually-worded genuine statement falling to COULD NOT DETERMINE is
+// recoverable; a sales page credited as a commitment is not.
+const CONTENT_TERMS: Record<string, { terms: string[]; min: number; min_chars?: number; commit: string[]; noun: string }> = {
   'a privacy policy': {
     terms: ['personal information', 'we collect', 'third part', 'your rights', 'opt out', 'data we', 'cookies'],
     min: 2,
     min_chars: 500,
+    // 'we collect' appears in terms too — there it counts toward topicality, here it is
+    // the commitment itself. The overlap is deliberate, not incidental: a privacy policy
+    // is first-person by nature, and every phrase below is a business describing what IT
+    // does, not privacy as a subject.
+    commit: ['we collect', 'we use your', 'we share', 'we do not sell', 'information we collect', 'this privacy policy', 'this policy describes', 'this policy explains'],
     noun: 'privacy policy',
   },
   'an accessibility statement': {
     terms: ['accessibility', 'wcag', 'disability', 'assistive', 'barrier', 'screen reader'],
     min: 2,
     min_chars: 300,
+    // What a statement says and a services page doesn't: a commitment about THIS site or
+    // an invitation to report a barrier ON it. Kept away from bare 'conformance' /
+    // 'committed to' alone where possible — sales pages say "achieve WCAG conformance"
+    // and "committed to helping clients" — but no phrase list is airtight, which is why
+    // link picking also de-ranks /services/-shaped URLs upstream.
+    commit: ['this website', 'this site', 'our website', 'we are committed', 'we strive to', 'conforms to', 'if you encounter', 'if you experience', 'we welcome your feedback'],
     noun: 'accessibility statement',
   },
 };
@@ -171,6 +200,20 @@ function confirmPage(rec: any, apex: string, label: string, absent: any, mainUrl
       ok: false,
       check: cnd(
         `A link labeled "${anchor}" pointed to ${url}, but that page doesn't read like a ${spec.noun}. Worth confirming where yours actually lives.`,
+      ),
+    };
+  }
+  // Commitment check: being ABOUT the topic is not being a commitment about this site.
+  // A page can clear length and vocabulary by selling or discussing the topic — the
+  // calibration run produced four such pages. Absent first-person commitment language,
+  // the honest answer is COULD NOT DETERMINE, never FOUND.
+  if (spec && !hasAny(content, spec.commit)) {
+    const anchor = (rec.anchor_text || '').trim() || label;
+    const url = rec.final_url || rec.requested_url;
+    return {
+      ok: false,
+      check: cnd(
+        `A link labeled "${anchor}" pointed to ${url}. That page discusses the topic, but we could not find language making a commitment about this site itself — so we could not confirm it is a ${spec.noun}. If yours lives elsewhere, that page is the one to link.`,
       ),
     };
   }

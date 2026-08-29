@@ -97,9 +97,20 @@ Deno.serve(async (req) => {
   // Agency client's footer, but a visitor's route to an opt-out is not optional, and
   // Agency answers the branding concern by rewriting this path onto their own domain (the
   // same rewrite they already use for statements). An explicit choice always wins.
-  const injectPrivacyChoices = (site.inject_privacy_choices_link === true || site.inject_privacy_choices_link === false)
+  const injectPrivacyChoicesPref = (site.inject_privacy_choices_link === true || site.inject_privacy_choices_link === false)
     ? site.inject_privacy_choices_link
     : true;
+
+  // NEVER INJECT A LINK TO A MECHANISM THAT CANNOT WORK. On the Free plan the intake
+  // endpoint refuses to record requests, so the page's only working path is the contact
+  // email. Where that email exists, routing to it is a legitimate opt-out mechanism and
+  // the link stays. Where it doesn't, there is no mechanism to point at — a footer link
+  // to a dead end is worse than no link, specifically for the visitor, who would walk
+  // away believing they opted out. This gate is a hard override: an explicit subscriber
+  // "on" cannot resurrect a link that leads nowhere.
+  const privacyContactEmail = site.privacy_contact_email || org.privacy_contact_email || '';
+  const choicesMechanismWorks = canShowRequestCard(org.plan) || !!privacyContactEmail;
+  const injectPrivacyChoices = injectPrivacyChoicesPref && choicesMechanismWorks;
 
   const payload = {
     statement_urls: statementUrls,

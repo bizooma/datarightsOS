@@ -207,18 +207,30 @@ export default async function ({ page, context }) {
     try { pageData = await snap(); } catch (e3) { pageData = null; }
 
     if (pageData) {
+      // Link picking with DE-RANKING: a URL under /services/, /solutions/, /blog/ or
+      // /products/ is where a site sells or discusses a topic, not where it commits to
+      // it — the calibration run followed four such links to marketing pages that then
+      // read plausibly as statements. A de-ranked match is kept only as a fallback: it
+      // is still followed when nothing better exists (the content-side commitment check
+      // is what finally decides), but any non-marketing-shaped match beats it.
+      var DERANK = /\\/(services?|solutions|products?|blog)(\\/|$|\\?)/;
       var pick = function (list) {
+        var fallback = null;
         for (var i = 0; i < pageData.anchors.length; i++) {
           var a = pageData.anchors[i];
           var hrefL = a.href_l || '';
           if (!hrefL || hrefL.indexOf('javascript:') === 0 || hrefL.indexOf('mailto:') === 0 || hrefL.charAt(0) === '#') continue;
           for (var j = 0; j < list.length; j++) {
             if (a.text.indexOf(list[j]) !== -1 || hrefL.indexOf(list[j]) !== -1) {
-              try { return { url: new URL(a.href, pageData.url).href, text: a.text }; } catch (x2) { return null; }
+              var cand = null;
+              try { cand = { url: new URL(a.href, pageData.url).href, text: a.text }; } catch (x2) { cand = null; }
+              if (!cand) break;
+              if (DERANK.test(hrefL)) { if (!fallback) fallback = cand; break; }
+              return cand;
             }
           }
         }
-        return null;
+        return fallback;
       };
 
       // HARD CAP: the submitted page plus at most 2 followed pages. No crawling.
