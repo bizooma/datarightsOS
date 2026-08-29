@@ -4,11 +4,13 @@ import { base44 } from '@/api/base44Client';
 import ScanForm from '@/components/scan/ScanForm';
 import ScanProgress from '@/components/scan/ScanProgress';
 import ScanReport from '@/components/scan/ScanReport';
+import CachedNotice from '@/components/scan/CachedNotice';
 
 export default function Scan() {
   const [scan, setScan] = useState(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState('');
+  const [cached, setCached] = useState(false);
   const pollRef = useRef(null);
 
   const stopPolling = () => {
@@ -61,12 +63,12 @@ export default function Scan() {
     }, 6000);
   };
 
-  const handleScan = async (url) => {
-    setError(''); setScan(null); stopPolling();
+  const handleScan = async (url, force = false) => {
+    setError(''); setScan(null); setCached(false); stopPolling();
     setRunning(true);
     let res;
     try {
-      res = await base44.functions.invoke('startScan', { url });
+      res = await base44.functions.invoke('startScan', { url, force });
     } catch {
       setError('The scan could not be started. Please try again.');
       setRunning(false);
@@ -79,6 +81,7 @@ export default function Scan() {
       return;
     }
     setScan(d.scan);
+    setCached(d.cached === true);
     if (d.cached || d.scan.status !== 'running') { setRunning(false); return; }
     try {
       const pr = await base44.functions.invoke('processScan', { scan_id: d.scan.id });
@@ -123,6 +126,14 @@ export default function Scan() {
         )}
 
         {showProgress && <ScanProgress domain={scan?.domain || ''} />}
+
+        {showReport && cached && (
+          <CachedNotice
+            scan={scan}
+            busy={showProgress}
+            onRescan={() => handleScan(scan.url || scan.domain, true)}
+          />
+        )}
 
         {showReport && <ScanReport scan={scan} />}
       </main>

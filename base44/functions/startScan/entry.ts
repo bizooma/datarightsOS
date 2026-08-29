@@ -53,10 +53,15 @@ export default async function (req) {
     const now = Date.now();
 
     // Domain cache: a completed scan for this domain within the last hour is
-    // returned as-is — no new browser sessions.
-    const cachedList = await svc.entities.Scan.filter({ domain: host, status: 'complete' }, '-created_date', 1);
-    if (cachedList[0] && now - new Date(cachedList[0].created_date).getTime() < HOUR) {
-      return Response.json({ ok: true, cached: true, scan: sanitize(cachedList[0]) });
+    // returned as-is — no new browser sessions. `force` bypasses ONLY this cache
+    // (a site that just changed must be re-observable); the per-IP limits below
+    // still apply, so this can't be used to run unbounded paid sessions.
+    const force = body.force === true;
+    if (!force) {
+      const cachedList = await svc.entities.Scan.filter({ domain: host, status: 'complete' }, '-created_date', 1);
+      if (cachedList[0] && now - new Date(cachedList[0].created_date).getTime() < HOUR) {
+        return Response.json({ ok: true, cached: true, scan: sanitize(cachedList[0]) });
+      }
     }
 
     // A scan for this domain already in flight? Hand back the same record so the
