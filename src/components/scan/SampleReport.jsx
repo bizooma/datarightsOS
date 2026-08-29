@@ -6,13 +6,18 @@ import NeutralCheckList from '@/components/scan/NeutralCheckList';
 // screenshot: it stays in sync when the report design changes, and it is real
 // text for crawlers and screen readers.
 //
-// THE DOMAIN IS FABRICATED. example-firm.com is not a real business — never put a
-// real company's domain or findings on our own marketing page.
+// THE DOMAIN MUST BE RESERVED, NOT MERELY FABRICATED. example.com is reserved by IANA
+// under RFC 2606 for documentation and can never be registered by a third party, so
+// fabricated findings shown against it can never describe a real business's site.
+// A made-up-sounding domain is NOT safe: example-firm.com looked invented but is in
+// fact registered and resolving. Only example.com, example.net, example.org and
+// anything under the .example TLD are guaranteed unowned — use one of those and
+// nothing else here.
 //
 // COPY FOLLOWS THE REPORT'S RULES: observations only. No score, grade, or verdict,
 // and none of "violation", "risk", "non-compliant", or "exposed" — this is showing
 // our product's output, so it obeys our product's rules.
-const SAMPLE_DOMAIN = 'example-firm.com';
+const SAMPLE_DOMAIN = 'example.com';
 
 const AMBER = {
   key: 'pre_consent_tracking',
