@@ -1,4 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Self-hosted variable fonts (full Latin range, all weights).
+   Previously loaded from fonts.googleapis.com + fonts.gstatic.com — removed so the
+   site makes no third-party font requests. Same typefaces, same rendering. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://base44.app/api/apps/6a3735f4f27dcb14405892ae/files/mp/public/6a3735f4f27dcb14405892ae/33ef37896_inter-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('https://base44.app/api/apps/6a3735f4f27dcb14405892ae/files/mp/public/6a3735f4f27dcb14405892ae/d1f260300_space-grotesk-latin-wght-normal.woff2') format('woff2-variations');
+}
 
 @tailwind base;
 @tailwind components;
