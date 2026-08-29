@@ -150,6 +150,34 @@ function countTerms(text: string, terms: string[]) {
   return terms.filter((t) => h.includes(t)).length;
 }
 
+// Diagnostic readout of exactly what the validator measured for each followed page —
+// the same inputs confirmPage judges (main-content length after chrome stripping, which
+// topic terms hit, which commitment phrase hit), exposed so a scan's verdict can be
+// audited from logs instead of trusted. Read-only: this never influences the checks.
+export function followDiagnostics(followed: any[]) {
+  return (followed || []).map((rec: any) => {
+    const label = rec.kind === 'privacy' ? 'a privacy policy' : 'an accessibility statement';
+    const spec = CONTENT_TERMS[label];
+    const content = rec.main_text || '';
+    return {
+      kind: rec.kind,
+      anchor_text: rec.anchor_text || '',
+      requested_url: rec.requested_url,
+      final_url: rec.final_url,
+      http_status: rec.status,
+      loaded_ok: rec.ok,
+      error: rec.error || null,
+      settle_note: rec.settle_note || null,
+      main_chars: content.length,
+      min_chars_required: spec.min_chars,
+      terms_hit: spec.terms.filter((t: string) => content.includes(t)),
+      terms_total: spec.terms.length,
+      terms_required: spec.min,
+      commit_hit: spec.commit.filter((c: string) => content.includes(c)),
+    };
+  });
+}
+
 // Whenever the link's wording and the URL it resolved to differ, show both. A
 // mismatch is exactly the thing the reader needs to see, not something to hide
 // behind a tidy "Found at".

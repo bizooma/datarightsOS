@@ -12,7 +12,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { secrets } from 'base44:runtime';
 import { analyzeScan } from '../../shared/scanChecks.ts';
-import { analyzeGroupB } from '../../shared/scanGroupB.ts';
+import { analyzeGroupB, followDiagnostics } from '../../shared/scanGroupB.ts';
 import { PATTERNS, CMP_MATCHERS } from '../../shared/scanPatterns.ts';
 import { datarightsosProvides } from '../../shared/scanTools.ts';
 import { detectBlockedPage, BLOCKED_MESSAGE } from '../../shared/scanBlocked.ts';
@@ -394,6 +394,12 @@ export default async function (req) {
 
     const findings = analyzeScan({ url: scan.url, pass1, pass2 });
 
+    // Validator audit trail: log the measured inputs for every followed page so a
+    // verdict can be checked against its numbers.
+    try {
+      console.log('[processScan] follow diagnostics: ' + JSON.stringify(followDiagnostics(pass1.followed || [])));
+    } catch { /* diagnostics must never break a scan */ }
+
     // Group B needs two Group A outcomes for its combination flags.
     const tool = await resolveOwnWidget(svc, pass1, scan.domain);
     const groupB = analyzeGroupB({
@@ -408,7 +414,14 @@ export default async function (req) {
 
     const updated = await svc.entities.Scan.update(scan.id, {
       status: 'complete',
-      findings: { checks: { ...findings.checks, ...groupB.checks }, pages_visited: groupB.pages_visited },
+      findings: {
+        checks: { ...findings.checks, ...groupB.checks },
+        pages_visited: groupB.pages_visited,
+        // The validator's measured inputs per followed page (lengths and phrase hits
+        // only — never page content). Stored so any FOUND can be audited against the
+        // numbers that produced it instead of taken on trust.
+        follow_diagnostics: followDiagnostics(pass1.followed || []),
+      },
       third_party_domains: findings.third_party_domains,
       gpc_pass_failed: !pass2.ok,
       completed_at: new Date().toISOString(),
