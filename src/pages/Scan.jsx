@@ -5,6 +5,7 @@ import ScanForm from '@/components/scan/ScanForm';
 import ScanProgress from '@/components/scan/ScanProgress';
 import ScanReport from '@/components/scan/ScanReport';
 import CachedNotice from '@/components/scan/CachedNotice';
+import BlockedNotice from '@/components/scan/BlockedNotice';
 
 export default function Scan() {
   const [scan, setScan] = useState(null);
@@ -127,7 +128,15 @@ export default function Scan() {
 
         {showProgress && <ScanProgress domain={scan?.domain || ''} />}
 
-        {showReport && cached && (
+        {showReport && scan.status === 'blocked' && (
+          <BlockedNotice
+            scan={scan}
+            busy={showProgress}
+            onRescan={() => handleScan(scan.url || scan.domain, true)}
+          />
+        )}
+
+        {showReport && scan.status !== 'blocked' && cached && (
           <CachedNotice
             scan={scan}
             busy={showProgress}
@@ -135,7 +144,7 @@ export default function Scan() {
           />
         )}
 
-        {showReport && <ScanReport scan={scan} />}
+        {showReport && scan.status !== 'blocked' && <ScanReport scan={scan} />}
       </main>
     </div>
   );

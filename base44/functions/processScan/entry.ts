@@ -15,6 +15,7 @@ import { analyzeScan } from '../../shared/scanChecks.ts';
 import { analyzeGroupB } from '../../shared/scanGroupB.ts';
 import { PATTERNS, CMP_MATCHERS } from '../../shared/scanPatterns.ts';
 import { datarightsosProvides } from '../../shared/scanTools.ts';
+import { detectBlockedPage, BLOCKED_MESSAGE } from '../../shared/scanBlocked.ts';
 
 // When OUR widget is on the page, what it serves is read from the site's saved
 // configuration rather than guessed from the DOM — so a drawer the subscriber
@@ -56,10 +57,12 @@ export default async function ({ page, context }) {
   const requests = [];
   page.on('request', function (r) { try { requests.push(r.url()); } catch (e) {} });
   if (context.gpc) { await page.setExtraHTTPHeaders({ 'Sec-GPC': '1' }); }
+  var mainStatus = null;
   try {
-    await page.goto(context.url, { waitUntil: 'networkidle2', timeout: 30000 });
+    var mainResp = await page.goto(context.url, { waitUntil: 'networkidle2', timeout: 30000 });
+    mainStatus = mainResp ? mainResp.status() : null;
   } catch (e) {
-    return { data: { requests: requests, forms: null, nav_error: String((e && e.message) || e) }, type: 'application/json' };
+    return { data: { requests: requests, forms: null, main_status: mainStatus, nav_error: String((e && e.message) || e) }, type: 'application/json' };
   }
   await new Promise(function (r) { setTimeout(r, 4000); });
   let forms = null;
@@ -194,7 +197,7 @@ export default async function ({ page, context }) {
           if (!hrefL || hrefL.indexOf('javascript:') === 0 || hrefL.indexOf('mailto:') === 0 || hrefL.charAt(0) === '#') continue;
           for (var j = 0; j < list.length; j++) {
             if (a.text.indexOf(list[j]) !== -1 || hrefL.indexOf(list[j]) !== -1) {
-              try { return new URL(a.href, pageData.url).href; } catch (x2) { return null; }
+              try { return { url: new URL(a.href, pageData.url).href, text: a.text }; } catch (x2) { return null; }
             }
           }
         }
@@ -203,13 +206,13 @@ export default async function ({ page, context }) {
 
       // HARD CAP: the submitted page plus at most 2 followed pages. No crawling.
       var targets = [];
-      var pUrl = pick(p.privacy);
-      var aUrl = pick(p.a11y);
-      if (pUrl) targets.push({ kind: 'privacy', url: pUrl });
-      if (aUrl && aUrl !== pUrl) targets.push({ kind: 'accessibility', url: aUrl });
+      var pPick = pick(p.privacy);
+      var aPick = pick(p.a11y);
+      if (pPick) targets.push({ kind: 'privacy', url: pPick.url, text: pPick.text });
+      if (aPick && (!pPick || aPick.url !== pPick.url)) targets.push({ kind: 'accessibility', url: aPick.url, text: aPick.text });
 
       for (var t = 0; t < targets.length && followed.length < 2; t++) {
-        var rec = { kind: targets[t].kind, requested_url: targets[t].url, ok: false, status: null, final_url: null, text: '', anchors: [], form_hay: '', error: null };
+        var rec = { kind: targets[t].kind, requested_url: targets[t].url, anchor_text: targets[t].text, ok: false, status: null, final_url: null, text: '', anchors: [], form_hay: '', error: null };
         try {
           var resp = await page.goto(targets[t].url, { waitUntil: 'domcontentloaded', timeout: 15000 });
           rec.status = resp ? resp.status() : null;
@@ -225,7 +228,7 @@ export default async function ({ page, context }) {
     }
   }
 
-  return { data: { requests: mainRequests, forms: forms, page: pageData, followed: followed }, type: 'application/json' };
+  return { data: { requests: mainRequests, forms: forms, main_status: mainStatus, page: pageData, followed: followed }, type: 'application/json' };
 }
 `;
 
@@ -256,6 +259,7 @@ async function runPass(url, gpc, token) {
       ok: true,
       requests: data.requests,
       forms: data.forms ?? null,
+      main_status: data.main_status ?? null,
       page: data.page ?? null,
       followed: data.followed ?? [],
       nav_error: data.nav_error || null,
@@ -323,6 +327,20 @@ export default async function (req) {
         completed_at: new Date().toISOString(),
       });
       return Response.json({ ok: true, scan: sanitize(failed) });
+    }
+
+    // Did we load the site, or a security check standing in front of it? A blocked
+    // load produces NO findings — every check would describe the challenge page.
+    // This state is not 'complete', so it is never served from the domain cache.
+    const blocked = detectBlockedPage({ status: pass1.main_status, page: pass1.page });
+    if (blocked.blocked) {
+      console.log('[processScan] blocked: ' + blocked.reason);
+      const stopped = await svc.entities.Scan.update(scan.id, {
+        status: 'blocked',
+        error: BLOCKED_MESSAGE,
+        completed_at: new Date().toISOString(),
+      });
+      return Response.json({ ok: true, scan: sanitize(stopped) });
     }
 
     // Pass 2: same load with a Global Privacy Control signal. A failure here

@@ -15,10 +15,11 @@
       "enum": [
         "running",
         "complete",
-        "failed"
+        "failed",
+        "blocked"
       ],
       "default": "running",
-      "description": "Scan lifecycle. failed = Browserless errored/timed out and NO findings are reported."
+      "description": "Scan lifecycle. failed = Browserless errored/timed out and NO findings are reported. blocked = the page we loaded was a bot challenge, block page, or CDN error rather than the site, so NO findings are reported \u2014 analyzing it would describe the challenge page instead of the business. Only 'complete' is ever served from the domain cache."
     },
     "requester_ip_hash": {
       "type": "string",
@@ -36,7 +37,7 @@
     },
     "error": {
       "type": "string",
-      "description": "Failure reason when status=failed"
+      "description": "Failure reason when status=failed, or the visitor-facing explanation when status=blocked"
     },
     "gpc_pass_failed": {
       "type": "boolean",

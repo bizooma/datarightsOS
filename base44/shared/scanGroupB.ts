@@ -77,6 +77,40 @@ function looseAbsent(anchors: any[], text: string, loose: string[], label: strin
   return notFound(`No link to ${label} was found on the pages we checked.`);
 }
 
+// A page that loads and has words on it is NOT proof it is the document we claim.
+// A link labeled "privacy policy" pointing at /disclaimer/ loaded fine and read as
+// FOUND — a false claim we made after checking only that a page existed. The
+// followed page must actually read like the thing before we credit it.
+const CONTENT_TERMS: Record<string, { terms: string[]; min: number; noun: string }> = {
+  'a privacy policy': {
+    terms: ['personal information', 'we collect', 'third part', 'your rights', 'opt out', 'data we', 'cookies'],
+    min: 3,
+    noun: 'privacy policy',
+  },
+  'an accessibility statement': {
+    terms: ['accessibility', 'wcag', 'disability', 'assistive', 'barrier', 'screen reader'],
+    min: 2,
+    noun: 'accessibility statement',
+  },
+};
+
+function countTerms(text: string, terms: string[]) {
+  const h = text || '';
+  return terms.filter((t) => h.includes(t)).length;
+}
+
+// Whenever the link's wording and the URL it resolved to differ, show both. A
+// mismatch is exactly the thing the reader needs to see, not something to hide
+// behind a tidy "Found at".
+function linkDetails(rec: any) {
+  const anchor = (rec.anchor_text || '').trim();
+  const url = rec.final_url || rec.requested_url || '';
+  if (!anchor) return [];
+  const slug = anchor.replace(/[^a-z0-9]+/g, '-');
+  if (slug && url.toLowerCase().includes(slug)) return [];
+  return [`Link text: "${anchor}"`, `Resolved to: ${url}`];
+}
+
 function confirmPage(rec: any, apex: string, label: string, absent: any) {
   if (!rec) return { ok: false, check: absent };
   if (!rec.ok || rec.error) {
@@ -91,7 +125,19 @@ function confirmPage(rec: any, apex: string, label: string, absent: any) {
   if ((rec.text || '').length < MIN_POLICY_TEXT) {
     return { ok: false, check: cnd(`A link to ${label} was found, but the page returned almost no readable text, so we could not confirm it.`, [`Link: ${rec.final_url || rec.requested_url}`]) };
   }
-  return { ok: true, check: found(`Found at ${rec.final_url || rec.requested_url}.`) };
+  // Content check: does the page read like the document the link promised?
+  const spec = CONTENT_TERMS[label];
+  if (spec && countTerms(rec.text || '', spec.terms) < spec.min) {
+    const anchor = (rec.anchor_text || '').trim() || label;
+    const url = rec.final_url || rec.requested_url;
+    return {
+      ok: false,
+      check: cnd(
+        `A link labeled "${anchor}" pointed to ${url}, but that page doesn't read like a ${spec.noun}. Worth confirming where yours actually lives.`,
+      ),
+    };
+  }
+  return { ok: true, check: found(`Found at ${rec.final_url || rec.requested_url}.`, linkDetails(rec)) };
 }
 
 // groupA: { trackersPresent, chatbotPresent } — needed for the two combination flags.
@@ -213,9 +259,13 @@ export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
     request_mechanism = found('Found: a link to a request page.', [`Link text: ${reqAnchor.text || '(no text)'}`]);
   } else if (reqMail) {
     request_mechanism = found(`Found: an email address (${reqMail}).`);
-  } else if (privacy_policy.status === STATUS.FOUND || privacyText) {
+  } else if (privacy_policy.status === STATUS.FOUND) {
     // Default per spec: a policy exists but we couldn't parse a mechanism out of it.
     request_mechanism = cnd('A privacy policy was reachable, but we could not identify a form, link, or address for submitting a request, so this could not be determined.');
+  } else if (privacyText) {
+    // A page was reachable but we could not confirm it IS a policy — so we must
+    // not describe it as one here either.
+    request_mechanism = cnd('We could not identify a form, link, or address for submitting a request on the pages we checked, so this could not be determined.');
   } else {
     request_mechanism = notFound('No request form, request page, or privacy contact address was found on the pages we checked.');
   }
