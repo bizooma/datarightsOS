@@ -27,6 +27,7 @@ export default function PrintReport({ scan }) {
   const neutral = present.filter(({ key, check }) => !needsAttention(key, check));
   const domains = scan.third_party_domains || [];
   const answerLabels = flaggedLabels(checks);
+  const pagesVisited = scan.findings?.pages_visited || [];
 
   return (
     <div className="pr-doc">
@@ -92,6 +93,15 @@ export default function PrintReport({ scan }) {
         <p>{answerLabels.length > 0 ? NEXT_STEPS_AMBER : NEXT_STEPS_CLEAR}</p>
         <p className="pr-next-closer">{NEXT_STEPS_CLOSER}</p>
       </div>
+
+      {pagesVisited.length > 0 && (
+        <div className="pr-domains">
+          <h3>Pages we checked</h3>
+          {pagesVisited.map((p, i) => (
+            <p key={`${p.url}-${i}`}>{p.url}{p.kind ? ` — ${p.kind}` : ''}</p>
+          ))}
+        </div>
+      )}
 
       {domains.length > 0 && (
         <div className="pr-domains">

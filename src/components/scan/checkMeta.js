@@ -8,7 +8,28 @@ export const CHECK_ORDER = [
   'forms_pii',
   'pre_consent_tracking',
   'gpc_comparison',
+  // Group B — what appears to be missing.
+  'cookie_consent',
+  'privacy_policy',
+  'do_not_sell',
+  'accessibility_statement',
+  'request_mechanism',
+  'accessibility_reporting',
+  'ai_disclosure',
 ];
+
+// Group B checks look for ABSENCE, so their context reads in the inverse of
+// Group A: a FOUND result needs no explanation, while NOT FOUND and COULD NOT
+// DETERMINE carry the full "why this matters" and "what to check".
+export const GROUP_B_KEYS = new Set([
+  'cookie_consent',
+  'privacy_policy',
+  'do_not_sell',
+  'accessibility_statement',
+  'request_mechanism',
+  'accessibility_reporting',
+  'ai_disclosure',
+]);
 
 export const CHECK_LABELS = {
   tracking_scripts: 'Tracking scripts detected',
@@ -19,6 +40,13 @@ export const CHECK_LABELS = {
   forms_pii: 'Contact forms collecting personal information',
   pre_consent_tracking: 'Tracking fired before consent',
   gpc_comparison: 'Global Privacy Control comparison',
+  cookie_consent: 'Cookie consent mechanism',
+  privacy_policy: 'Privacy policy',
+  do_not_sell: '"Do Not Sell or Share" mechanism',
+  accessibility_statement: 'Accessibility statement',
+  request_mechanism: 'Privacy request mechanism',
+  accessibility_reporting: 'Accessibility reporting channel',
+  ai_disclosure: 'AI disclosure',
 };
 
 // Plain-language status per check. The label must describe the observation and
@@ -54,6 +82,13 @@ const STATUS_LABELS = {
     // zero_baseline = no trackers on either load, so no comparison happened.
     not_found: (check) => (check?.zero_baseline ? 'No tracking to compare' : 'No change observed'),
   },
+  cookie_consent: { found: () => 'Detected', not_found: () => 'Not found' },
+  privacy_policy: { found: () => 'Found', not_found: () => 'Not found' },
+  do_not_sell: { found: () => 'Found', not_found: () => 'Not found' },
+  accessibility_statement: { found: () => 'Found', not_found: () => 'Not found' },
+  request_mechanism: { found: () => 'Found', not_found: () => 'Not found' },
+  accessibility_reporting: { found: () => 'Found', not_found: () => 'Not found' },
+  ai_disclosure: { found: () => 'Found', not_found: () => 'Not found' },
 };
 
 // tracking_scripts details carry one line per matched vendor.
@@ -79,6 +114,12 @@ export function statusLabelFor(checkKey, check) {
 //   - tracking actually fired before a consent choice existed
 //   - the GPC signal produced no change in behavior
 export function needsAttention(checkKey, check) {
+  // The two Group B combination flags — internal inconsistencies the analyzer
+  // observed directly (tracking with no way to decline it, a chat widget with no
+  // disclosure). A missing policy or link on its own is never flagged: whether
+  // it's required depends on the business, and we don't know their revenue or
+  // where their customers live.
+  if (check?.attention) return true;
   if (checkKey === 'pre_consent_tracking') return check?.status === 'found';
   // Only the real case: trackers were observed and behavior didn't change.
   // A zero-tracker baseline had nothing to measure, so it is never a finding.

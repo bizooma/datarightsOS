@@ -7,6 +7,7 @@ import ScanAnswer from '@/components/scan/ScanAnswer';
 import NextSteps from '@/components/scan/NextSteps';
 import DownloadPdfButton from '@/components/scan/DownloadPdfButton';
 import EmailReportForm from '@/components/scan/EmailReportForm';
+import PagesVisited from '@/components/scan/PagesVisited';
 import { SCOPE_LINE } from '@/components/scan/reportText';
 
 export default function ScanReport({ scan }) {
@@ -68,6 +69,8 @@ export default function ScanReport({ scan }) {
       </div>
 
       <NextSteps scan={scan} />
+
+      <PagesVisited pages={scan.findings?.pages_visited} />
 
       {(scan.third_party_domains || []).length > 0 && (
         <div className="bg-card border border-border rounded-lg p-4">

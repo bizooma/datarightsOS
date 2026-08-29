@@ -3,11 +3,11 @@ import { CHECK_LABELS, CHECK_ORDER, needsAttention } from '@/components/scan/che
 // Single source of truth for the report's scope statement. The PDF must carry it
 // VERBATIM, so both surfaces read it from here — never retype it in one place.
 //
-// SCOPE NOTE: this wording describes a single-page Group A scan. When Group B
-// lands and the scanner follows links to policy pages, this line stops being
-// accurate and must be revisited deliberately rather than edited in passing.
+// SCOPE NOTE: the scanner now visits up to 3 pages (the submitted URL plus a
+// discovered privacy policy and accessibility statement), so this speaks of
+// "the pages we checked". The pages actually visited are listed in the report.
 export const SCOPE_LINE =
-  'Findings marked in amber are the ones worth reviewing. The rest is what we observed on the page we scanned — not a clean bill of health. We can\'t see other pages on your site, how it behaves for logged-in visitors, or what happens after a form is submitted.';
+  'Findings marked in amber are the ones worth reviewing. The rest is what we observed on the pages we checked — not a clean bill of health. We can\'t see every page on your site, how it behaves for logged-in visitors, or what happens after a form is submitted.';
 
 // Facts only — a count and a one-line statement of the most significant
 // observation. No score, grade, or rating.
@@ -33,14 +33,14 @@ export const DOMAIN_EXPLAINER =
 // The plain-language answer that leads the report. It is a statement about OUR
 // FINDINGS, never about the reader's legal status — no compliant, non-compliant,
 // passing, failing, or safe, in any wording, ever.
-export const ANSWER_CLEAR = 'Nothing we observed on this page needs your attention right now.';
+export const ANSWER_CLEAR = 'Nothing we observed needs your attention right now.';
 export const ANSWER_CLEAR_SUB =
-  "That's not the same as a clean bill of health — we only looked at one page, from the outside. See what we couldn't check below.";
+  "That's not the same as a clean bill of health — we only looked at the pages listed below, from the outside. See what we couldn't check below.";
 export const ANSWER_FLAGGED_SUB =
   'Details below. Everything else we observed is listed after them.';
 
 export function answerHeadline(count) {
-  return `${count} ${count === 1 ? 'thing' : 'things'} on this page ${count === 1 ? 'is' : 'are'} worth looking at:`;
+  return `${count} ${count === 1 ? 'thing is' : 'things are'} worth looking at:`;
 }
 
 // Labels of the attention-flagged checks, in report order.
