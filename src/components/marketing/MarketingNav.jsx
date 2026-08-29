@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Shield } from 'lucide-react';
+import { statementUrl } from '@/lib/statementUrls';
 
 export default function MarketingNav({ isAuthenticated }) {
   return (
@@ -13,7 +14,10 @@ export default function MarketingNav({ isAuthenticated }) {
           <Link to="/#features" className="hover:text-white transition-colors">Features</Link>
           <Link to="/#who" className="hover:text-white transition-colors">Who it's for</Link>
           <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy</Link>
+          {/* Points at the static statement page, not the in-app /privacy-policy route.
+              This is the first privacy link in the document, so it is the one a crawler
+              or scanner follows — it needs to be the real HTML document. */}
+          <a href={statementUrl('datarightsos-com', 'privacy_policy')} className="hover:text-white transition-colors">Privacy</a>
           <Link to="/support-request" className="hover:text-white transition-colors">Support</Link>
         </nav>
 
