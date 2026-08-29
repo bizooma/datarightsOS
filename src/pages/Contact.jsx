@@ -12,7 +12,7 @@ export default function Contact() {
       <main className="max-w-2xl mx-auto px-6 py-16">
         <h1 className="text-3xl font-bold text-foreground mb-3">Contact Us</h1>
         <p className="text-muted-foreground leading-relaxed mb-10">
-          Have a question about Data Rights OS, need help with your account, or want to talk about pricing?
+          Have a question about DataRightsOS, need help with your account, or want to talk about pricing?
           Reach out and our team will get back to you.
         </p>
 

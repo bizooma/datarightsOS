@@ -7,7 +7,7 @@ export default function MarketingNav({ isAuthenticated }) {
     <header className="sticky top-0 z-50 bg-black border-b border-white/10">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center">
-          <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9c1b23b5f_logo-horizontal-reversed.svg" alt="Data Rights OS" className="h-14 object-contain" />
+          <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9c1b23b5f_logo-horizontal-reversed.svg" alt="DataRightsOS" className="h-14 object-contain" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-7 text-sm text-slate-300">

@@ -61,7 +61,7 @@ export default function Sidebar() {
   });
 
   const brandColor = org?.brand_primary_color || '#0d7d74';
-  const productName = org?.white_label_product_name || 'Data Rights OS';
+  const productName = org?.white_label_product_name || 'DataRightsOS';
   const logoUrl = org?.brand_logo_url;
 
   const allItems = isSuperAdmin

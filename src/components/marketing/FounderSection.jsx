@@ -18,7 +18,7 @@ export default function FounderSection() {
             and asked me what they were supposed to do with it. They had four compliance widgets
             installed on their site — and not one of them answered that email. That was the whole
             problem in a single message: the banners were up, but the moment a real request came in,
-            nobody knew what happened next. I built Data Rights OS to answer that email.
+            nobody knew what happened next. I built DataRightsOS to answer that email.
           </p>
         </div>
       </div>

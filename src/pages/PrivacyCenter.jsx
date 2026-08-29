@@ -169,7 +169,7 @@ export default function PrivacyCenter() {
         ))}
 
         <p className="text-center text-xs text-gray-400 pt-2">
-          Powered by Data Rights OS · Policy v{site.policy_version}
+          Powered by DataRightsOS · Policy v{site.policy_version}
         </p>
       </div>
     </div>

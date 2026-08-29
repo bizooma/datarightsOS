@@ -9,15 +9,15 @@ export default function MarketingFooter() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
             <div className="mb-3">
-              <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9c1b23b5f_logo-horizontal-reversed.svg" alt="Data Rights OS" className="h-12 object-contain" />
+              <img src="https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9c1b23b5f_logo-horizontal-reversed.svg" alt="DataRightsOS" className="h-12 object-contain" />
             </div>
             <div className="text-slate-200 text-xs max-w-xs leading-relaxed space-y-3">
               <p>
                 <span className="text-white font-semibold block mb-1">Compliance Is Becoming a Moving Target</span>
-                Privacy rights, accessibility statements, cookie disclosures, AI notices, and consumer request links are no longer "nice to have." Data RightS OS gives your website a simple way to display important statements and help visitors find the rights information they're looking for.
+                Privacy rights, accessibility statements, cookie disclosures, AI notices, and consumer request links are no longer "nice to have." DataRightsOS gives your website a simple way to display important statements and help visitors find the rights information they're looking for.
               </p>
               <p>
-                Data RightS OS helps businesses organize and display privacy, accessibility, AI, and data-rights statements. It does not replace legal advice or guarantee compliance.
+                DataRightsOS helps businesses organize and display privacy, accessibility, AI, and data-rights statements. It does not replace legal advice or guarantee compliance.
               </p>
             </div>
           </div>

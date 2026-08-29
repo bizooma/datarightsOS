@@ -33,8 +33,8 @@ export default function BizoomaSection() {
           </p>
           <p className="mt-4 text-slate-600 leading-relaxed">
             As privacy regulations, accessibility requirements, and AI disclosure rules spread across
-            US states, that gap became a serious risk for the businesses we serve. So we created Data
-            Rights OS — a single, installable layer that gives any website the consent management,
+            US states, that gap became a serious risk for the businesses we serve. So we created
+            DataRightsOS — a single, installable layer that gives any website the consent management,
             data-rights workflows, and audit logging it needs to stay on the right side of the law.
           </p>
           <BizoomaNewsletter />

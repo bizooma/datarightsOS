@@ -103,23 +103,26 @@ export default function Scan() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="text-sm font-semibold text-foreground">Data Rights OS</Link>
+          <Link to="/" className="text-sm font-semibold text-foreground">DataRightsOS</Link>
           <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">← Back to home</Link>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-10 space-y-8">
-        <div className="text-center max-w-2xl mx-auto">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight">
+      <main className="px-4 py-10">
+        {/* Wider measure than the rest of the page: the headline is 46 characters and
+            cannot sit on one line inside the 5xl body column at a readable size. */}
+        <div className="text-center max-w-[1180px] mx-auto">
+          <h1 className="text-2xl sm:text-[1.75rem] lg:text-[2rem] font-semibold text-foreground tracking-tight [text-wrap:balance]">
             What loads on your site before anyone consents?
           </h1>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-3 max-w-2xl mx-auto">
             Enter your website. We load it in a clean browser as a first-time visitor, record every
             tracking request that fires, then load it again with a Global Privacy Control signal and
             compare. Observations only — you'll see exactly what we saw.
           </p>
         </div>
 
+        <div className="max-w-5xl mx-auto space-y-8 mt-8">
         <ScanForm onScan={handleScan} busy={showProgress} />
 
         {error && (
@@ -145,6 +148,7 @@ export default function Scan() {
         )}
 
         {showReport && scan.status !== 'blocked' && <ScanReport scan={scan} />}
+        </div>
       </main>
     </div>
   );

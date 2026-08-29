@@ -33,7 +33,7 @@ export default function PrintReport({ scan }) {
     <div className="pr-doc">
       {/* The logo is white type — it only reads on the dark ink band. */}
       <div className="pr-band">
-        <img src={LOGO_REVERSED} alt="Data Rights OS" />
+        <img src={LOGO_REVERSED} alt="DataRightsOS" />
         <p className="pr-band-kicker">Website Tracking Scan Report</p>
       </div>
 
