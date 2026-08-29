@@ -53,6 +53,34 @@ export const PRINT_CSS = `
   }
   .pr-summary p { font-size: 12.5px; margin: 0 0 4px; }
 
+  .pr-summary-note { font-size: 10.5px; color: #55636F; }
+
+  /* The plain-language answer block. */
+  .pr-answer {
+    border: 1px solid #D8E0E7; border-radius: 6px; padding: 14px 16px; margin-bottom: 16px;
+    break-inside: avoid; page-break-inside: avoid;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .pr-answer-amber { border: 2px solid #D89B2A; background: #FDF6E7; }
+  .pr-answer-head { font-size: 13px; font-weight: 700; margin: 0; line-height: 1.5; }
+  .pr-answer-list { margin: 7px 0 0; padding-left: 16px; }
+  .pr-answer-list li { font-size: 12px; line-height: 1.55; margin-bottom: 2px; }
+  .pr-answer-sub { font-size: 10.5px; color: #55636F; line-height: 1.6; margin: 8px 0 0; }
+
+  /* One forward-looking line on a nothing-detected finding. */
+  .pr-note { font-size: 10.5px; color: #55636F; line-height: 1.55; margin: 7px 0 0; }
+
+  .pr-next {
+    border: 1px solid #D8E0E7; border-radius: 6px; padding: 14px 16px; margin-bottom: 14px;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .pr-next h3 {
+    font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: #55636F; margin: 0 0 8px; font-weight: 700;
+  }
+  .pr-next p { font-size: 12px; line-height: 1.6; margin: 0; }
+  .pr-next-closer { color: #55636F; margin-top: 8px !important; }
+
   .pr-scope { font-size: 11px; color: #55636F; line-height: 1.6; margin: 0 0 18px; }
 
   .pr-section-label {

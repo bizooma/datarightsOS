@@ -3,6 +3,8 @@ import CheckCard from '@/components/scan/CheckCard';
 import NeutralCheckList from '@/components/scan/NeutralCheckList';
 import { CHECK_ORDER, needsAttention } from '@/components/scan/checkMeta';
 import ScanSummary from '@/components/scan/ScanSummary';
+import ScanAnswer from '@/components/scan/ScanAnswer';
+import NextSteps from '@/components/scan/NextSteps';
 import DownloadPdfButton from '@/components/scan/DownloadPdfButton';
 import EmailReportForm from '@/components/scan/EmailReportForm';
 import { SCOPE_LINE } from '@/components/scan/reportText';
@@ -52,6 +54,8 @@ export default function ScanReport({ scan }) {
 
       <ScanSummary scan={scan} />
 
+      <ScanAnswer scan={scan} />
+
       <p className="text-xs text-muted-foreground leading-relaxed px-1">
         {SCOPE_LINE}
       </p>
@@ -62,6 +66,8 @@ export default function ScanReport({ scan }) {
         ))}
         <NeutralCheckList items={neutral} />
       </div>
+
+      <NextSteps scan={scan} />
 
       {(scan.third_party_domains || []).length > 0 && (
         <div className="bg-card border border-border rounded-lg p-4">

@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { CHECK_LABELS, statusLabelFor } from '@/components/scan/checkMeta';
-import { contextFor } from '@/components/scan/checkContext';
+import { resolveContext } from '@/components/scan/checkContext';
 
 // Everything not flagged for attention: a compact row per check (name + plain
 // status), expandable on click to reveal the same observation, details, and
 // context copy the full card shows.
 function NeutralRow({ checkKey, check }) {
   const [open, setOpen] = useState(false);
-  const ctx = contextFor(checkKey, check);
+  const ctx = resolveContext(checkKey, check);
   return (
     <div className="border-b border-border last:border-b-0">
       <button
@@ -35,17 +35,20 @@ function NeutralRow({ checkKey, check }) {
               ))}
             </ul>
           )}
-          {ctx && (
+          {ctx.mode === 'full' && (
             <div className="mt-3 pt-3 border-t border-border space-y-2">
               <div>
                 <p className="text-[11px] font-semibold tracking-wide uppercase text-muted-foreground">Why this matters</p>
-                <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{ctx.why}</p>
+                <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{ctx.ctx.why}</p>
               </div>
               <div>
                 <p className="text-[11px] font-semibold tracking-wide uppercase text-muted-foreground">What to check</p>
-                <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{ctx.check}</p>
+                <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{ctx.ctx.check}</p>
               </div>
             </div>
+          )}
+          {ctx.mode === 'note' && (
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{ctx.note}</p>
           )}
         </div>
       )}

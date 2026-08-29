@@ -1,10 +1,10 @@
 import { CHECK_LABELS, statusLabelFor } from '@/components/scan/checkMeta';
-import { contextFor } from '@/components/scan/checkContext';
+import { resolveContext } from '@/components/scan/checkContext';
 
 // Full, expanded card. Used for attention-flagged findings, and for a neutral
 // check the reader has expanded from the list.
 export default function CheckCard({ checkKey, check, attention = false }) {
-  const ctx = contextFor(checkKey, check);
+  const ctx = resolveContext(checkKey, check);
   const statusLabel = statusLabelFor(checkKey, check);
   return (
     <div
@@ -39,17 +39,20 @@ export default function CheckCard({ checkKey, check, attention = false }) {
           ))}
         </ul>
       )}
-      {ctx && (
+      {ctx.mode === 'full' && (
         <div className="mt-3 pt-3 border-t border-border space-y-2">
           <div>
             <p className="text-[11px] font-semibold tracking-wide uppercase text-muted-foreground">Why this matters</p>
-            <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{ctx.why}</p>
+            <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{ctx.ctx.why}</p>
           </div>
           <div>
             <p className="text-[11px] font-semibold tracking-wide uppercase text-muted-foreground">What to check</p>
-            <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{ctx.check}</p>
+            <p className="text-xs text-foreground/80 mt-0.5 leading-relaxed">{ctx.ctx.check}</p>
           </div>
         </div>
+      )}
+      {ctx.mode === 'note' && (
+        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{ctx.note}</p>
       )}
     </div>
   );

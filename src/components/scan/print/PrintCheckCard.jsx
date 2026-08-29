@@ -1,12 +1,12 @@
 import { CHECK_LABELS, statusLabelFor } from '@/components/scan/checkMeta';
-import { contextFor } from '@/components/scan/checkContext';
+import { resolveContext } from '@/components/scan/checkContext';
 
 // Print rendering of one finding. ALWAYS fully expanded — collapsing is a screen
 // affordance, and a document that hides half its content is not the report.
 // Colors are literal hex here on purpose: this is a fixed-ink print document,
 // and print-color-adjust (set on the print page) keeps the amber emphasis.
 export default function PrintCheckCard({ checkKey, check, attention = false }) {
-  const ctx = contextFor(checkKey, check);
+  const ctx = resolveContext(checkKey, check);
   return (
     <div className={attention ? 'pr-card pr-card-amber' : 'pr-card'}>
       {attention && <p className="pr-eyebrow">Worth reviewing</p>}
@@ -22,14 +22,15 @@ export default function PrintCheckCard({ checkKey, check, attention = false }) {
           {check.details.map((d, i) => <li key={i}>{d}</li>)}
         </ul>
       )}
-      {ctx && (
+      {ctx.mode === 'full' && (
         <div className="pr-context">
           <p className="pr-context-label">Why this matters</p>
-          <p className="pr-context-body">{ctx.why}</p>
+          <p className="pr-context-body">{ctx.ctx.why}</p>
           <p className="pr-context-label">What to check</p>
-          <p className="pr-context-body">{ctx.check}</p>
+          <p className="pr-context-body">{ctx.ctx.check}</p>
         </div>
       )}
+      {ctx.mode === 'note' && <p className="pr-note">{ctx.note}</p>}
     </div>
   );
 }

@@ -1,6 +1,19 @@
 import PrintCheckCard from '@/components/scan/print/PrintCheckCard';
 import { CHECK_ORDER, needsAttention } from '@/components/scan/checkMeta';
-import { SCOPE_LINE, summaryHeadline, summaryDomainLine } from '@/components/scan/reportText';
+import {
+  SCOPE_LINE,
+  summaryHeadline,
+  summaryDomainLine,
+  DOMAIN_EXPLAINER,
+  ANSWER_CLEAR,
+  ANSWER_CLEAR_SUB,
+  ANSWER_FLAGGED_SUB,
+  answerHeadline,
+  flaggedLabels,
+  NEXT_STEPS_AMBER,
+  NEXT_STEPS_CLEAR,
+  NEXT_STEPS_CLOSER,
+} from '@/components/scan/reportText';
 
 const LOGO_REVERSED = 'https://media.base44.com/images/public/6a3735f4f27dcb14405892ae/9c1b23b5f_logo-horizontal-reversed.svg';
 
@@ -13,6 +26,7 @@ export default function PrintReport({ scan }) {
   const flagged = present.filter(({ key, check }) => needsAttention(key, check));
   const neutral = present.filter(({ key, check }) => !needsAttention(key, check));
   const domains = scan.third_party_domains || [];
+  const answerLabels = flaggedLabels(checks);
 
   return (
     <div className="pr-doc">
@@ -33,8 +47,25 @@ export default function PrintReport({ scan }) {
       <div className="pr-summary">
         <h2>Summary</h2>
         <p>{summaryDomainLine(domains.length)}</p>
+        <p className="pr-summary-note">{DOMAIN_EXPLAINER}</p>
         <p>{summaryHeadline(checks)}</p>
       </div>
+
+      {/* The plain-language answer — our findings, never a status claim. */}
+      {answerLabels.length === 0 ? (
+        <div className="pr-answer">
+          <p className="pr-answer-head">{ANSWER_CLEAR}</p>
+          <p className="pr-answer-sub">{ANSWER_CLEAR_SUB}</p>
+        </div>
+      ) : (
+        <div className="pr-answer pr-answer-amber">
+          <p className="pr-answer-head">{answerHeadline(answerLabels.length)}</p>
+          <ul className="pr-answer-list">
+            {answerLabels.map((label) => <li key={label}>{label}</li>)}
+          </ul>
+          <p className="pr-answer-sub">{ANSWER_FLAGGED_SUB}</p>
+        </div>
+      )}
 
       <p className="pr-scope">{SCOPE_LINE}</p>
 
@@ -55,6 +86,12 @@ export default function PrintReport({ scan }) {
           ))}
         </>
       )}
+
+      <div className="pr-next">
+        <h3>What to do next</h3>
+        <p>{answerLabels.length > 0 ? NEXT_STEPS_AMBER : NEXT_STEPS_CLEAR}</p>
+        <p className="pr-next-closer">{NEXT_STEPS_CLOSER}</p>
+      </div>
 
       {domains.length > 0 && (
         <div className="pr-domains">

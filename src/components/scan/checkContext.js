@@ -50,3 +50,36 @@ export function contextFor(checkKey, check) {
   }
   return CHECK_CONTEXT[checkKey] || null;
 }
+
+// When a check found NOTHING, "what to check" asks the reader to inspect a tool
+// they don't have. Those checks get one short forward-looking line instead of the
+// full context block.
+const NOT_DETECTED_NOTES = {
+  tracking_scripts: "If you add analytics or advertising tools later, they'll need to respect consent.",
+  meta_pixel: "If you add one later, it needs to respect a visitor's opt-out.",
+  google_analytics: 'If you add analytics later, it needs to respect consent.',
+  google_ads: "If you start running ads, these tools need to respect a visitor's opt-out.",
+  ai_chatbot: "If you add a chatbot later, visitors should be told they're talking to AI.",
+  gpc_comparison: 'With no tracking on the page, there was nothing for a privacy signal to change.',
+};
+
+// Single decision point for how much context a finding earns, shared by the
+// screen cards and the print document so both stay in step.
+// { mode: 'full', ctx } — detected or flagged: observation + why + what to check.
+// { mode: 'note', note } — nothing detected: observation + one forward-looking line.
+// { mode: 'none' }       — nothing useful to add.
+export function resolveContext(checkKey, check) {
+  const detected = check?.status === 'found';
+  if (detected) {
+    const ctx = contextFor(checkKey, check);
+    return ctx ? { mode: 'full', ctx } : { mode: 'none' };
+  }
+  // The GPC check reports "no change observed" as not_found, and that IS the
+  // flagged finding — it keeps the full context. Only the zero-tracker case,
+  // where there was nothing to compare, gets the short note.
+  if (checkKey === 'gpc_comparison' && check?.status === 'not_found' && !check?.zero_baseline) {
+    return { mode: 'full', ctx: CHECK_CONTEXT.gpc_comparison };
+  }
+  const note = NOT_DETECTED_NOTES[checkKey];
+  return note ? { mode: 'note', note } : { mode: 'none' };
+}

@@ -1,4 +1,4 @@
-import { CHECK_LABELS } from '@/components/scan/checkMeta';
+import { CHECK_LABELS, CHECK_ORDER, needsAttention } from '@/components/scan/checkMeta';
 
 // Single source of truth for the report's scope statement. The PDF must carry it
 // VERBATIM, so both surfaces read it from here — never retype it in one place.
@@ -25,6 +25,37 @@ export function summaryHeadline(checks) {
 export function summaryDomainLine(count) {
   return `${count} third-party ${count === 1 ? 'domain was' : 'domains were'} contacted when this page loaded.`;
 }
+
+// "Third-party domain" is jargon. The count means nothing without this line.
+export const DOMAIN_EXPLAINER =
+  'Third-party domains are other companies your site contacted while loading the page.';
+
+// The plain-language answer that leads the report. It is a statement about OUR
+// FINDINGS, never about the reader's legal status — no compliant, non-compliant,
+// passing, failing, or safe, in any wording, ever.
+export const ANSWER_CLEAR = 'Nothing we observed on this page needs your attention right now.';
+export const ANSWER_CLEAR_SUB =
+  "That's not the same as a clean bill of health — we only looked at one page, from the outside. See what we couldn't check below.";
+export const ANSWER_FLAGGED_SUB =
+  'Details below. Everything else we observed is listed after them.';
+
+export function answerHeadline(count) {
+  return `${count} ${count === 1 ? 'thing' : 'things'} on this page ${count === 1 ? 'is' : 'are'} worth looking at:`;
+}
+
+// Labels of the attention-flagged checks, in report order.
+export function flaggedLabels(checks) {
+  return CHECK_ORDER
+    .filter((key) => checks[key] && needsAttention(key, checks[key]))
+    .map((key) => CHECK_LABELS[key] || key);
+}
+
+export const NEXT_STEPS_AMBER =
+  'Start with the items marked in amber above — those are the ones where what your site does and what a visitor expects don\'t line up. Each one has a "what to check" step you can do yourself in a few minutes.';
+export const NEXT_STEPS_CLEAR =
+  'Nothing here needs immediate attention. Two things worth doing anyway: scan your other pages, especially any with forms or checkout, and re-scan after you make changes to your site.';
+export const NEXT_STEPS_CLOSER =
+  'Questions about anything in this report? Reply to the email or reach us at datarightsos.com.';
 
 // datarightsos-scan-<domain>-<YYYY-MM-DD>.pdf
 export function pdfFilename(scan) {
