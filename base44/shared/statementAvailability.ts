@@ -13,6 +13,24 @@
 // So the injection side must never re-derive this. Anything that links to a
 // statement page asks here, and a new precondition added to serving is a
 // precondition for linking on the same edit.
+//
+// ============================================================================
+// KNOWN DEBT — THIS MODULE HAS A HAND-KEPT MIRROR (logged 2026-08-29)
+//
+// src/lib/statementBlockReasons.js restates the rule below for the dashboard UI,
+// because this file is Deno TS outside src/ and the frontend can't import it.
+// ADD A PRECONDITION HERE => YOU MUST ALSO EDIT THAT FILE, or the UI will show a
+// blocked state it cannot explain (or, worse, no blocked state at all).
+//
+// That is the same one-rule-in-two-places shape as the bug described above. The
+// real fix is to generate the JS mirror from this file at build time, or to expose
+// a read-only, side-effect-free block-state endpoint the UI can call. Do one of
+// those the next time this module changes. Do not add a third copy.
+//
+// NOTE: widgetConfig is NOT usable as that endpoint — it mutates on GET
+// (auto-activates Site.install_status), so calling it from the dashboard would
+// falsely mark sites installed.
+// ============================================================================
 
 /**
  * The name a statement page is published under. Site overrides org.

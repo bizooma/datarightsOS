@@ -1,5 +1,26 @@
 import { canServeStatements } from '@/lib/planLimits';
 
+// ============================================================================
+// KNOWN DEBT — READ BEFORE EDITING (logged 2026-08-29, accepted deliberately)
+//
+// The rule below is a HAND-KEPT MIRROR of base44/shared/statementAvailability.ts.
+// Adding a precondition means editing TWO files. That is the same shape as the bug
+// this notice exists to report: ONE rule implemented in more than one place put four
+// links to 404s in a live customer's footer, and nothing in the product noticed.
+// This is debt, not a fix. Treat a divergence here as a production bug, not a nit.
+//
+// WHEN YOU NEXT TOUCH THIS, FIX IT PROPERLY — one of:
+//   1. Generate this JS mirror from the TS source at build time (single source).
+//   2. Add a read-only endpoint returning block state with NO side effects, and
+//      have the UI call that instead of restating the rule.
+// NOT a third hand-kept copy.
+//
+// REJECTED: reusing widgetConfig for this. It MUTATES on GET (auto-flips
+// Site.install_status to 'active'), so reading block state from the dashboard would
+// silently mark uninstalled sites as installed. Any replacement endpoint must be
+// genuinely side-effect-free.
+// ============================================================================
+
 // WHY A REASON AND NOT A BOOLEAN: "your pages aren't published" without saying why
 // is the same silence in a nicer box. Every notice in the UI renders copy keyed to
 // the specific reason, so a subscriber always learns what to change.
