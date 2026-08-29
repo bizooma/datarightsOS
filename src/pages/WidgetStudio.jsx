@@ -22,6 +22,7 @@ import {
 import EmbedSnippet from '@/components/widget-studio/EmbedSnippet';
 import StatementLinksPanel from '@/components/widget-studio/StatementLinksPanel';
 import BusinessNameWarning from '@/components/widget-studio/BusinessNameWarning';
+import DuplicateDocumentWarning from '@/components/widget-studio/DuplicateDocumentWarning';
 import PrivacyCenterPreview from '@/components/widget-studio/PrivacyCenterPreview';
 import LayoutPicker from '@/components/widget-studio/LayoutPicker';
 import LauncherStyleSection from '@/components/widget-studio/LauncherStyleSection';
@@ -244,7 +245,10 @@ export default function WidgetStudio() {
           {selectedSite && (
             <div className="col-span-3 space-y-6">
               {canServeStatements(org?.plan) && (
-                <BusinessNameWarning site={selectedSite} org={org} />
+                <>
+                  <BusinessNameWarning site={selectedSite} org={org} />
+                  <DuplicateDocumentWarning site={selectedSite} />
+                </>
               )}
               <Tabs defaultValue="config">
                 <TabsList className="h-9 mb-4">
