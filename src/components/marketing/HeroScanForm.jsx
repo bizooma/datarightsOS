@@ -42,11 +42,15 @@ export default function HeroScanForm() {
           aria-label="Your website address"
           aria-invalid={!!error}
           aria-describedby={error ? 'hero-scan-error' : undefined}
-          className="flex-1 min-w-0 sm:min-w-[260px] h-11 rounded-lg bg-white px-4 text-sm text-[#14202b] placeholder:text-slate-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#0d7d74]"
+          /* text-base (16px) is not cosmetic: iOS Safari auto-zooms the page on focus
+             for ANY input under 16px, and the visitor then has to pinch back out to
+             reach the button. Height is set explicitly (not by padding alone) so it
+             matches the button exactly — they sit stacked at the same width. */
+          className="flex-1 min-w-0 sm:min-w-[260px] h-12 lg:h-11 py-3 rounded-lg bg-white px-4 text-base lg:text-sm text-[#14202b] placeholder:text-slate-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#0d7d74]"
         />
         <button
           type="submit"
-          className="inline-flex items-center justify-center gap-2 h-11 shrink-0 bg-[#0d7d74] text-white font-semibold px-6 rounded-lg hover:bg-[#0a6b63] transition-colors text-sm"
+          className="inline-flex items-center justify-center gap-2 h-12 lg:h-11 shrink-0 bg-[#0d7d74] text-white font-semibold px-6 rounded-lg hover:bg-[#0a6b63] transition-colors text-base lg:text-sm"
         >
           <Search className="w-4 h-4" />
           Scan my site
