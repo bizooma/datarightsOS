@@ -28,7 +28,10 @@ export default function HeroScanForm() {
         Start by seeing what your site does right now.
       </p>
 
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col sm:flex-row gap-2.5">
+      {/* Side-by-side only where the column is wide enough for it. At md the hero
+          splits into two columns, so a row here squeezed the input to 172px — too
+          narrow to type or read a domain in. md stacks; lg is wide again. */}
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-2.5">
         <input
           type="text"
           inputMode="url"
@@ -39,7 +42,7 @@ export default function HeroScanForm() {
           aria-label="Your website address"
           aria-invalid={!!error}
           aria-describedby={error ? 'hero-scan-error' : undefined}
-          className="flex-1 min-w-0 h-11 rounded-lg bg-white px-4 text-sm text-[#14202b] placeholder:text-slate-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#0d7d74]"
+          className="flex-1 min-w-0 sm:min-w-[260px] h-11 rounded-lg bg-white px-4 text-sm text-[#14202b] placeholder:text-slate-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#0d7d74]"
         />
         <button
           type="submit"
