@@ -383,6 +383,10 @@ export default async function (req) {
       const stopped = await svc.entities.Scan.update(scan.id, {
         status: 'blocked',
         error: BLOCKED_MESSAGE,
+        // WHICH signal fired. `error` is the same sentence for every blocked scan,
+        // so without this a wrongly-blocked scan cannot be classified later —
+        // logs age out, and re-fetching the live domain is the only alternative.
+        block_reason: blocked.reason,
         completed_at: new Date().toISOString(),
       });
       return Response.json({ ok: true, scan: sanitize(stopped) });

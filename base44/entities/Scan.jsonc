@@ -21,6 +21,10 @@
       "default": "running",
       "description": "Scan lifecycle. failed = Browserless errored/timed out and NO findings are reported. blocked = the page we loaded was a bot challenge, block page, or CDN error rather than the site, so NO findings are reported \u2014 analyzing it would describe the challenge page instead of the business. Only 'complete' is ever served from the domain cache."
     },
+    "block_reason": {
+      "type": "string",
+      "description": "WHICH block signal fired, in internal terms (e.g. 'The site returned HTTP 403 for the page itself.'). Distinct from `error`, which holds the visitor-facing BLOCKED_MESSAGE and is identical for every blocked scan. Stored because a wrongly-blocked scan is otherwise unclassifiable after the fact: the detector's reason used to go only to logs, which age out, so auditing three historical blocked scans meant re-fetching the live domains and inferring which rule had fired \u2014 and one of them (a site running Cloudflare Turnstile on its contact form) turned out to be a false positive that had been silently returning zero findings. Set only when status='blocked'. Internal diagnostics, never shown to visitors."
+    },
     "requester_ip_hash": {
       "type": "string",
       "description": "Salted SHA-256 of the requester IP, used only for rate limiting (3/hr, 10/day per IP). Raw IP is never stored."
