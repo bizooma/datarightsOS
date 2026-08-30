@@ -290,12 +290,23 @@ export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
   const a11yAnchors = a11yRec?.ok ? (a11yRec.anchors || []) : [];
 
   // ---- 1. Cookie consent mechanism ----
-  const cmpHay = [page.script_hay || '', mainText, (pass1.requests || []).join(' ').toLowerCase()].join(' ');
+  // VENDOR IDENTITY COMES FROM SCRIPTS AND NETWORK REQUESTS ONLY — never page prose.
+  // This haystack used to include mainText (visible body text), which meant a page that
+  // merely NAMES a vendor read as USING one: a blog post about OneTrust, or a footer
+  // still crediting a CMP the business cancelled, produced a FOUND consent mechanism.
+  // Writing about a vendor is not installing one. Same principle as the commitment rule
+  // for followed pages: the page has to DO the thing, not mention it.
+  // A home-built banner is still detected — structurally, below.
+  const cmpHay = [page.script_hay || '', (pass1.requests || []).join(' ').toLowerCase()].join(' ');
   const cmp = CMP_MATCHERS.find((m) => cmpHay.includes(m.match));
   let cookie_consent;
   if (cmp) {
     cookie_consent = found(`A consent mechanism was detected (${cmp.vendor}).`);
   } else if (page.banner_text && page.banner_control) {
+    // STRUCTURE, NOT SUBSTRING. banner_text is set only by a VISIBLE element that is
+    // fixed/sticky/dialog, carries consent language in its own body text (anchor text
+    // stripped), and banner_control requires an accept/decline control INSIDE that same
+    // element. This is the only path to FOUND for a site with no vendor script.
     cookie_consent = found('A consent mechanism was detected (custom banner).');
   } else if (page.banner_text) {
     cookie_consent = cnd('Consent language appeared in a banner-style element, but no clear accept or decline control could be identified, so this could not be determined.');
@@ -440,6 +451,28 @@ export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
   for (const [key, observation] of Object.entries(tool?.provides || {})) {
     if (!checks[key] || checks[key].status === STATUS.FOUND) continue;
     checks[key] = found(observation as string);
+  }
+
+  // COMBINATION FLAG — the pairing, and the one the report had no language for.
+  // A consent mechanism exists AND trackers loaded on a fresh visit with no consent
+  // choice on record. Both halves are things we observed directly, and stating them
+  // together is not a verdict: a banner that does not gate what it asks about is a
+  // promise made to every visitor and not kept.
+  // Runs AFTER the tool.provides upgrades so a mechanism credited from saved config
+  // is treated the same as one detected on the page.
+  // Note the primary Group A flag is untouched and independent: pre_consent_tracking
+  // stands on its own whether or not a mechanism was found. Only this pairing depends
+  // on both, and it replaces nothing — it is the second, separate reading.
+  if (groupA?.trackersPresent && checks.cookie_consent.status === STATUS.FOUND) {
+    checks.cookie_consent = {
+      ...checks.cookie_consent,
+      attention: true,
+      observation: 'A consent mechanism was detected, and tracking loaded before any consent choice was recorded.',
+      details: [
+        ...(checks.cookie_consent.details || []),
+        checks.cookie_consent.observation,
+      ],
+    };
   }
 
   return { checks, pages_visited };
