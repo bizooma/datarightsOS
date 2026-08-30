@@ -65,6 +65,40 @@ export async function markInstalled(svc: any, site: any): Promise<boolean> {
   }
 }
 
+/**
+ * Records WHERE the widget was loaded from (script host + page URL). Informational,
+ * exactly like install_status, and for the same reason safe to call from a public
+ * endpoint: nothing gates on it, and both inputs are client-supplied (the script
+ * reports its own src; Referer is forgeable).
+ *
+ * Writes ONLY when a value actually changed, so a site with traffic does not
+ * generate one update per page view — the tradeoff is that install_source_seen_at
+ * is the last CHANGE, not the last fetch.
+ */
+export async function recordInstallSource(
+  svc: any,
+  site: any,
+  { scriptHost, pageUrl }: { scriptHost: string; pageUrl: string },
+): Promise<boolean> {
+  const host = (scriptHost || '').slice(0, 200);
+  const page = (pageUrl || '').slice(0, 500);
+  if (!host && !page) return false;
+  const patch: Record<string, string> = {};
+  if (host && host !== site.install_script_host) patch.install_script_host = host;
+  if (page && page !== site.install_page_url) patch.install_page_url = page;
+  if (!Object.keys(patch).length) return false;
+  patch.install_source_seen_at = new Date().toISOString();
+  try {
+    await svc.entities.Site.update(site.id, patch);
+    Object.assign(site, patch);
+    return true;
+  } catch (err) {
+    // Never break a config response over an informational field.
+    console.error('[serviceStatus] recordInstallSource failed for site', site.id, (err as Error).message);
+    return false;
+  }
+}
+
 /** True when we are entitled to serve this site. The ONLY render gate. */
 export function isServiceActive(site: any): boolean {
   return (site?.service_status || 'active') === 'active';

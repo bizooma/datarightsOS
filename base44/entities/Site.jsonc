@@ -40,6 +40,19 @@
       "default": "never_installed",
       "description": "INFORMATIONAL ONLY \u2014 has the widget ever actually loaded on this site. Drives the Widget Studio status dot and nothing else. ONE-WAY: never_installed -> installed, never the reverse. May be written by the PUBLIC widgetConfig and widgetEvent endpoints precisely because nothing gates on it: being wrong here means 'somebody fetched the config', which is harmless. NOTHING about money or entitlement may ever be decided from this field \u2014 that is service_status. This column previously did both jobs, which is how a public GET ended up able to restore service to an expired trial. The onboarding checklist deliberately does NOT trust this field either (a config fetch is not an install); it keys off real visitor evidence (ConsentRecord). Deliberately NOT field-locked: it is harmless, and locking it would block nothing worth blocking."
     },
+    "install_script_host": {
+      "type": "string",
+      "description": "Hostname the widget script was actually loaded from on this site's last config fetch \u2014 'datarightsos.com' for the Widget Studio snippet, 'api.base44.app' for a direct platform-URL install, or something else entirely for a proxied/white-label install. INFORMATIONAL ONLY, same class as install_status: reported by the widget (it reads its own script src) and therefore client-supplied, so it is never gated on. Exists because how a site installed was previously unrecorded anywhere, and answering 'which sites install via the platform URL?' meant fetching thirteen homepages and reading their script tags by hand. That question matters: a scanner or capability check that matches only one host silently mis-reports every site using the other, which is exactly the bug that made bizooma.com read as having no consent mechanism."
+    },
+    "install_page_url": {
+      "type": "string",
+      "description": "The page URL (from the Referer header) of the most recent config fetch. Useful for confirming the widget is live on the domain we think it is, and for spotting a snippet pasted onto the wrong site or a staging host. Informational only \u2014 a Referer is trivially forgeable and nothing may gate on it."
+    },
+    "install_source_seen_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When install_script_host / install_page_url were last observed. Updated only when either value actually CHANGES, so a busy site does not generate a write per page view \u2014 meaning this is the timestamp of the last change, not of the last fetch."
+    },
     "service_status": {
       "type": "string",
       "enum": [

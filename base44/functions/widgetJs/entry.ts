@@ -307,7 +307,13 @@ Deno.serve(async (req) => {
     enabled_drawers: ['privacy_rights', 'cookies', 'accessibility'], honor_gpc: true,
     intro_video_url: '', accessibility_statement_url: '', privacy_policy_url: '', policy_version: '1.0' };
 
-  fetch(API + '/widgetConfig?site=' + encodeURIComponent(SITE) + '&t=' + Date.now(), { cache: 'no-store' })
+  // Report the script's OWN url so the server can record how this site installed.
+  // The config host is hardcoded above, so the request itself cannot reveal whether
+  // the snippet points at datarightsos.com or api.base44.app — only the script knows.
+  var SRC = '';
+  try { SRC = script.src || script.getAttribute('src') || ''; } catch (e) { SRC = ''; }
+
+  fetch(API + '/widgetConfig?site=' + encodeURIComponent(SITE) + '&src=' + encodeURIComponent(SRC) + '&t=' + Date.now(), { cache: 'no-store' })
     .then(function (r) { return r.ok ? r.json() : DEFAULT; })
     .then(function (res) { render((res && res.data) ? res.data : res, true); })
     .catch(function () { render(DEFAULT, true); });

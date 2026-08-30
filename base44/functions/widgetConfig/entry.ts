@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { canServeStatements, canServeStatementPages, canShowRequestCard, canCustomLauncher } from '../../shared/planLimits.ts';
-import { markInstalled } from '../../shared/serviceStatus.ts';
+import { markInstalled, recordInstallSource } from '../../shared/serviceStatus.ts';
 import { statementUrl, privacyChoicesUrl } from '../../shared/statementUrls.ts';
 import { canServeStatementPage, canPublishStatementPages, publishedBusinessName } from '../../shared/statementAvailability.ts';
 
@@ -41,6 +41,17 @@ Deno.serve(async (req) => {
   // next page view — silently restored service to an expired trial and made the
   // suspension gate unfireable. service_status is NOT written here, ever.
   await markInstalled(base44.asServiceRole, site);
+
+  // WHERE the widget loaded from. Same informational class as install_status above,
+  // and written here for the same reason it is safe: nothing gates on it. The script
+  // reports its own src because widgetJs hardcodes this endpoint's host, so the
+  // request cannot distinguish a datarightsos.com install from an api.base44.app one.
+  let scriptHost = '';
+  try { scriptHost = new URL(url.searchParams.get('src') || '').hostname; } catch { scriptHost = ''; }
+  await recordInstallSource(base44.asServiceRole, site, {
+    scriptHost,
+    pageUrl: req.headers.get('referer') || '',
+  });
 
   // Only the Agency (white-label) plan can remove the "Powered by DataRightsOS" badge.
   // Core and Proof always show it, regardless of the site's hide_branding flag.
