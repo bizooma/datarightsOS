@@ -200,7 +200,7 @@ export default async function ({ page, context }) {
           var hay = low((g.getAttribute('alt') || '') + ' ' + (g.getAttribute('class') || '') + ' ' + (g.getAttribute('id') || '') + ' ' + (g.getAttribute('src') || ''));
           if (hay.indexOf('privacyoptions') !== -1 || hay.indexOf('privacy-options') !== -1 || hay.indexOf('ccpa-optout') !== -1 || hay.indexOf('optout-icon') !== -1) { cpraIcon = true; break; }
         }
-        return { url: location.href, anchors: anchors, script_hay: scriptHay.slice(0, 20000), form_hay: formHay, text: text, main_text: mainOnly, text_no_links: textNoLinksAll, banner_text: bannerText, banner_control: bannerControl, cpra_icon: cpraIcon };
+        return { url: location.href, title: (document.title || '').slice(0, 300), anchors: anchors, script_hay: scriptHay.slice(0, 20000), form_hay: formHay, text: text, main_text: mainOnly, text_no_links: textNoLinksAll, banner_text: bannerText, banner_control: bannerControl, cpra_icon: cpraIcon };
       }, p);
     };
 
