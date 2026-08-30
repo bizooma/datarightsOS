@@ -65,15 +65,27 @@ export async function markInstalled(svc: any, site: any): Promise<boolean> {
   }
 }
 
+// How many distinct host hostnames we keep per site, and how often an already-known
+// host's last_seen is refreshed. The cap bounds what a leaked key can write; the
+// throttle keeps a busy site from generating an update per page view.
+const MAX_INSTALL_HOSTS = 10;
+const HOST_REFRESH_MS = 60 * 60 * 1000;
+
 /**
- * Records WHERE the widget was loaded from (script host + page URL). Informational,
- * exactly like install_status, and for the same reason safe to call from a public
- * endpoint: nothing gates on it, and both inputs are client-supplied (the script
- * reports its own src; Referer is forgeable).
+ * Records WHERE the widget was loaded from: the script's own host, plus the SET of
+ * page hostnames this key has appeared on. Informational, exactly like
+ * install_status, and safe from a public endpoint for the same reason: nothing gates
+ * on it, and both inputs are client-supplied (the script reports its own src;
+ * Referer is forgeable).
  *
- * Writes ONLY when a value actually changed, so a site with traffic does not
- * generate one update per page view — the tradeoff is that install_source_seen_at
- * is the last CHANGE, not the last fetch.
+ * WHY A SET, NOT A LATEST VALUE: this held a single most-recent page URL, and a
+ * deploy-preview visit simply overwrote the production one — so the field could not
+ * answer either question worth asking. A hostname set answers both: how many places
+ * the key runs, and whether the odd one out is benign (a preview host of the same
+ * project) or not. Hostname only — paths and query strings are dropped.
+ *
+ * Writes only on real change: a new hostname, a changed script host, or a known
+ * host whose last_seen is older than the refresh window.
  */
 export async function recordInstallSource(
   svc: any,
@@ -81,13 +93,37 @@ export async function recordInstallSource(
   { scriptHost, pageUrl }: { scriptHost: string; pageUrl: string },
 ): Promise<boolean> {
   const host = (scriptHost || '').slice(0, 200);
-  const page = (pageUrl || '').slice(0, 500);
-  if (!host && !page) return false;
-  const patch: Record<string, string> = {};
-  if (host && host !== site.install_script_host) patch.install_script_host = host;
-  if (page && page !== site.install_page_url) patch.install_page_url = page;
+  let pageHost = '';
+  try { pageHost = new URL(pageUrl || '').hostname.toLowerCase().slice(0, 200); } catch { pageHost = ''; }
+  if (!host && !pageHost) return false;
+
+  const now = new Date().toISOString();
+  const patch: Record<string, any> = {};
+  if (host && host !== site.install_script_host) {
+    patch.install_script_host = host;
+    patch.install_source_seen_at = now;
+  }
+
+  if (pageHost) {
+    const hosts = Array.isArray(site.install_hosts) ? [...site.install_hosts] : [];
+    const existing = hosts.find((h: any) => h?.hostname === pageHost);
+    if (existing) {
+      // Known host: refresh at most once per window.
+      if (!existing.last_seen || Date.now() - new Date(existing.last_seen).getTime() > HOST_REFRESH_MS) {
+        patch.install_hosts = hosts.map((h: any) =>
+          h?.hostname === pageHost ? { ...h, last_seen: now } : h,
+        );
+      }
+    } else if (hosts.length < MAX_INSTALL_HOSTS) {
+      patch.install_hosts = [...hosts, { hostname: pageHost, first_seen: now, last_seen: now }];
+    } else if (!site.install_hosts_truncated) {
+      // At the cap. Drop the new host rather than evicting a known one, and record
+      // that we did — a full list must never be mistaken for a complete one.
+      patch.install_hosts_truncated = true;
+    }
+  }
+
   if (!Object.keys(patch).length) return false;
-  patch.install_source_seen_at = new Date().toISOString();
   try {
     await svc.entities.Site.update(site.id, patch);
     Object.assign(site, patch);

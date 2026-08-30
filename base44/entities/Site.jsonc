@@ -44,14 +44,38 @@
       "type": "string",
       "description": "Hostname the widget script was actually loaded from on this site's last config fetch \u2014 'datarightsos.com' for the Widget Studio snippet, 'api.base44.app' for a direct platform-URL install, or something else entirely for a proxied/white-label install. INFORMATIONAL ONLY, same class as install_status: reported by the widget (it reads its own script src) and therefore client-supplied, so it is never gated on. Exists because how a site installed was previously unrecorded anywhere, and answering 'which sites install via the platform URL?' meant fetching thirteen homepages and reading their script tags by hand. That question matters: a scanner or capability check that matches only one host silently mis-reports every site using the other, which is exactly the bug that made bizooma.com read as having no consent mechanism."
     },
-    "install_page_url": {
-      "type": "string",
-      "description": "The page URL (from the Referer header) of the most recent config fetch. Useful for confirming the widget is live on the domain we think it is, and for spotting a snippet pasted onto the wrong site or a staging host. Informational only \u2014 a Referer is trivially forgeable and nothing may gate on it."
+    "install_hosts": {
+      "type": "array",
+      "maxItems": 10,
+      "description": "The SET of distinct hostnames this site's key has loaded the widget on (from the Referer header), each with first- and last-seen timestamps. Replaced a single install_page_url that held only the MOST RECENT page, which could not express the thing we actually wanted to know: one deploy-preview visit overwrote the production value, so the field taught us nothing about where the key really runs. A set makes both readings legible at a glance \u2014 'this key has loaded on 3 distinct hosts' is worth a look, and 'one of them is a netlify preview of the same project' is obviously benign. CAPPED AT 10 so a leaked or misconfigured key cannot grow the record without bound; once full, new hostnames are dropped (existing entries still update their last_seen) and install_hosts_truncated is set so a full list is never silently mistaken for a complete one. Informational only, exactly like install_script_host: a Referer is trivially forgeable, so nothing may ever gate on it.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "description": "Hostname only, never the full page URL \u2014 paths and query strings carry visitor-identifying detail we have no reason to keep."
+          },
+          "first_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this hostname was first observed loading the widget. Never updated afterwards."
+          },
+          "last_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this hostname was most recently observed. Throttled to at most one write per hour per host, so a busy site does not generate an update per page view."
+          }
+        }
+      }
+    },
+    "install_hosts_truncated": {
+      "type": "boolean",
+      "description": "True once install_hosts hit its 10-entry cap and a genuinely new hostname had to be dropped. Exists so a full list is never read as a complete one \u2014 without it, a key loading on eleven hosts and a key loading on exactly ten look identical, and the first is the case worth investigating."
     },
     "install_source_seen_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When install_script_host / install_page_url were last observed. Updated only when either value actually CHANGES, so a busy site does not generate a write per page view \u2014 meaning this is the timestamp of the last change, not of the last fetch."
+      "description": "When install_script_host was last observed to CHANGE \u2014 not the time of the last fetch. Per-hostname timing now lives on the install_hosts entries, so this tracks the script-host value only."
     },
     "service_status": {
       "type": "string",
