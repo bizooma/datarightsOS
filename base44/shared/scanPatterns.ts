@@ -83,6 +83,13 @@ export const CMP_MATCHERS = [
   { match: 'usercentrics', vendor: 'Usercentrics' },
   { match: 'datarightsos', vendor: 'DataRightsOS' },
   { match: 'dros-root', vendor: 'DataRightsOS' },
+  // The same widget served from the platform host:
+  // https://api.base44.app/api/apps/<id>/functions/widgetJs
+  // Matching only 'datarightsos' made every site installed this way invisible to
+  // our own scanner — reported as having NO consent mechanism, and denied widget
+  // capability crediting in resolveOwnWidget, which reads these same matchers.
+  // The path is the stable part; the host and app id are not.
+  { match: '/functions/widgetjs', vendor: 'DataRightsOS' },
   { match: 'termsfeed', vendor: 'TermsFeed' },
   { match: 'civicuk.com/cookie', vendor: 'Civic Cookie Control' },
 ];
