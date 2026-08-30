@@ -258,13 +258,22 @@ export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
   const privacyRec = followed.find((f: any) => f.kind === 'privacy') || null;
   const a11yRec = followed.find((f: any) => f.kind === 'accessibility') || null;
 
-  const pages_visited = [
+  // "Pages we checked" must say what a page WAS, not what we hoped it would be.
+  // A followed link was labeled "accessibility statement" purely because it matched
+  // the accessibility pattern — so a sign-up form at /accessibility/signup?mode=signin
+  // was presented to the reader as their accessibility statement, an assertion the
+  // validator had explicitly refused to make. The label now follows the validator:
+  // only a page that qualified is named as the document.
+  const buildPagesVisited = (qualified: Record<string, boolean>) => [
     { url: page?.url || url, kind: 'scanned page', status: 200 },
-    ...followed.map((f: any) => ({
-      url: f.final_url || f.requested_url,
-      kind: f.kind === 'privacy' ? 'privacy policy' : 'accessibility statement',
-      status: f.status ?? null,
-    })),
+    ...followed.map((f: any) => {
+      const doc = f.kind === 'privacy' ? 'privacy policy' : 'accessibility statement';
+      return {
+        url: f.final_url || f.requested_url,
+        kind: qualified[f.kind] ? doc : `followed as a possible ${doc} — did not qualify`,
+        status: f.status ?? null,
+      };
+    }),
   ];
 
   // The whole page could not be read → every Group B check is undetermined.
@@ -275,7 +284,7 @@ export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
         cookie_consent: u, privacy_policy: u, do_not_sell: u, accessibility_statement: u,
         request_mechanism: u, accessibility_reporting: u, ai_disclosure: u,
       },
-      pages_visited,
+      pages_visited: buildPagesVisited({}),
     };
   }
 
@@ -327,11 +336,12 @@ export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
   }
 
   // ---- 2. Privacy policy ----
-  const privacy_policy = confirmPage(
+  const privacyConfirmed = confirmPage(
     privacyRec, apex, 'a privacy policy',
     looseAbsent(mainAnchors, mainText, ['privacy', 'polic', '/legal', 'your data', 'data protection'], 'a privacy policy'),
     page.url,
-  ).check;
+  );
+  const privacy_policy = privacyConfirmed.check;
 
   // ---- 3. "Do Not Sell or Share" mechanism ----
   let do_not_sell;
@@ -475,5 +485,14 @@ export function analyzeGroupB({ url, pass1, groupA, tool }: any) {
     };
   }
 
-  return { checks, pages_visited };
+  // Qualification comes from the validator only. A mechanism credited from the
+  // site's saved widget config upgrades a CHECK, but it says nothing about the page
+  // we followed — so it must never turn a rejected page into a named document.
+  return {
+    checks,
+    pages_visited: buildPagesVisited({
+      privacy: privacyConfirmed.ok,
+      accessibility: a11yConfirmed.ok,
+    }),
+  };
 }

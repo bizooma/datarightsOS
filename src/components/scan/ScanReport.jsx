@@ -8,6 +8,7 @@ import NextSteps from '@/components/scan/NextSteps';
 import DownloadPdfButton from '@/components/scan/DownloadPdfButton';
 import EmailReportForm from '@/components/scan/EmailReportForm';
 import PagesVisited from '@/components/scan/PagesVisited';
+import ThirdPartyDomains from '@/components/scan/ThirdPartyDomains';
 import { SCOPE_LINE } from '@/components/scan/reportText';
 
 export default function ScanReport({ scan }) {
@@ -72,14 +73,7 @@ export default function ScanReport({ scan }) {
 
       <PagesVisited pages={scan.findings?.pages_visited} />
 
-      {(scan.third_party_domains || []).length > 0 && (
-        <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-foreground mb-2">Third-party domains observed</h3>
-          <p className="text-xs text-muted-foreground break-words">
-            {scan.third_party_domains.join(' · ')}
-          </p>
-        </div>
-      )}
+      <ThirdPartyDomains domains={scan.third_party_domains} />
 
       <EmailReportForm scan={scan} />
 

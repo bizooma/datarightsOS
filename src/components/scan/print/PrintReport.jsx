@@ -1,4 +1,5 @@
 import PrintCheckCard from '@/components/scan/print/PrintCheckCard';
+import { groupByVendor } from '@/components/scan/vendorDomains';
 import { CHECK_ORDER, needsAttention } from '@/components/scan/checkMeta';
 import {
   SCOPE_LINE,
@@ -106,7 +107,11 @@ export default function PrintReport({ scan }) {
       {domains.length > 0 && (
         <div className="pr-domains">
           <h3>Third-party domains observed</h3>
-          <p>{domains.join(' · ')}</p>
+          {groupByVendor(domains).map((g, i) => (
+            <p key={g.vendor || `unknown-${i}`}>
+              {g.domains.join(' · ')}{g.vendor ? ` (${g.vendor} — ${g.role})` : ' (not identified)'}
+            </p>
+          ))}
         </div>
       )}
 

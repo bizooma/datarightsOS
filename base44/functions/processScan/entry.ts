@@ -213,7 +213,12 @@ export default async function ({ page, context }) {
       // read plausibly as statements. A de-ranked match is kept only as a fallback: it
       // is still followed when nothing better exists (the content-side commitment check
       // is what finally decides), but any non-marketing-shaped match beats it.
-      var DERANK = /\\/(services?|solutions|products?|blog)(\\/|$|\\?)/;
+      // AUTH/ACCOUNT URLs are de-ranked for a different reason and with the same
+      // mechanism: /accessibility/signup?mode=signin matched the accessibility
+      // pattern, so we spent a page load on a sign-in form and then named it as the
+      // site's accessibility statement. A login screen can never be the document.
+      var DERANK = /\\/(services?|solutions|products?|blog|sign-?up|sign-?in|log-?in|logout|register|account|auth|my-?account)(\\/|$|\\?)/;
+      var AUTHQ = /[?&](mode|action|screen_?hint|view)=(sign-?in|sign-?up|log-?in|login|register)/;
       var pick = function (list) {
         var fallback = null;
         for (var i = 0; i < pageData.anchors.length; i++) {
@@ -225,7 +230,7 @@ export default async function ({ page, context }) {
               var cand = null;
               try { cand = { url: new URL(a.href, pageData.url).href, text: a.text }; } catch (x2) { cand = null; }
               if (!cand) break;
-              if (DERANK.test(hrefL)) { if (!fallback) fallback = cand; break; }
+              if (DERANK.test(hrefL) || AUTHQ.test(hrefL)) { if (!fallback) fallback = cand; break; }
               return cand;
             }
           }
